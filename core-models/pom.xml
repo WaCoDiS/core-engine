@@ -9,4 +9,44 @@
     <artifactId>core-models</artifactId>
     <packaging>jar</packaging>
     <name>WaCoDiS Core Engine Data Models</name>
+    <dependencies>
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>openapi-generator-maven-plugin</artifactId>
+            <version>3.3.0</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/wacodis-schemas.yml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <output>${project.basedir}</output>
+                            <modelPackage>de.wacodis.core.models</modelPackage>
+                            
+                            <generateApis>false</generateApis>
+                            <generateModels>true</generateModels>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <!--<configHelp>true</configHelp>-->
+                            <configOptions>
+                                <sourceFolder>src/main/java</sourceFolder>
+                                <dateLibrary>joda</dateLibrary>
+                                <serializableModel>true</serializableModel>
+                            </configOptions>
+    
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
