@@ -15,6 +15,11 @@
             <artifactId>openapi-generator-maven-plugin</artifactId>
             <version>3.3.0</version>
         </dependency>
+        <dependency>
+            <groupId>de.wacodis</groupId>
+            <artifactId>openapi</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
     <profiles>
         <profile>
@@ -31,7 +36,7 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <inputSpec>${project.basedir}/src/main/resources/wacodis-schemas.yml</inputSpec>
+                                    <inputSpec>${project.basedir}/definitions/wacodis-schemas.yml</inputSpec>
                                     <generatorName>spring</generatorName>
                                     <output>${project.basedir}</output>
                                     <modelPackage>de.wacodis.core.models</modelPackage>
