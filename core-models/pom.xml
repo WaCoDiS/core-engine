@@ -27,6 +27,31 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>unpack</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>de.wacodis</groupId>
+                                            <artifactId>openapi</artifactId>
+                                            <version>0.0.1-SNAPSHOT</version>
+                                            <type>jar</type>
+                                            <includes>definitions/wacodis-schemas.yml</includes>
+                                            <outputDirectory>${project.build.directory}/openapi</outputDirectory>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <groupId>org.openapitools</groupId>
                         <artifactId>openapi-generator-maven-plugin</artifactId>
                         <version>3.3.0</version>
@@ -35,8 +60,8 @@
                                 <goals>
                                     <goal>generate</goal>
                                 </goals>
-                                <configuration>
-                                    <inputSpec>${project.basedir}/definitions/wacodis-schemas.yml</inputSpec>
+                                <configuration>                    
+                                    <inputSpec>${project.build.directory}/openapi/definitions/wacodis-schemas.yml</inputSpec>
                                     <generatorName>spring</generatorName>
                                     <output>${project.basedir}</output>
                                     <modelPackage>de.wacodis.core.models</modelPackage>
@@ -44,7 +69,7 @@
                                     <generateApis>false</generateApis>
                                     <generateModels>true</generateModels>
                                     <generateSupportingFiles>false</generateSupportingFiles>
-                                    <configHelp>true</configHelp>
+                                    <!--<configHelp>true</configHelp>-->
                                     <configOptions>
                                         <sourceFolder>src/main/java</sourceFolder>
                                         <dateLibrary>joda</dateLibrary>
