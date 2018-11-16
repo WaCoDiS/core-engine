@@ -15,11 +15,6 @@
             <artifactId>openapi-generator-maven-plugin</artifactId>
             <version>3.3.0</version>
         </dependency>
-        <dependency>
-            <groupId>de.wacodis</groupId>
-            <artifactId>openapi</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
     </dependencies>
     <profiles>
         <!--Unpack the model definition file from dependency and generate the models.-->
@@ -82,6 +77,13 @@
                     </plugin>
                 </plugins>
             </build>
+            <dependencies>
+                <dependency>
+                    <groupId>de.wacodis</groupId>
+                    <artifactId>openapi</artifactId>
+                    <version>0.0.1-SNAPSHOT</version>
+                </dependency>
+            </dependencies>
         </profile>
         <!--Use this profile to download the model definition file if you don't 
         have built the necessary dependencies yet -->
