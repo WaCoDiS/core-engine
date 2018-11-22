@@ -8,6 +8,7 @@ package de.wacodis.coreengine.evaluator.wacodisjobevaluation;
 import de.wacodis.core.models.AbstractDataEnvelope;
 import de.wacodis.core.models.AbstractSubsetDefinition;
 
+
 /**
  *
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
@@ -17,8 +18,9 @@ public interface DataEnvelopeMatcher {
      * matches DataEnvelope and SubsetDefinition regarding content,
      * return true if inputs are considered to be consistent
      * @param dataEnvelope
+     * @param jobWrapper
      * @param subsetDefinition
      * @return 
      */
-    boolean match(AbstractDataEnvelope dataEnvelope, AbstractSubsetDefinition subsetDefinition);
+    boolean match(AbstractDataEnvelope dataEnvelope, WacodisJobWrapper jobWrapper, AbstractSubsetDefinition subsetDefinition);
 }

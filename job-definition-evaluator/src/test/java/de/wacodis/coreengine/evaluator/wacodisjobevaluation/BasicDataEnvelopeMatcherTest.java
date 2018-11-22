@@ -15,6 +15,11 @@ import de.wacodis.core.models.CopernicusSubsetDefinition;
 import de.wacodis.core.models.GdiDeDataEnvelope;
 import de.wacodis.core.models.SensorWebDataEnvelope;
 import de.wacodis.core.models.SensorWebSubsetDefinition;
+import de.wacodis.core.models.WacodisJobDefinition;
+import de.wacodis.core.models.WacodisJobDefinitionExecution;
+import de.wacodis.core.models.WacodisJobDefinitionTemporalCoverage;
+import java.util.ArrayList;
+import java.util.List;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -36,7 +41,7 @@ public class BasicDataEnvelopeMatcherTest {
         CopernicusDataEnvelope copernicusEnv = getCopernicusDataEnvelope();
         CopernicusSubsetDefinition copernicusSubset = getCopernicusSubsetDefinition();
 
-        assertTrue(this.matcher.match(copernicusEnv, copernicusSubset));
+        assertTrue(this.matcher.match(copernicusEnv, getJobWrapper(), copernicusSubset));
     }
 
     @Test
@@ -47,7 +52,7 @@ public class BasicDataEnvelopeMatcherTest {
         copernicusEnv.setCloudCoverage(50.0f);
         copernicusSubset.setMaximumCloudCoverage(5.0f);
 
-        assertFalse(this.matcher.match(copernicusEnv, copernicusSubset));
+        assertFalse(this.matcher.match(copernicusEnv, getJobWrapper(), copernicusSubset));
     }
 
     @Test
@@ -58,7 +63,7 @@ public class BasicDataEnvelopeMatcherTest {
         copernicusEnv.setDatasetId("identifierA");
         copernicusSubset.setIdentifier("identifierB");
 
-        assertFalse(this.matcher.match(copernicusEnv, copernicusSubset));
+        assertFalse(this.matcher.match(copernicusEnv, getJobWrapper(), copernicusSubset));
     }
 
     @Test
@@ -66,7 +71,7 @@ public class BasicDataEnvelopeMatcherTest {
         SensorWebDataEnvelope sensorWebEnv = getSensorWebDataEnvelope();
         SensorWebSubsetDefinition sensorWebSubset = getSensorWebSubsetDefinition();
 
-        assertTrue(this.matcher.match(sensorWebEnv, sensorWebSubset));
+        assertTrue(this.matcher.match(sensorWebEnv, getJobWrapper(), sensorWebSubset));
     }
 
     @Test
@@ -77,7 +82,7 @@ public class BasicDataEnvelopeMatcherTest {
         sensorWebEnv.setOffering("offeringA");
         sensorWebSubset.setOffering("offeringB");
 
-        assertFalse(this.matcher.match(sensorWebEnv, sensorWebSubset));
+        assertFalse(this.matcher.match(sensorWebEnv, getJobWrapper(), sensorWebSubset));
     }
 
     @Test
@@ -85,7 +90,7 @@ public class BasicDataEnvelopeMatcherTest {
         GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
         CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
 
-        assertTrue(this.matcher.match(gdiDeEnv, catalogueSubset));
+        assertTrue(this.matcher.match(gdiDeEnv, getJobWrapper(), catalogueSubset));
     }
 
     @Test
@@ -96,7 +101,7 @@ public class BasicDataEnvelopeMatcherTest {
         gdiDeEnv.setRecordRefId("identifierA");
         catalogueSubset.setDatasetIdentifier("identifierB");
 
-        assertFalse(this.matcher.match(gdiDeEnv, catalogueSubset));
+        assertFalse(this.matcher.match(gdiDeEnv, getJobWrapper(), catalogueSubset));
     }
 
     @Test
@@ -104,7 +109,7 @@ public class BasicDataEnvelopeMatcherTest {
         AbstractDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
         AbstractSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
 
-        assertTrue(this.matcher.match(gdiDeEnv, catalogueSubset));
+        assertTrue(this.matcher.match(gdiDeEnv, getJobWrapper(), catalogueSubset));
     }
 
     @Test
@@ -112,7 +117,7 @@ public class BasicDataEnvelopeMatcherTest {
         GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
         CopernicusSubsetDefinition copernicusSubset = getCopernicusSubsetDefinition();
 
-        assertFalse(this.matcher.match(gdiDeEnv, copernicusSubset));
+        assertFalse(this.matcher.match(gdiDeEnv, getJobWrapper(), copernicusSubset));
     }
 
     @Test
@@ -123,7 +128,192 @@ public class BasicDataEnvelopeMatcherTest {
         gdiDeEnv.setSourceType(null);
         catalogueSubset.setSourceType(null);
 
-        assertFalse(this.matcher.match(gdiDeEnv, catalogueSubset));
+        assertFalse(this.matcher.match(gdiDeEnv, getJobWrapper(), catalogueSubset));
+    }
+
+    @Test
+    public void testMatchTimeFrameDuration() {
+        WacodisJobWrapper wrapper = getJobWrapper();
+        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
+        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
+
+        wrapper.getJobDefinition().getTemporalCoverage().setDuration("P1D");
+
+        assertFalse(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
+    }
+
+    @Test
+    public void testMatchTimeFrameDataEnvelopeStartBeforeRelevancy() {
+        WacodisJobWrapper wrapper = getJobWrapper();
+        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
+        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
+
+        gdiDeEnv.getTimeFrame().setEndTime(DateTime.parse("2000-01-01T00:00:00Z"));
+
+        assertFalse(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
+    }
+
+    @Test
+    public void testMatchTimeFrameDataEnvelopeStartAfterRelevancy() {
+        WacodisJobWrapper wrapper = getJobWrapper();
+        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
+        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
+
+        gdiDeEnv.getTimeFrame().setStartTime(DateTime.parse("2019-01-01T00:00:00Z"));
+
+        assertFalse(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
+    }
+
+    @Test
+    public void testMatchTimeFrameDataEnvelopeStartCoversDuration() {
+        WacodisJobWrapper wrapper = getJobWrapper();
+        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
+        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
+
+        gdiDeEnv.getTimeFrame().setStartTime(DateTime.parse("2000-01-01T00:00:00Z"));
+        gdiDeEnv.getTimeFrame().setEndTime(DateTime.parse("2020-01-01T00:00:00Z"));
+
+        assertTrue(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
+    }
+
+    @Test
+    public void testMatchTimeFrameDataEnvelopeStartPreviousExectution_BeforeRelevancy() {
+        WacodisJobWrapper wrapper = getJobWrapper();
+        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
+        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
+
+        wrapper.getJobDefinition().getTemporalCoverage().setPreviousExecution(Boolean.TRUE);
+        gdiDeEnv.getTimeFrame().setEndTime(DateTime.parse("2017-12-31T00:00:00Z"));
+
+        assertFalse(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
+    }
+
+    @Test
+    public void testMatchTimeFrameDataEnvelopeStartPreviousExectution_AfterExecution() {
+        WacodisJobWrapper wrapper = getJobWrapper();
+        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
+        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
+
+        wrapper.getJobDefinition().getTemporalCoverage().setPreviousExecution(Boolean.TRUE);
+        gdiDeEnv.getTimeFrame().setStartTime(DateTime.parse("2018-03-01T00:00:00Z"));
+
+        assertFalse(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
+    }
+
+    @Test(expected = java.lang.NullPointerException.class)
+    public void testMatchTimeFrameDataEnvelopeStartPreviousExectution_NoPattern() {
+        WacodisJobWrapper wrapper = getJobWrapper();
+        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
+        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
+
+        wrapper.getJobDefinition().getTemporalCoverage().setPreviousExecution(Boolean.TRUE);
+        wrapper.getJobDefinition().getExecution().setPattern(null);
+        
+        this.matcher.match(gdiDeEnv, wrapper, catalogueSubset);
+    }
+
+    @Test(expected = java.lang.NullPointerException.class)
+    public void testMatchTimeFrameDataEnvelopeStartPreviousExectution_NoExecution() {
+        WacodisJobWrapper wrapper = getJobWrapper();
+        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
+        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
+
+        wrapper.getJobDefinition().getTemporalCoverage().setPreviousExecution(Boolean.TRUE);
+        wrapper.getJobDefinition().setExecution(null);
+        
+        this.matcher.match(gdiDeEnv, wrapper, catalogueSubset);
+    }
+
+    @Test
+    public void testMatchAreaOfInterestLargerJobExtentLongitude() {
+        WacodisJobWrapper wrapper = getJobWrapper();
+        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
+        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
+
+        wrapper.getJobDefinition().getAreaOfInterest().getExtent().set(2, 15.0f); //maxLon
+
+        assertFalse(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
+    }
+
+    @Test
+    public void testMatchAreaOfInterestLargerJobExtentLatitude() {
+        WacodisJobWrapper wrapper = getJobWrapper();
+        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
+        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
+
+        wrapper.getJobDefinition().getAreaOfInterest().getExtent().set(3, 15.0f); //maxLat
+
+        assertFalse(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
+    }
+
+    @Test
+    public void testMatchAreaOfInterestSmallerDataEnvelopeExtentLongitude() {
+        WacodisJobWrapper wrapper = getJobWrapper();
+        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
+        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
+
+        gdiDeEnv.getAreaOfInterest().getExtent().set(2, 5.0f); //maxLon
+
+        assertFalse(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
+    }
+
+    @Test
+    public void testMatchAreaOfInterestDataEnvelopeExtentLatitude() {
+        WacodisJobWrapper wrapper = getJobWrapper();
+        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
+        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
+
+        gdiDeEnv.getAreaOfInterest().getExtent().set(2, 5.0f);
+
+        assertFalse(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
+    }
+
+    @Test
+    public void testMatchAreaOfInterestSmallerDataEnvelopeExtentDisjointNorthEast() {
+        WacodisJobWrapper wrapper = getJobWrapper();
+        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
+        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
+
+        AbstractDataEnvelopeAreaOfInterest aoi = new AbstractDataEnvelopeAreaOfInterest();
+        aoi.addExtentItem(15.0f);
+        aoi.addExtentItem(15.0f);
+        aoi.addExtentItem(20.0f);
+        aoi.addExtentItem(20.0f);
+        gdiDeEnv.setAreaOfInterest(aoi);
+
+        assertFalse(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
+    }
+
+    @Test
+    public void testMatchAreaOfInterestSmallerDataEnvelopeExtentDisjointSouthWest() {
+        WacodisJobWrapper wrapper = getJobWrapper();
+        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
+        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
+
+        AbstractDataEnvelopeAreaOfInterest aoi = new AbstractDataEnvelopeAreaOfInterest();
+        aoi.addExtentItem(-15.0f);
+        aoi.addExtentItem(-15.0f);
+        aoi.addExtentItem(-20.0f);
+        aoi.addExtentItem(-20.0f);
+        gdiDeEnv.setAreaOfInterest(aoi);
+
+        assertFalse(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
+    }
+
+    @Test
+    public void testMatchAreaOfInterest() {
+        WacodisJobWrapper wrapper = getJobWrapper();
+        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
+        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
+
+        AbstractDataEnvelopeAreaOfInterest aoi = new AbstractDataEnvelopeAreaOfInterest();
+        aoi.addExtentItem(5.0f);
+        aoi.addExtentItem(5.0f);
+        aoi.addExtentItem(7.0f);
+        aoi.addExtentItem(7.0f);
+        wrapper.getJobDefinition().setAreaOfInterest(aoi);
+
+        assertTrue(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
     }
 
     private CopernicusDataEnvelope getCopernicusDataEnvelope() {
@@ -231,5 +421,36 @@ public class BasicDataEnvelopeMatcherTest {
         copernicusSubset.setIdentifier("testID");
 
         return copernicusSubset;
+    }
+
+    private WacodisJobWrapper getJobWrapper() {
+        WacodisJobDefinitionTemporalCoverage tempCov = new WacodisJobDefinitionTemporalCoverage();
+        tempCov.setDuration("P1M"); //covers the month before execution
+
+        List<AbstractSubsetDefinition> inputs = new ArrayList<>();
+        inputs.add(getCatalogueSubsetDefinition());
+        inputs.add(getCopernicusSubsetDefinition());
+        inputs.add(getSensorWebSubsetDefinition());
+
+        AbstractDataEnvelopeAreaOfInterest aoi = new AbstractDataEnvelopeAreaOfInterest();
+        aoi.addExtentItem(0.0f);
+        aoi.addExtentItem(0.0f);
+        aoi.addExtentItem(10.0f);
+        aoi.addExtentItem(10.0f);
+
+        WacodisJobDefinitionExecution execution = new WacodisJobDefinitionExecution();
+        execution.setPattern("0 0 1 * *"); //executes on the 1st day of each month (00:00:00)
+
+        WacodisJobDefinition jobDef = new WacodisJobDefinition();
+        jobDef.setInputs(inputs);
+        jobDef.setTemporalCoverage(tempCov);
+        jobDef.setAreaOfInterest(aoi);
+        jobDef.setLastFinishedExecution(DateTime.parse("2017-02-01T00:00:00Z"));
+        jobDef.setExecution(execution);
+
+        DateTime executionTime = new DateTime(DateTime.parse("2018-02-01T00:00:00Z"));
+        WacodisJobWrapper jobWrapper = new WacodisJobWrapper(jobDef, executionTime);
+
+        return jobWrapper;
     }
 }
