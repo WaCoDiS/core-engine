@@ -5,6 +5,7 @@
  */
 package de.wacodis.coreengine.evaluator.wacodisjobevaluation;
 
+import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
 import de.wacodis.core.models.CatalogueSubsetDefinition;
 import de.wacodis.core.models.CopernicusSubsetDefinition;
@@ -42,7 +43,7 @@ public class WacodisJobWrapperTest {
         WacodisJobDefinition jobDef = getJobDefinition();
         WacodisJobWrapper job = new WacodisJobWrapper(jobDef, new DateTime());
         
-        job.getInputs().add(new MutablePair<>(new AbstractSubsetDefinition(), Boolean.FALSE)); //should fail
+        job.getInputs().add(new InputPair(new AbstractSubsetDefinition(),null)); //should fail
     }
 
     /**
@@ -53,16 +54,16 @@ public class WacodisJobWrapperTest {
         WacodisJobWrapper job = new WacodisJobWrapper(getJobDefinition(), new DateTime());
         assertFalse(job.isExecutable());
         
-        job.getInputs().get(0).setValue(Boolean.TRUE);      
+        job.getInputs().get(0).setValue(new AbstractResource());      
         assertFalse(job.isExecutable());
         
-        job.getInputs().get(1).setValue(Boolean.TRUE);
+        job.getInputs().get(1).setValue(new AbstractResource());
         assertTrue(job.isExecutable());
         
-        job.getInputs().get(1).setValue(Boolean.FALSE);    
+        job.getInputs().get(1).setValue(null);    
         assertFalse(job.isExecutable());
         
-        job.getInputs().get(0).setValue(Boolean.FALSE);
+        job.getInputs().get(0).setValue(null);
         assertFalse(job.isExecutable());
     }
     
@@ -73,8 +74,8 @@ public class WacodisJobWrapperTest {
     public void testSubsetsInitialized(){
         WacodisJobWrapper job = new WacodisJobWrapper(getJobDefinition(), new DateTime());
         
-        for(Pair<AbstractSubsetDefinition, Boolean> input : job.getInputs()){
-            assertFalse(input.getValue());
+        for(InputPair pair : job.getInputs()){
+            assertFalse(pair.hasResource());
         }
     }
     

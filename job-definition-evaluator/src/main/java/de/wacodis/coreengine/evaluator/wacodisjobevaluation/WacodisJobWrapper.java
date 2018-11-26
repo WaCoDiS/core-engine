@@ -26,7 +26,7 @@ public class WacodisJobWrapper {
 
     private final WacodisJobDefinition jobDefinition;
     private final DateTime executionTime;
-    private final List<Pair<AbstractSubsetDefinition, Boolean>> inputs;
+    private final List<InputPair> inputs;
 
     public WacodisJobWrapper(WacodisJobDefinition job, DateTime executionTime) {
         this.jobDefinition = job;
@@ -43,7 +43,7 @@ public class WacodisJobWrapper {
      *
      * @return
      */
-    public List<Pair<AbstractSubsetDefinition, Boolean>> getInputs() {
+    public List<InputPair> getInputs() {
         return Collections.unmodifiableList(inputs);
     }
 
@@ -61,8 +61,8 @@ public class WacodisJobWrapper {
      * @return
      */
     public boolean isExecutable() {
-        for (Pair subset : this.inputs) {
-            if (subset.getValue().equals(Boolean.FALSE)) {
+        for (InputPair input : this.inputs) {
+            if (!input.hasResource()) {
                 return false;
             }
         }
@@ -72,8 +72,8 @@ public class WacodisJobWrapper {
 
     private void initSubsets() {
         for (AbstractSubsetDefinition subset : this.jobDefinition.getInputs()) {
-            Pair<AbstractSubsetDefinition, Boolean> inputPair = new MutablePair<>(subset, Boolean.FALSE);
-            this.inputs.add(inputPair);
+            InputPair pair = new InputPair(subset);
+            this.inputs.add(pair);
         }
     }
 }
