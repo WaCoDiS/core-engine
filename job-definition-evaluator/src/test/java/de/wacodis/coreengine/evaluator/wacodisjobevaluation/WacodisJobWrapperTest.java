@@ -5,7 +5,6 @@
  */
 package de.wacodis.coreengine.evaluator.wacodisjobevaluation;
 
-import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
 import de.wacodis.core.models.CatalogueSubsetDefinition;
 import de.wacodis.core.models.CopernicusSubsetDefinition;
@@ -45,7 +44,7 @@ public class WacodisJobWrapperTest {
         
         //exception expected because collection should be unmodifiable
         assertThrows(java.lang.UnsupportedOperationException.class, () -> {
-             job.getInputs().add(new InputPair(new AbstractSubsetDefinition(),null)); 
+             job.getInputs().add(new InputHelper(new AbstractSubsetDefinition())); 
         }); 
     }
 
@@ -57,16 +56,16 @@ public class WacodisJobWrapperTest {
         WacodisJobWrapper job = new WacodisJobWrapper(getJobDefinition(), new DateTime());
         assertFalse(job.isExecutable());
         
-        job.getInputs().get(0).setValue(new AbstractResource());      
+        job.getInputs().get(0).setResourceAvailable(true);      
         assertFalse(job.isExecutable());
         
-        job.getInputs().get(1).setValue(new AbstractResource());
+        job.getInputs().get(1).setResourceAvailable(true);
         assertTrue(job.isExecutable());
         
-        job.getInputs().get(1).setValue(null);    
+        job.getInputs().get(1).setResourceAvailable(false);    
         assertFalse(job.isExecutable());
         
-        job.getInputs().get(0).setValue(null);
+        job.getInputs().get(0).setResourceAvailable(false);
         assertFalse(job.isExecutable());
     }
     
@@ -79,7 +78,7 @@ public class WacodisJobWrapperTest {
     public void testSubsetsInitialized(){
         WacodisJobWrapper job = new WacodisJobWrapper(getJobDefinition(), new DateTime());
         
-        for(InputPair pair : job.getInputs()){
+        for(InputHelper pair : job.getInputs()){
             assertFalse(pair.hasResource());
         }
     }

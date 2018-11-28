@@ -10,8 +10,6 @@ import de.wacodis.core.models.WacodisJobDefinition;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +24,7 @@ public class WacodisJobWrapper {
 
     private final WacodisJobDefinition jobDefinition;
     private final DateTime executionTime;
-    private final List<InputPair> inputs;
+    private final List<InputHelper> inputs;
 
     public WacodisJobWrapper(WacodisJobDefinition job, DateTime executionTime) {
         this.jobDefinition = job;
@@ -43,7 +41,7 @@ public class WacodisJobWrapper {
      *
      * @return
      */
-    public List<InputPair> getInputs() {
+    public List<InputHelper> getInputs() {
         return Collections.unmodifiableList(inputs);
     }
 
@@ -61,8 +59,8 @@ public class WacodisJobWrapper {
      * @return
      */
     public boolean isExecutable() {
-        for (InputPair input : this.inputs) {
-            if (!input.hasResource()) {
+        for (InputHelper input : this.inputs) {
+            if (!input.isResourceAvailable()) {
                 return false;
             }
         }
@@ -71,8 +69,8 @@ public class WacodisJobWrapper {
     }
 
     private void initSubsets() {
-        for (AbstractSubsetDefinition subset : this.jobDefinition.getInputs()) {
-            InputPair pair = new InputPair(subset);
+        for(AbstractSubsetDefinition subset : this.jobDefinition.getInputs()) {
+            InputHelper pair = new InputHelper(subset);
             this.inputs.add(pair);
         }
     }
