@@ -12,11 +12,10 @@ import de.wacodis.core.models.CopernicusSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinition;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 /**
  *
@@ -38,12 +37,16 @@ public class WacodisJobWrapperTest {
         assertEquals(2, job.getInputs().size());
     }
     
-    @Test(expected = java.lang.UnsupportedOperationException.class)
+    @Test
+    @DisplayName("check GetInputs returns umodifiable collection")
     public void testGetInputsUnmodifiable(){
         WacodisJobDefinition jobDef = getJobDefinition();
         WacodisJobWrapper job = new WacodisJobWrapper(jobDef, new DateTime());
         
-        job.getInputs().add(new InputPair(new AbstractSubsetDefinition(),null)); //should fail
+        //exception expected because collection should be unmodifiable
+        assertThrows(java.lang.UnsupportedOperationException.class, () -> {
+             job.getInputs().add(new InputPair(new AbstractSubsetDefinition(),null)); 
+        }); 
     }
 
     /**
@@ -67,10 +70,12 @@ public class WacodisJobWrapperTest {
         assertFalse(job.isExecutable());
     }
     
-    @Test
+    
     /**
      * tests if every input is marked as unavailable initially
      */
+    @Test
+    @DisplayName("check every resource is unavailable initially")
     public void testSubsetsInitialized(){
         WacodisJobWrapper job = new WacodisJobWrapper(getJobDefinition(), new DateTime());
         

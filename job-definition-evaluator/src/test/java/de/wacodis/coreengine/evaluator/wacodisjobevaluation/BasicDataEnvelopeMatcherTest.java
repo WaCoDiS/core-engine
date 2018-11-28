@@ -21,8 +21,9 @@ import de.wacodis.core.models.WacodisJobDefinitionTemporalCoverage;
 import java.util.ArrayList;
 import java.util.List;
 import org.joda.time.DateTime;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 /**
  *
@@ -200,7 +201,8 @@ public class BasicDataEnvelopeMatcherTest {
         assertFalse(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
     }
 
-    @Test(expected = java.lang.NullPointerException.class)
+    @Test
+    @DisplayName("check fail when TemporalCoverage set to PreviousExecution and no execution pattern provided")
     public void testMatchTimeFrameDataEnvelopeStartPreviousExectution_NoPattern() {
         WacodisJobWrapper wrapper = getJobWrapper();
         GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
@@ -209,10 +211,12 @@ public class BasicDataEnvelopeMatcherTest {
         wrapper.getJobDefinition().getTemporalCoverage().setPreviousExecution(Boolean.TRUE);
         wrapper.getJobDefinition().getExecution().setPattern(null);
         
-        this.matcher.match(gdiDeEnv, wrapper, catalogueSubset);
+        
+        assertThrows(java.lang.NullPointerException.class, () -> this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
     }
 
-    @Test(expected = java.lang.NullPointerException.class)
+    @Test
+    @DisplayName("check fail when TemporalCoverage set to PreviousExecution and no execution information provided")
     public void testMatchTimeFrameDataEnvelopeStartPreviousExectution_NoExecution() {
         WacodisJobWrapper wrapper = getJobWrapper();
         GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
@@ -221,7 +225,7 @@ public class BasicDataEnvelopeMatcherTest {
         wrapper.getJobDefinition().getTemporalCoverage().setPreviousExecution(Boolean.TRUE);
         wrapper.getJobDefinition().setExecution(null);
         
-        this.matcher.match(gdiDeEnv, wrapper, catalogueSubset);
+        assertThrows(java.lang.NullPointerException.class,() -> this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));    
     }
 
     @Test

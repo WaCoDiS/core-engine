@@ -16,7 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /**
- * 
+ *
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 public class CronExecutionTimeCalculatorTest {
@@ -111,24 +111,6 @@ public class CronExecutionTimeCalculatorTest {
      * Test of nextExecution method, of class CronExecutionTimeCalculator.
      */
     @Test
-    @DisplayName("check equality DateTime and ZoneDateTime")
-    public void testNextExecution_Conversion() {
-        CronExecutionTimeCalculator calc = new CronExecutionTimeCalculator();
-        calc.setCronDefinition(CronType.UNIX);
-        calc.setCronExpression("0 0 1 * *"); //executes on the 1st day of each month (00:00:00)
-        ZonedDateTime zonedDateTime = ZonedDateTime.of(2018, 1, 15, 11, 45, 25, 0, ZoneId.of("UTC+2"));
-        DateTime dateTime = DateTime.parse("2018-01-15T11:45:25+02:00");
-        
-        ZonedDateTime zonedNextExec = calc.nextExecution(zonedDateTime);
-        DateTime nextExec = calc.nextExecution(dateTime);
-
-        assertTrue((zonedNextExec.toEpochSecond() == (nextExec.getMillis()/1000)));
-    }
-
-    /**
-     * Test of nextExecution method, of class CronExecutionTimeCalculator.
-     */
-    @Test
     public void testNextExecution_DateTime() {
         CronExecutionTimeCalculator calc = new CronExecutionTimeCalculator();
         calc.setCronDefinition(CronType.UNIX);
@@ -138,4 +120,21 @@ public class CronExecutionTimeCalculatorTest {
         assertEquals(DateTime.parse("2018-02-01T00:00:00+02:00"), calc.nextExecution(dateTime));
     }
 
+    /**
+     * Test of nextExecution method, of class CronExecutionTimeCalculator.
+     */
+    @Test
+    @DisplayName("check equality DateTime and ZoneDateTime")
+    public void testNextExecution_Conversion() {
+        CronExecutionTimeCalculator calc = new CronExecutionTimeCalculator();
+        calc.setCronDefinition(CronType.UNIX);
+        calc.setCronExpression("0 0 1 * *"); //executes on the 1st day of each month (00:00:00)
+        ZonedDateTime zonedDateTime = ZonedDateTime.of(2018, 1, 15, 11, 45, 25, 0, ZoneId.of("UTC+2"));
+        DateTime dateTime = DateTime.parse("2018-01-15T11:45:25+02:00");
+
+        ZonedDateTime zonedNextExec = calc.nextExecution(zonedDateTime);
+        DateTime nextExec = calc.nextExecution(dateTime);
+
+        assertTrue((zonedNextExec.toEpochSecond() == (nextExec.getMillis() / 1000)));
+    }
 }
