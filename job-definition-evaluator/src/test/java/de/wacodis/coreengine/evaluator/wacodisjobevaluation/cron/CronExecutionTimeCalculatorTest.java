@@ -11,8 +11,9 @@ import com.cronutils.model.definition.CronDefinitionBuilder;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import org.joda.time.DateTime;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 /**
  * 
@@ -110,6 +111,7 @@ public class CronExecutionTimeCalculatorTest {
      * Test of nextExecution method, of class CronExecutionTimeCalculator.
      */
     @Test
+    @DisplayName("check equality DateTime and ZoneDateTime")
     public void testNextExecution_Conversion() {
         CronExecutionTimeCalculator calc = new CronExecutionTimeCalculator();
         calc.setCronDefinition(CronType.UNIX);

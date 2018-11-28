@@ -24,6 +24,7 @@
         <spring-boot.version>2.1.0.RELEASE</spring-boot.version>
         <spring-cloud.version>Greenwich.M1</spring-cloud.version>   
         <wacodis-core-engine.version>0.0.1-SNAPSHOT</wacodis-core-engine.version>
+        <surefire-plugin.version>2.22.0</surefire-plugin.version>
     </properties>
     
     <dependencyManagement>
@@ -64,6 +65,15 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+       
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire-plugin.version}</version>
+            </plugin>
+        </plugins>
+    </build>
   
     <repositories>
         <repository>
