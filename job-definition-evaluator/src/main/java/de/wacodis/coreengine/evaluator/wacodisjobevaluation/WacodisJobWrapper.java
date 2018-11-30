@@ -31,7 +31,7 @@ public class WacodisJobWrapper {
         this.executionTime = executionTime;
         this.inputs = new ArrayList<>();
 
-        initSubsets();
+        initInputs();
         
         LOGGER.debug(WacodisJobWrapper.class.getSimpleName() + " instance created for WacodisJobDefinition " + this.jobDefinition.getId());
     }
@@ -68,10 +68,10 @@ public class WacodisJobWrapper {
         return true;
     }
 
-    private void initSubsets() {
+    private void initInputs() {
         for(AbstractSubsetDefinition subset : this.jobDefinition.getInputs()) {
-            InputHelper pair = new InputHelper(subset);
-            this.inputs.add(pair);
+            InputHelper input = new InputHelper(subset);
+            this.inputs.add(input);
         }
     }
 }

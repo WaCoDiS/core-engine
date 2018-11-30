@@ -7,7 +7,6 @@ package de.wacodis.coreengine.evaluator.wacodisjobevaluation;
 
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
-import java.util.Optional;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
