@@ -5,6 +5,8 @@
  */
 package de.wacodis.coreengine.evaluator.http;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import org.springframework.http.ResponseEntity;
 
 /**
@@ -13,5 +15,10 @@ import org.springframework.http.ResponseEntity;
  * @param <R> response type
  */
 public interface HTTPRequest<R> {
+
     ResponseEntity<R> execute();
+
+    static URL stringToURL(String urlStr) throws MalformedURLException {
+        return new URL(urlStr);
+    }
 }
