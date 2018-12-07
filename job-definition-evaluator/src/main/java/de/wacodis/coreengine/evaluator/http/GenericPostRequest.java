@@ -105,6 +105,7 @@ public class GenericPostRequest<P, R> implements HTTPRequest<R> {
         return url;
     }
 
+    @Override
     public void setUrl(URL url) {
         this.url = url;
     }
@@ -125,6 +126,7 @@ public class GenericPostRequest<P, R> implements HTTPRequest<R> {
         return headers;
     }
 
+    @Override
     public void setHeaders(HttpHeaders headers) {
         this.headers = headers;
     }

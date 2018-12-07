@@ -212,7 +212,7 @@ public class BasicDataEnvelopeMatcherTest {
         wrapper.getJobDefinition().getExecution().setPattern(null);
         
         
-        assertThrows(java.lang.NullPointerException.class, () -> this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
+        assertThrows(java.lang.IllegalArgumentException.class, () -> this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
     }
 
     @Test
@@ -225,7 +225,7 @@ public class BasicDataEnvelopeMatcherTest {
         wrapper.getJobDefinition().getTemporalCoverage().setPreviousExecution(Boolean.TRUE);
         wrapper.getJobDefinition().setExecution(null);
         
-        assertThrows(java.lang.NullPointerException.class,() -> this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));    
+        assertThrows(java.lang.IllegalArgumentException.class,() -> this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));    
     }
 
     @Test

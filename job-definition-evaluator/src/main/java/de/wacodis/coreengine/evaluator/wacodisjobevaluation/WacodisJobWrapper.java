@@ -7,19 +7,24 @@ package de.wacodis.coreengine.evaluator.wacodisjobevaluation;
 
 import de.wacodis.core.models.AbstractSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinition;
+import de.wacodis.core.models.WacodisJobDefinitionTemporalCoverage;
+import de.wacodis.coreengine.evaluator.wacodisjobevaluation.cron.CronExecutionTimeCalculator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
+import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Wrapper class for a JobDefinition to keep track of available/missing inputs
+ *
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 public class WacodisJobWrapper {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(WacodisJobWrapper.class);
 
     private final WacodisJobDefinition jobDefinition;
@@ -32,7 +37,7 @@ public class WacodisJobWrapper {
         this.inputs = new ArrayList<>();
 
         initInputs();
-        
+
         LOGGER.debug(WacodisJobWrapper.class.getSimpleName() + " instance created for WacodisJobDefinition " + this.jobDefinition.getId());
     }
 
@@ -68,8 +73,34 @@ public class WacodisJobWrapper {
         return true;
     }
 
+    /**
+     *
+     * @return
+     */
+    public Interval calculateInputRelevancyTimeFrame() {
+        WacodisJobDefinitionTemporalCoverage tempCov = this.jobDefinition.getTemporalCoverage();
+        DateTime start;
+
+        if (tempCov.getPreviousExecution() != null && tempCov.getPreviousExecution()) { //previousExecution (data since last job execution is relevant)
+            try {
+                String cronExpression = this.jobDefinition.getExecution().getPattern();
+                CronExecutionTimeCalculator timeCalculator = new CronExecutionTimeCalculator(cronExpression);
+                start = timeCalculator.previousExecution(this.executionTime); //scheduled time of previous job execution
+            } catch (NullPointerException e) {
+                LOGGER.error("temporalCoverage previousExecution is true but no execution pattern (cron) is set");
+                throw new java.lang.IllegalArgumentException("No execution pattern provided but attribute previousExecution is set true for JobDefinition: " + jobDefinition.getId(), e);
+            }
+
+        } else { //duration (data since a specified point in time is relevant)
+            Period period = Period.parse(tempCov.getDuration()); //terms duration and period are mixed up
+            start = this.executionTime.minus(period);
+        }
+        
+        return new Interval(start, this.executionTime);
+    }
+
     private void initInputs() {
-        for(AbstractSubsetDefinition subset : this.jobDefinition.getInputs()) {
+        for (AbstractSubsetDefinition subset : this.jobDefinition.getInputs()) {
             InputHelper input = new InputHelper(subset);
             this.inputs.add(input);
         }

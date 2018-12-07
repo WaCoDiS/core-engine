@@ -14,11 +14,7 @@ import de.wacodis.core.models.CopernicusSubsetDefinition;
 import de.wacodis.core.models.GdiDeDataEnvelope;
 import de.wacodis.core.models.SensorWebDataEnvelope;
 import de.wacodis.core.models.SensorWebSubsetDefinition;
-import de.wacodis.core.models.WacodisJobDefinition;
-import de.wacodis.core.models.WacodisJobDefinitionTemporalCoverage;
-import de.wacodis.coreengine.evaluator.wacodisjobevaluation.cron.CronExecutionTimeCalculator;
-import org.joda.time.DateTime;
-import org.joda.time.Period;
+import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +46,7 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
         }
 
         //match by timeframe, area of interest and attributes (parial results)
-        boolean isMatchTF = matchTimeFrame(dataEnvelope, jobWrapper.getExecutionTime(), jobWrapper.getJobDefinition());
+        boolean isMatchTF = matchTimeFrame(dataEnvelope, jobWrapper);
         boolean isMatchAOI = matchAreaofInterest(dataEnvelope.getAreaOfInterest(), jobWrapper.getJobDefinition().getAreaOfInterest());
         boolean isMatchAttr = matchAttributes(dataEnvelope, subsetDefinition);
         //combine partial results
@@ -104,27 +100,11 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
      * @param tempCoverage
      * @return
      */
-    private boolean matchTimeFrame(AbstractDataEnvelope dataEnvelope, DateTime executionTime, WacodisJobDefinition jobDefinition) {
-        WacodisJobDefinitionTemporalCoverage tempCoverage = jobDefinition.getTemporalCoverage();
-        Period period = Period.parse(tempCoverage.getDuration()); //terms duration and period are mixed up
-        DateTime beginRelevancy; //point in time when a DataEnvelope becomes relevant for a WacodisJob 
+    private boolean matchTimeFrame(AbstractDataEnvelope dataEnvelope, WacodisJobWrapper jobWrapper) {
+        Interval inputRelevancyTimeFrame = jobWrapper.calculateInputRelevancyTimeFrame();
 
-        if (tempCoverage.getPreviousExecution() != null && tempCoverage.getPreviousExecution()) { //previousExecution (data since last job execution is relevant)
-            try {
-                String cronExpression = jobDefinition.getExecution().getPattern();
-                CronExecutionTimeCalculator timeCalculator = new CronExecutionTimeCalculator(cronExpression);
-                beginRelevancy = timeCalculator.previousExecution(executionTime); //scheduled time of previous job execution
-            } catch (NullPointerException e) {
-                LOGGER.error("temporalCoverage previousExecution is true but no execution pattern (cron) is set");
-                throw new NullPointerException("No execution pattern provided but attribute previousExecution is set true for JobDefinition: " + jobDefinition.getId());
-            }
-
-        } else { //duration (data since a specified point in time is relevant)
-            beginRelevancy = executionTime.minus(period);
-        }
-
-        return dataEnvelope.getTimeFrame().getEndTime().isAfter(beginRelevancy) //envelopes timeframe intersects time between beginRelevancy and executionTime
-                && dataEnvelope.getTimeFrame().getStartTime().isBefore(executionTime);
+        return dataEnvelope.getTimeFrame().getEndTime().isAfter(inputRelevancyTimeFrame.getStart()) //envelopes timeframe intersects time between beginRelevancy (start) and executionTime (end)
+                && dataEnvelope.getTimeFrame().getStartTime().isBefore(inputRelevancyTimeFrame.getEnd());
     }
 
     /**
