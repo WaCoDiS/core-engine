@@ -7,6 +7,9 @@ package de.wacodis.coreengine.evaluator.wacodisjobevaluation;
 
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
+import java.util.ArrayList;
+import java.util.List;
+import org.assertj.core.util.Arrays;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -26,9 +29,11 @@ public class InputHelperTest {
     public void testGetResource() {
         AbstractSubsetDefinition subset = new AbstractSubsetDefinition();
         AbstractResource resource = new AbstractResource();
-        InputHelper input = new InputHelper(subset, resource);
+        List<AbstractResource> resourceList = new ArrayList();
+        resourceList.add(resource);
+        InputHelper input = new InputHelper(subset, resourceList);
 
-        assertEquals(resource, input.getResource().get());
+        assertEquals(resourceList, input.getResource().get());
     }
 
     /**
@@ -49,10 +54,12 @@ public class InputHelperTest {
     public void testSetResource() {
         AbstractSubsetDefinition subset = new AbstractSubsetDefinition();
         AbstractResource resource = new AbstractResource();
+        List<AbstractResource> resourceList = new ArrayList();
+        resourceList.add(resource);
         InputHelper input = new InputHelper(subset);
 
-        input.setResource(resource);
-        assertEquals(resource, input.getResource().get());
+        input.setResource(resourceList);
+        assertEquals(resourceList, input.getResource().get());
     }
 
     /**
@@ -95,9 +102,11 @@ public class InputHelperTest {
     public void testHasResource() {
         AbstractSubsetDefinition subset = new AbstractSubsetDefinition();
         AbstractResource resource = new AbstractResource();
+        List<AbstractResource> resourceList = new ArrayList();
+        resourceList.add(resource);
         InputHelper input = new InputHelper(subset);
 
-        input.setResource(resource);
+        input.setResource(resourceList);
         assertTrue(input.hasResource());
     }
 

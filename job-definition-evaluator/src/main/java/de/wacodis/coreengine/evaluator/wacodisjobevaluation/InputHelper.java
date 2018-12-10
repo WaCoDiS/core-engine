@@ -7,6 +7,7 @@ package de.wacodis.coreengine.evaluator.wacodisjobevaluation;
 
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -18,15 +19,15 @@ public class InputHelper {
 
     private final AbstractSubsetDefinition subsetDefinition;
     private boolean resourceAvailable;
-    private Optional<AbstractResource> resource;
+    private Optional<List<AbstractResource>> resource;
 
-    public InputHelper(AbstractSubsetDefinition subsetDefinition, Optional<AbstractResource> resource) {
+    public InputHelper(AbstractSubsetDefinition subsetDefinition, Optional<List<AbstractResource>> resource) {
         this.subsetDefinition = subsetDefinition;
         this.resource = resource;
         this.resourceAvailable = false;
     }
 
-    public InputHelper(AbstractSubsetDefinition subsetDefinition, AbstractResource resource) {
+    public InputHelper(AbstractSubsetDefinition subsetDefinition, List<AbstractResource> resource) {
         this(subsetDefinition, Optional.ofNullable(resource)) ;
     }
 
@@ -39,15 +40,15 @@ public class InputHelper {
         this(subsetDefinition, Optional.empty());
     }
 
-    public Optional<AbstractResource> getResource() {
+    public Optional<List<AbstractResource>> getResource() {
         return resource;
     }
 
-    public void setResource(AbstractResource resource) {
+    public void setResource(List<AbstractResource> resource) {
         setResource(Optional.ofNullable(resource));
     }
 
-    public void setResource(Optional<AbstractResource> resource) {
+    public void setResource(Optional<List<AbstractResource>> resource) {
         this.resource = resource;
     }
 
