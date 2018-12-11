@@ -16,9 +16,11 @@ import org.springframework.context.annotation.ComponentScan;
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 @SpringBootApplication
-@ComponentScan("de.wacodis.coreengine.evaluator")
+@ComponentScan({
+    "de.wacodis.coreengine.evaluator",
+    "de.wacodis.coreengine.scheduling"})
 public class CoreEngineApp {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CoreEngineApp.class);
 
     /**
