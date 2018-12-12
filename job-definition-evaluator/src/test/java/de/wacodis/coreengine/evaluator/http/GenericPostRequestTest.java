@@ -144,25 +144,4 @@ public class GenericPostRequestTest {
         this.postBody.setInputs(inputs);
         this.postBody.setTimeFrame(frame);
     }
-
-    /**
-     * Test of getUrl method, of class GenericPostRequest.
-     */
-    @org.junit.Test
-    public void testGetUrl() {
-    }
-
-    /**
-     * Test of getPayload method, of class GenericPostRequest.
-     */
-    @org.junit.Test
-    public void testGetPayload() {
-    }
-
-    /**
-     * Test of getHeaders method, of class GenericPostRequest.
-     */
-    @org.junit.Test
-    public void testGetHeaders() {
-    }
 }

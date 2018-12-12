@@ -137,4 +137,18 @@ public class CronExecutionTimeCalculatorTest {
 
         assertTrue((zonedNextExec.toEpochSecond() == (nextExec.getMillis() / 1000)));
     }
+
+    @Test
+    @DisplayName("check next/previous execution time for cron expression that executes every fith day")
+    public void testCalculateExecutionTime_EveryFifthDay() {
+        String cronStr = "0 0 */5 * *"; //executes every fith day at 00:00:00 
+        DateTime execTime = DateTime.parse("2018-01-03T12:30:15Z");
+
+        CronExecutionTimeCalculator calc = new CronExecutionTimeCalculator(cronStr, CronType.UNIX);
+        DateTime prevExecTime = calc.previousExecution(execTime);
+        DateTime nextExecTime = calc.nextExecution(execTime);
+
+        assertEquals(DateTime.parse("2018-01-01T00:00:00Z"), prevExecTime);
+        assertEquals(DateTime.parse("2018-01-06T00:00:00Z"), nextExecTime);
+    }
 }

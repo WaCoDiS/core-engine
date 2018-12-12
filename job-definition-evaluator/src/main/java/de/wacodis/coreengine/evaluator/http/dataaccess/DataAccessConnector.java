@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
 /**
- *
+ * search data-access-api for available resources
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 public class DataAccessConnector implements ResourceProvider<Map<String, List<AbstractResource>>, DataAccessResourceSearchBody> {
@@ -54,10 +54,10 @@ public class DataAccessConnector implements ResourceProvider<Map<String, List<Ab
     }
 
     /**
-     *
+     * execute HTTP-Post to data-access-api, instance variable Url must be set
      * @param searchBody
-     * @return
-     * @throws java.io.IOException
+     * @return response body
+     * @throws java.io.IOException if request is not successful or has no response body
      */
     @Override
     public Map<String, List<AbstractResource>> searchResources(DataAccessResourceSearchBody searchBody) throws IOException {
@@ -65,11 +65,15 @@ public class DataAccessConnector implements ResourceProvider<Map<String, List<Ab
         ResponseEntity<Map<String, List<AbstractResource>>> response = this.dataAccessRequest.execute();
         
         if(response.getStatusCode().is2xxSuccessful() && response.hasBody()){
+            LOGGER.info("Retrieving data from data-acces-api succeeded, Url: " + this.dataAccessRequest.getUrl().toString() +
+                         ", StatusCode: " + response.getStatusCodeValue() + ", RequestBody: " + searchBody.toString() 
+                         + ", ResponseBody: " + response.getBody().toString());
+            
             return response.getBody();
         }else{
             LOGGER.error("Retrieving data from data-acces-api failed, Url: " + this.dataAccessRequest.getUrl().toString() +
-                         " StatusCode: " + response.getStatusCodeValue() + " RequestBody: " + searchBody.toString() 
-                         + " hasResponseBody: " + response.hasBody());
+                         ", StatusCode: " + response.getStatusCodeValue() + ", RequestBody: " + searchBody.toString() 
+                         + ", hasResponseBody: " + response.hasBody());
             throw new java.io.IOException("Could not retrieve resources from " + this.dataAccessRequest.getUrl().toString()+ ", StatusCode: " + response.getStatusCodeValue() + ", hasBody: " + response.hasBody());
         }
     }
