@@ -8,6 +8,7 @@ package de.wacodis.coreengine.evaluator.wacodisjobevaluation;
 import de.wacodis.core.models.AbstractDataEnvelope;
 import de.wacodis.core.models.AbstractSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinition;
+import de.wacodis.coreengine.evaluator.EvaluationStatus;
 import java.util.List;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.DisplayName;
@@ -158,7 +159,7 @@ public class WacodisJobInputTrackerTest {
      */
     @Test
     public void testAddJobIsExecutableChangeListener() {
-        JobIsExecutableChangeListener listener = (WacodisJobWrapper Job, boolean isExecutbable) -> {
+        JobIsExecutableChangeListener listener = (WacodisJobWrapper Job, EvaluationStatus status) -> {
         };
         WacodisJobInputTrackerTestSubclass tracker = new WacodisJobInputTrackerTestSubclass(this.inputTracker.getMatcher());
 
@@ -172,7 +173,7 @@ public class WacodisJobInputTrackerTest {
      */
     @Test
     public void testRemoveJobIsExecutableChangeListener() {
-        JobIsExecutableChangeListener listener = (WacodisJobWrapper Job, boolean isExecutbable) -> {
+        JobIsExecutableChangeListener listener = (WacodisJobWrapper Job, EvaluationStatus status) -> {
         };
         WacodisJobInputTrackerTestSubclass tracker = new WacodisJobInputTrackerTestSubclass(this.inputTracker.getMatcher());
 
@@ -187,7 +188,7 @@ public class WacodisJobInputTrackerTest {
      */
     @Test
     public void testClearJobIsExecutableChangeListeners() {
-        JobIsExecutableChangeListener listener = (WacodisJobWrapper Job, boolean isExecutbable) -> {
+        JobIsExecutableChangeListener listener = (WacodisJobWrapper Job, EvaluationStatus status) -> {
         };
         WacodisJobInputTrackerTestSubclass tracker = new WacodisJobInputTrackerTestSubclass(this.inputTracker.getMatcher());
 
@@ -283,9 +284,9 @@ public class WacodisJobInputTrackerTest {
         }
 
         @Override
-        public void onJobIsExecutableChanged(WacodisJobWrapper job, boolean isExecutable) {
+        public void onJobIsExecutableChanged(WacodisJobWrapper job, EvaluationStatus status) {
             this.eventOccured = true;
-            this.executable_LastEvent = isExecutable;
+            this.executable_LastEvent = status.equals(EvaluationStatus.EXECUTABLE);
         }
     }
 }

@@ -6,6 +6,7 @@
 package de.wacodis.coreengine.evaluator.wacodisjobevaluation;
 
 import de.wacodis.core.models.AbstractDataEnvelope;
+import de.wacodis.coreengine.evaluator.EvaluationStatus;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -154,9 +155,10 @@ public class WacodisJobInputTracker {
 
     private void notifyListeners(WacodisJobWrapper job, boolean isExecutable) {
         LOGGER.debug("Notify Listeners for Job " + job.getJobDefinition().getName() + ", isExecutable: " + isExecutable);
+        EvaluationStatus status = (isExecutable)? EvaluationStatus.EXECUTABLE : EvaluationStatus.NOTEXECUTABLE;
         
         for (JobIsExecutableChangeListener listener : this.listeners) {
-            listener.onJobIsExecutableChanged(job, isExecutable);
+            listener.onJobIsExecutableChanged(job, status);
         }
     }
 }
