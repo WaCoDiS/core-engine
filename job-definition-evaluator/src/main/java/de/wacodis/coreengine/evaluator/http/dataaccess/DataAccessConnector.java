@@ -7,7 +7,6 @@ package de.wacodis.coreengine.evaluator.http.dataaccess;
 
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.DataAccessResourceSearchBody;
-import de.wacodis.coreengine.evaluator.http.DataAccessResourceSearchRequest;
 import de.wacodis.coreengine.evaluator.http.GenericPostRequest;
 import java.io.IOException;
 import java.util.List;
