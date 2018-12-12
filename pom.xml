@@ -25,6 +25,7 @@
         <spring-cloud.version>Greenwich.M1</spring-cloud.version>   
         <wacodis-core-engine.version>0.0.1-SNAPSHOT</wacodis-core-engine.version>
         <surefire-plugin.version>2.22.1</surefire-plugin.version>
+        <quartz.version>2.3.0</quartz.version>
     </properties>
     
     <dependencyManagement>
@@ -62,6 +63,16 @@
                 <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.quartz-scheduler</groupId>
+                <artifactId>quartz</artifactId>
+                <version>${quartz.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.quartz-scheduler</groupId>
+                <artifactId>quartz-jobs</artifactId>
+                <version>${quartz.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
