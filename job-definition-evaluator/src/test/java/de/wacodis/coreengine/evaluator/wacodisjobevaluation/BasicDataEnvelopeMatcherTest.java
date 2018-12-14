@@ -38,6 +38,39 @@ public class BasicDataEnvelopeMatcherTest {
     }
 
     @Test
+    public void testSetMinimumOverlapPercentage_IllegalArgument() {
+        BasicDataEnvelopeMatcher basicMatcher = new BasicDataEnvelopeMatcher();
+
+        assertAll(
+                () -> assertThrows(java.lang.IllegalArgumentException.class, () -> basicMatcher.setMinimumOverlapPercentage(110.5f)),
+                () -> assertThrows(java.lang.IllegalArgumentException.class, () -> basicMatcher.setMinimumOverlapPercentage(-1.0f))
+        );
+    }
+
+    @Test
+    public void testSetMinimumOverlapPercentage_IllegalArgument_Constructor() {
+        assertAll(
+                () -> assertThrows(java.lang.IllegalArgumentException.class, () -> new BasicDataEnvelopeMatcher(110.5f)),
+                () -> assertThrows(java.lang.IllegalArgumentException.class, () -> new BasicDataEnvelopeMatcher(-1.0f))
+        );
+    }
+
+    @Test
+    public void testSetMinimumOverlapPercentage() {
+        BasicDataEnvelopeMatcher basicMatcher = new BasicDataEnvelopeMatcher();
+
+        basicMatcher.setMinimumOverlapPercentage(0.0f);
+        assertEquals(0.0f, basicMatcher.getMinimumOverlapPercentage());
+    }
+
+    @Test
+    public void testGetMinimumOverlapPercentage() {
+        BasicDataEnvelopeMatcher basicMatcher = new BasicDataEnvelopeMatcher(100.0f);
+
+        assertEquals(100.0f, basicMatcher.getMinimumOverlapPercentage());
+    }
+
+    @Test
     public void testIsMatchCopernicusDataEnvelopeCopernicusSubsetDefinition() {
         CopernicusDataEnvelope copernicusEnv = getCopernicusDataEnvelope();
         CopernicusSubsetDefinition copernicusSubset = getCopernicusSubsetDefinition();
@@ -210,8 +243,7 @@ public class BasicDataEnvelopeMatcherTest {
 
         wrapper.getJobDefinition().getTemporalCoverage().setPreviousExecution(Boolean.TRUE);
         wrapper.getJobDefinition().getExecution().setPattern(null);
-        
-        
+
         assertThrows(java.lang.IllegalArgumentException.class, () -> this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
     }
 
@@ -224,100 +256,71 @@ public class BasicDataEnvelopeMatcherTest {
 
         wrapper.getJobDefinition().getTemporalCoverage().setPreviousExecution(Boolean.TRUE);
         wrapper.getJobDefinition().setExecution(null);
-        
-        assertThrows(java.lang.IllegalArgumentException.class,() -> this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));    
+
+        assertThrows(java.lang.IllegalArgumentException.class, () -> this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
     }
 
     @Test
-    public void testMatchAreaOfInterestLargerJobExtentLongitude() {
+    public void testMatchAreaOfInterest_CompleteOverlap() {
         WacodisJobWrapper wrapper = getJobWrapper();
         GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
         CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
-
-        wrapper.getJobDefinition().getAreaOfInterest().getExtent().set(2, 15.0f); //maxLon
-
-        assertFalse(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
-    }
-
-    @Test
-    public void testMatchAreaOfInterestLargerJobExtentLatitude() {
-        WacodisJobWrapper wrapper = getJobWrapper();
-        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
-        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
-
-        wrapper.getJobDefinition().getAreaOfInterest().getExtent().set(3, 15.0f); //maxLat
-
-        assertFalse(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
-    }
-
-    @Test
-    public void testMatchAreaOfInterestSmallerDataEnvelopeExtentLongitude() {
-        WacodisJobWrapper wrapper = getJobWrapper();
-        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
-        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
-
-        gdiDeEnv.getAreaOfInterest().getExtent().set(2, 5.0f); //maxLon
-
-        assertFalse(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
-    }
-
-    @Test
-    public void testMatchAreaOfInterestDataEnvelopeExtentLatitude() {
-        WacodisJobWrapper wrapper = getJobWrapper();
-        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
-        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
-
-        gdiDeEnv.getAreaOfInterest().getExtent().set(2, 5.0f);
-
-        assertFalse(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
-    }
-
-    @Test
-    public void testMatchAreaOfInterestSmallerDataEnvelopeExtentDisjointNorthEast() {
-        WacodisJobWrapper wrapper = getJobWrapper();
-        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
-        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
-
-        AbstractDataEnvelopeAreaOfInterest aoi = new AbstractDataEnvelopeAreaOfInterest();
-        aoi.addExtentItem(15.0f);
-        aoi.addExtentItem(15.0f);
-        aoi.addExtentItem(20.0f);
-        aoi.addExtentItem(20.0f);
-        gdiDeEnv.setAreaOfInterest(aoi);
-
-        assertFalse(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
-    }
-
-    @Test
-    public void testMatchAreaOfInterestSmallerDataEnvelopeExtentDisjointSouthWest() {
-        WacodisJobWrapper wrapper = getJobWrapper();
-        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
-        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
-
-        AbstractDataEnvelopeAreaOfInterest aoi = new AbstractDataEnvelopeAreaOfInterest();
-        aoi.addExtentItem(-15.0f);
-        aoi.addExtentItem(-15.0f);
-        aoi.addExtentItem(-20.0f);
-        aoi.addExtentItem(-20.0f);
-        gdiDeEnv.setAreaOfInterest(aoi);
-
-        assertFalse(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
-    }
-
-    @Test
-    public void testMatchAreaOfInterest() {
-        WacodisJobWrapper wrapper = getJobWrapper();
-        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
-        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
-
-        AbstractDataEnvelopeAreaOfInterest aoi = new AbstractDataEnvelopeAreaOfInterest();
-        aoi.addExtentItem(5.0f);
-        aoi.addExtentItem(5.0f);
-        aoi.addExtentItem(7.0f);
-        aoi.addExtentItem(7.0f);
-        wrapper.getJobDefinition().setAreaOfInterest(aoi);
-
+        //default minimum overlap percentage = 100%
         assertTrue(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
+    }
+
+    @Test
+    public void testMatchAreaOfInterest_Disjoint() {
+        BasicDataEnvelopeMatcher basicMatcher = new BasicDataEnvelopeMatcher();
+        basicMatcher.setMinimumOverlapPercentage(0.1f);
+        WacodisJobWrapper wrapper = getJobWrapper();
+        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
+        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
+
+        AbstractDataEnvelopeAreaOfInterest aoi = new AbstractDataEnvelopeAreaOfInterest();
+        aoi.addExtentItem(15.0f);
+        aoi.addExtentItem(15.0f);
+        aoi.addExtentItem(20.0f);
+        aoi.addExtentItem(20.0f);
+        gdiDeEnv.setAreaOfInterest(aoi);
+
+        assertFalse(basicMatcher.match(gdiDeEnv, wrapper, catalogueSubset));
+    }
+
+    @Test
+    public void testMatchAreaOfInterest_PartialOverlap() {
+        BasicDataEnvelopeMatcher basicMatcher = new BasicDataEnvelopeMatcher();
+        basicMatcher.setMinimumOverlapPercentage(50.0f);
+        WacodisJobWrapper wrapper = getJobWrapper();
+        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
+        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
+
+        AbstractDataEnvelopeAreaOfInterest aoi = new AbstractDataEnvelopeAreaOfInterest();
+        aoi.addExtentItem(5.0f);
+        aoi.addExtentItem(0.0f);
+        aoi.addExtentItem(15.0f);
+        aoi.addExtentItem(10.0f);
+        gdiDeEnv.setAreaOfInterest(aoi); //create 50% overlap 
+
+        assertTrue(basicMatcher.match(gdiDeEnv, wrapper, catalogueSubset));
+    }
+
+    @Test
+    public void testMatchAreaOfInterest_PartialOverlap_higherThreshold() {
+        BasicDataEnvelopeMatcher basicMatcher = new BasicDataEnvelopeMatcher();
+        basicMatcher.setMinimumOverlapPercentage(70.0f);
+        WacodisJobWrapper wrapper = getJobWrapper();
+        GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
+        CatalogueSubsetDefinition catalogueSubset = getCatalogueSubsetDefinition();
+
+        AbstractDataEnvelopeAreaOfInterest aoi = new AbstractDataEnvelopeAreaOfInterest();
+        aoi.addExtentItem(5.0f);
+        aoi.addExtentItem(0.0f);
+        aoi.addExtentItem(15.0f);
+        aoi.addExtentItem(10.0f);
+        gdiDeEnv.setAreaOfInterest(aoi); //create 50% overlap 
+
+        assertFalse(basicMatcher.match(gdiDeEnv, wrapper, catalogueSubset));
     }
 
     private CopernicusDataEnvelope getCopernicusDataEnvelope() {

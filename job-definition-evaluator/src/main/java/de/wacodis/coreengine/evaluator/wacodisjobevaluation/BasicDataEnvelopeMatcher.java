@@ -26,11 +26,36 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicDataEnvelopeMatcher.class);
 
+    private float minimumOverlapPercentage;
+
+    public BasicDataEnvelopeMatcher(float overlapPercentageThreshold) {
+        if (overlapPercentageThreshold > 100.0f || overlapPercentageThreshold < 0.0f) {
+            throw new IllegalArgumentException("overlapPercentageThreshold is " + overlapPercentageThreshold + " but must be between 0.0 and 100.0");
+        }
+
+        this.minimumOverlapPercentage = overlapPercentageThreshold;
+    }
+
     public BasicDataEnvelopeMatcher() {
+        this(100.0f);
+    }
+
+    public float getMinimumOverlapPercentage() {
+        return minimumOverlapPercentage;
+    }
+
+    public void setMinimumOverlapPercentage(float minimumOverlapPercentage) {
+        if (minimumOverlapPercentage > 100.0f || minimumOverlapPercentage < 0.0f) {
+            throw new IllegalArgumentException("overlapPercentageThreshold is " + minimumOverlapPercentage + " but must be between 0.0 and 100.0");
+        }
+
+        this.minimumOverlapPercentage = minimumOverlapPercentage;
+
     }
 
     /**
-     * matches DataEnvelope and SubsetDefinition by comparing common attributes, timeframe and area of interest
+     * matches DataEnvelope and SubsetDefinition by comparing common attributes,
+     * timeframe and area of interest
      *
      * @param dataEnvelope
      * @param jobWrapper
@@ -93,8 +118,11 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
     }
 
     /**
-     * Returns true if the timeframe of dataEnvelopes intersectes the time between a point in the past and executionTime.
-     * The point in the past is calculated according to jobDefinition (duration or previousExecution (scheduled point in time according to cron expression)).
+     * Returns true if the timeframe of dataEnvelopes intersectes the time
+     * between a point in the past and executionTime. The point in the past is
+     * calculated according to jobDefinition (duration or previousExecution
+     * (scheduled point in time according to cron expression)).
+     *
      * @param dataEnvelope
      * @param executionTime
      * @param tempCoverage
@@ -114,11 +142,21 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
      * @param aoiB
      * @return
      */
+    /*
     private boolean matchAreaofInterest(AbstractDataEnvelopeAreaOfInterest aoiA, AbstractDataEnvelopeAreaOfInterest aoiB) {
         return aoiB.getExtent().get(1) >= aoiA.getExtent().get(1) //minLat
                 && aoiB.getExtent().get(0) >= aoiA.getExtent().get(0) //minLon
                 && aoiB.getExtent().get(3) <= aoiA.getExtent().get(3) //maxLat
                 && aoiB.getExtent().get(2) <= aoiA.getExtent().get(2); //maxLon
+    }*/
+    /**
+     * 
+     * @param extentAreaOfInterest
+     * @param extentDataEnvelope
+     * @return 
+     */
+    private boolean matchAreaofInterest(AbstractDataEnvelopeAreaOfInterest extentAreaOfInterest, AbstractDataEnvelopeAreaOfInterest extentDataEnvelope) {
+        return (calculateOverlapPercentage(extentAreaOfInterest, extentDataEnvelope) >= this.minimumOverlapPercentage);
     }
 
     private boolean matchGdiDeDataEnevelope(GdiDeDataEnvelope dataEnvelope, CatalogueSubsetDefinition subsetDefinition) {
@@ -168,5 +206,57 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
      */
     private boolean matchSatellite(CopernicusDataEnvelope.SatelliteEnum satelliteEnv, CopernicusSubsetDefinition.SatelliteEnum satelliteSub) {
         return satelliteEnv.toString().equals(satelliteSub.toString());
+    }
+
+    private double calculateOverlapPercentage(AbstractDataEnvelopeAreaOfInterest areaOfInterestExtent, AbstractDataEnvelopeAreaOfInterest dataEnvelopeExtent) {
+        float[] intersection = new float[4];
+        Float[] aoiExtent = areaOfInterestExtent.getExtent().toArray(new Float[0]);
+        Float[] envExtent = dataEnvelopeExtent.getExtent().toArray(new Float[0]);
+
+        if (intersectsExtent(aoiExtent, envExtent)) {
+            if (aoiExtent[0] > envExtent[0]) {
+                intersection[0] = aoiExtent[0];
+            } else {
+                intersection[0] = envExtent[0];
+            }
+            if (aoiExtent[1] > envExtent[1]) {
+                intersection[1] = aoiExtent[1];
+            } else {
+                intersection[1] = envExtent[1];
+            }
+            if (aoiExtent[2] < envExtent[2]) {
+                intersection[2] = aoiExtent[2];
+            } else {
+                intersection[2] = envExtent[2];
+            }
+            if (aoiExtent[3] < envExtent[3]) {
+                intersection[3] = aoiExtent[3];
+            } else {
+                intersection[3] = envExtent[3];
+            }
+
+            float aIntersection = Math.abs(intersection[0] - intersection[2]);
+            float bIntersection = Math.abs(intersection[1] - intersection[3]);
+            float areaIntersection = aIntersection * bIntersection;
+
+            float aAoI = Math.abs(aoiExtent[0] - aoiExtent[2]);
+            float bAoI = Math.abs(aoiExtent[1] - aoiExtent[3]);
+            float areaAoI = aAoI * bAoI;
+
+            float overlapPercentage = ((areaAoI / 100) * areaIntersection);
+            
+            assert(overlapPercentage <= 100.0f);
+
+            return overlapPercentage;
+        } else {
+            return 0.0f; //no overlap
+        }
+    }
+
+    private boolean intersectsExtent(Float[] extent1, Float[] extent2) {
+        return extent1[0] <= extent2[2]
+                && extent1[2] >= extent2[0]
+                && extent1[1] <= extent2[3]
+                && extent1[3] >= extent2[1];
     }
 }
