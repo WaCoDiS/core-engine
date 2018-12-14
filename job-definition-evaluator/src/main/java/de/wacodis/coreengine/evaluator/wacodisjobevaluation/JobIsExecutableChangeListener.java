@@ -5,10 +5,12 @@
  */
 package de.wacodis.coreengine.evaluator.wacodisjobevaluation;
 
+import de.wacodis.coreengine.evaluator.EvaluationStatus;
+
 /**
  *
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 public interface JobIsExecutableChangeListener {
-    void onJobIsExecutableChanged(WacodisJobWrapper job, boolean isExecutable);
+    void onJobIsExecutableChanged(WacodisJobWrapper job, EvaluationStatus status);
 }
