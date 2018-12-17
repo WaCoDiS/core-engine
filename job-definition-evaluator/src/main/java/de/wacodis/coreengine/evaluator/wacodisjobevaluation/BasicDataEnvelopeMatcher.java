@@ -14,6 +14,7 @@ import de.wacodis.core.models.CopernicusSubsetDefinition;
 import de.wacodis.core.models.GdiDeDataEnvelope;
 import de.wacodis.core.models.SensorWebDataEnvelope;
 import de.wacodis.core.models.SensorWebSubsetDefinition;
+import java.util.Arrays;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,27 +137,16 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
     }
 
     /**
-     * returns true if aoiB is within or equal to aoiA
      *
-     * @param aoiA
-     * @param aoiB
-     * @return
-     */
-    /*
-    private boolean matchAreaofInterest(AbstractDataEnvelopeAreaOfInterest aoiA, AbstractDataEnvelopeAreaOfInterest aoiB) {
-        return aoiB.getExtent().get(1) >= aoiA.getExtent().get(1) //minLat
-                && aoiB.getExtent().get(0) >= aoiA.getExtent().get(0) //minLon
-                && aoiB.getExtent().get(3) <= aoiA.getExtent().get(3) //maxLat
-                && aoiB.getExtent().get(2) <= aoiA.getExtent().get(2); //maxLon
-    }*/
-    /**
-     * 
      * @param extentAreaOfInterest
      * @param extentDataEnvelope
-     * @return 
+     * @return
      */
     private boolean matchAreaofInterest(AbstractDataEnvelopeAreaOfInterest extentAreaOfInterest, AbstractDataEnvelopeAreaOfInterest extentDataEnvelope) {
-        return (calculateOverlapPercentage(extentAreaOfInterest, extentDataEnvelope) >= this.minimumOverlapPercentage);
+        Float[] aoiExtent = extentAreaOfInterest.getExtent().toArray(new Float[0]);
+        Float[] envExtent = extentDataEnvelope.getExtent().toArray(new Float[0]);
+
+        return (calculateOverlapPercentage(aoiExtent, envExtent) >= this.minimumOverlapPercentage);
     }
 
     private boolean matchGdiDeDataEnevelope(GdiDeDataEnvelope dataEnvelope, CatalogueSubsetDefinition subsetDefinition) {
@@ -208,55 +198,127 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
         return satelliteEnv.toString().equals(satelliteSub.toString());
     }
 
-    private double calculateOverlapPercentage(AbstractDataEnvelopeAreaOfInterest areaOfInterestExtent, AbstractDataEnvelopeAreaOfInterest dataEnvelopeExtent) {
-        float[] intersection = new float[4];
-        Float[] aoiExtent = areaOfInterestExtent.getExtent().toArray(new Float[0]);
-        Float[] envExtent = dataEnvelopeExtent.getExtent().toArray(new Float[0]);
+    /**
+     * calculates the area of intersection relative to the area of
+     * areaOfInterestExtent
+     *
+     * @param areaOfInterestExtent
+     * @param dataEnvelopeExtent
+     * @return value between 0.0 and 100.0
+     */
+    private float calculateOverlapPercentage(Float[] areaOfInterestExtent, Float[] dataEnvelopeExtent) {
+        float[] intersection = calculateIntersectionExtent(areaOfInterestExtent, dataEnvelopeExtent);
+        float areaIntersection = calculateAreaExtent(intersection);
+        float areaAreaOfInterest = calculateAreaExtent(areaOfInterestExtent);
+        float overlapPercentage = ((areaAreaOfInterest / 100) * areaIntersection);
 
-        if (intersectsExtent(aoiExtent, envExtent)) {
-            if (aoiExtent[0] > envExtent[0]) {
-                intersection[0] = aoiExtent[0];
-            } else {
-                intersection[0] = envExtent[0];
-            }
-            if (aoiExtent[1] > envExtent[1]) {
-                intersection[1] = aoiExtent[1];
-            } else {
-                intersection[1] = envExtent[1];
-            }
-            if (aoiExtent[2] < envExtent[2]) {
-                intersection[2] = aoiExtent[2];
-            } else {
-                intersection[2] = envExtent[2];
-            }
-            if (aoiExtent[3] < envExtent[3]) {
-                intersection[3] = aoiExtent[3];
-            } else {
-                intersection[3] = envExtent[3];
-            }
+        assert (overlapPercentage <= 100.0f && overlapPercentage >= 0.0f);
 
-            float aIntersection = Math.abs(intersection[0] - intersection[2]);
-            float bIntersection = Math.abs(intersection[1] - intersection[3]);
-            float areaIntersection = aIntersection * bIntersection;
-
-            float aAoI = Math.abs(aoiExtent[0] - aoiExtent[2]);
-            float bAoI = Math.abs(aoiExtent[1] - aoiExtent[3]);
-            float areaAoI = aAoI * bAoI;
-
-            float overlapPercentage = ((areaAoI / 100) * areaIntersection);
-            
-            assert(overlapPercentage <= 100.0f);
-
-            return overlapPercentage;
-        } else {
-            return 0.0f; //no overlap
-        }
+        return overlapPercentage;
     }
 
+    /**
+     *
+     * @param extent1
+     * @param extent2
+     * @return true if extent1 intersects extent2
+     */
     private boolean intersectsExtent(Float[] extent1, Float[] extent2) {
         return extent1[0] <= extent2[2]
                 && extent1[2] >= extent2[0]
                 && extent1[1] <= extent2[3]
                 && extent1[3] >= extent2[1];
     }
+
+    /**
+     * 
+     * @param extent1
+     * @param extent2
+     * @return intersection of extent1 and extent2
+     */
+    private float[] calculateIntersectionExtent(Float[] extent1, Float[] extent2) {
+        float[] intersection = new float[4];
+        Arrays.fill(intersection, 0.0f);
+
+        if (intersectsExtent(extent1, extent2)) {
+            if (extent1[0] > extent2[0]) {
+                intersection[0] = extent1[0];
+            } else {
+                intersection[0] = extent2[0];
+            }
+            if (extent1[1] > extent2[1]) {
+                intersection[1] = extent1[1];
+            } else {
+                intersection[1] = extent2[1];
+            }
+            if (extent1[2] < extent2[2]) {
+                intersection[2] = extent1[2];
+            } else {
+                intersection[2] = extent2[2];
+            }
+            if (extent1[3] < extent2[3]) {
+                intersection[3] = extent1[3];
+            } else {
+                intersection[3] = extent2[3];
+            }
+        }
+
+        return intersection;
+    }
+
+    /**
+     * calculates the area of an extent by a*b, does not respect curvature of
+     * earth
+     *
+     * @param extent
+     * @return
+     */
+    private float calculateAreaExtent(float[] extent) {
+        float a = Math.abs(extent[0] - extent[2]);
+        float b = Math.abs(extent[1] - extent[3]);
+        return a * b;
+    }
+
+    /**
+     * calculates the area of an extent by a*b, does not respect curvature of
+     * earth
+     *
+     * @param extent
+     * @return
+     */
+    private float calculateAreaExtent(Float[] extent) {
+        float[] primitiveExtent = getArrayAsPrimitive(extent);
+        return calculateAreaExtent(primitiveExtent);
+    }
+
+    /**
+     * copies values of a Float[] to a float[]
+     *
+     * @param extent
+     * @return
+     */
+    private float[] getArrayAsPrimitive(Float[] extent) {
+        float[] primitiveExtent = new float[extent.length];
+
+        for (int i = 0; i < extent.length; i++) {
+            primitiveExtent[i] = extent[i];
+        }
+
+        return primitiveExtent;
+    }
+
+    /**
+     * returns true if aoiB is within or equal to aoiA
+     *
+     * @param aoiA
+     * @param aoiB
+     * @return
+     */
+    /*
+    private boolean matchAreaofInterest(AbstractDataEnvelopeAreaOfInterest aoiA, AbstractDataEnvelopeAreaOfInterest aoiB) {
+        return aoiB.getExtent().get(1) >= aoiA.getExtent().get(1) //minLat
+                && aoiB.getExtent().get(0) >= aoiA.getExtent().get(0) //minLon
+                && aoiB.getExtent().get(3) <= aoiA.getExtent().get(3) //maxLat
+                && aoiB.getExtent().get(2) <= aoiA.getExtent().get(2); //maxLon
+    }*/
 }
