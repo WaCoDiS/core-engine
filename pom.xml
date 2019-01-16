@@ -26,6 +26,7 @@
         <wacodis-core-engine.version>0.0.1-SNAPSHOT</wacodis-core-engine.version>
         <surefire-plugin.version>2.22.1</surefire-plugin.version>
         <quartz.version>2.3.0</quartz.version>
+        <cron-utils.version>8.0.0</cron-utils.version>
     </properties>
     
     <dependencyManagement>
@@ -73,6 +74,11 @@
                 <groupId>org.quartz-scheduler</groupId>
                 <artifactId>quartz-jobs</artifactId>
                 <version>${quartz.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cronutils</groupId>
+                <artifactId>cron-utils</artifactId>
+                <version>${cron-utils.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

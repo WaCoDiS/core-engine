@@ -9,11 +9,7 @@
     <artifactId>job-definition-evaluator</artifactId>
     <packaging>jar</packaging>
     <name>WaCoDiS Job Definition Evaluator</name>
-    
-    <properties>
-        <cron-utils.version>8.0.0</cron-utils.version>
-    </properties>
-     
+   
     <dependencies>
         <dependency>
             <groupId>de.wacodis</groupId>
@@ -30,7 +26,6 @@
         <dependency>
             <groupId>com.cronutils</groupId>
             <artifactId>cron-utils</artifactId>
-            <version>${cron-utils.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
