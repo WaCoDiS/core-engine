@@ -6,6 +6,7 @@
 package de.wacodis.coreengine.scheduling.quartz;
 
 import de.wacodis.core.models.WacodisJobDefinition;
+import java.text.ParseException;
 import java.util.Date;
 import org.quartz.JobDetail;
 import org.quartz.SchedulerException;
@@ -26,8 +27,12 @@ public class SchedulingManager {
     @Autowired
     private JobContextFactory jCFactory;
 
-    public Date scheduleNewJob(WacodisJobDefinition jobDefinition) throws SchedulerException {
-        JobContext jobContext = jCFactory.createJobContext(jobDefinition);
+    public Date scheduleNewJob(WacodisJobDefinition jobDefinition) throws SchedulerException, ParseException {
+        return scheduleNewJob(jobDefinition, "Europe/Berlin");
+    }
+
+    public Date scheduleNewJob(WacodisJobDefinition jobDefinition, String timeZoneId) throws SchedulerException, ParseException {
+        JobContext jobContext = jCFactory.createJobContext(jobDefinition, timeZoneId);
         return scheduleNewJob(jobContext.getJobDetails(), jobContext.getTrigger());
     }
 
