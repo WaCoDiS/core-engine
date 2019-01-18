@@ -5,8 +5,6 @@
  */
 package de.wacodis.coreengine.scheduling.quartz;
 
-import java.io.IOException;
-import java.util.Properties;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;

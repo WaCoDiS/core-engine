@@ -28,7 +28,8 @@ public class SchedulingManager {
     private JobContextFactory jCFactory;
 
     public Date scheduleNewJob(WacodisJobDefinition jobDefinition) throws SchedulerException, ParseException {
-        return scheduleNewJob(jobDefinition, "Europe/Berlin");
+        JobContext jobContext = jCFactory.createJobContext(jobDefinition);
+        return scheduleNewJob(jobContext.getJobDetails(), jobContext.getTrigger());
     }
 
     public Date scheduleNewJob(WacodisJobDefinition jobDefinition, String timeZoneId) throws SchedulerException, ParseException {
