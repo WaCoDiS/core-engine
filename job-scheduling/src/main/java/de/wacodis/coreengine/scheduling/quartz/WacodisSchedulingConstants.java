@@ -14,5 +14,7 @@ public class WacodisSchedulingConstants {
     public static final String GROUP_NAME = "de.hsbo.wacodis";
 
     public static final String JOB_KEY_ID = "keyId";
+    
+    public static final String DEFAULT_TIMEZONE = "Europe/Berlin";
 
 }
