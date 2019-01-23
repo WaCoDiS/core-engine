@@ -20,13 +20,13 @@ import org.slf4j.LoggerFactory;
 public class WacodisJobInputTracker {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(WacodisJobInputTracker.class);
-
+    
     protected final List<WacodisJobWrapper> scheduledWacodisJobs;
     protected final List<WacodisJobWrapper> executableWacodisJobs;
     protected final List<JobIsExecutableChangeListener> listeners;
-
+    
     protected DataEnvelopeMatcher matcher;
-
+    
     public DataEnvelopeMatcher getMatcher() {
         return matcher;
     }
@@ -50,7 +50,7 @@ public class WacodisJobInputTracker {
      */
     public void addJob(WacodisJobWrapper job) {
         this.scheduledWacodisJobs.add(job);
-
+        
         if (job.isExecutable() && !this.executableWacodisJobs.contains(job)) {
             this.executableWacodisJobs.add(job);
             this.notifyListeners(job, true);
@@ -66,7 +66,7 @@ public class WacodisJobInputTracker {
         if (this.executableWacodisJobs.contains(job)) {
             this.executableWacodisJobs.remove(job);
         }
-
+        
         return this.scheduledWacodisJobs.remove(job);
     }
 
@@ -86,34 +86,36 @@ public class WacodisJobInputTracker {
     public boolean containsJob(WacodisJobWrapper job) {
         return this.scheduledWacodisJobs.contains(job);
     }
-
+    
     public void publishDataEnvelope(AbstractDataEnvelope dataEnvelope) {
         handleDataEnvelope(dataEnvelope, true);
     }
-
+    
     public void removeDataEnvelope(AbstractDataEnvelope dataEnvelope) {
         handleDataEnvelope(dataEnvelope, false);
     }
-
+    
     public void addJobIsExecutableChangeListener(JobIsExecutableChangeListener listener) {
         if (!this.listeners.contains(listener)) {
             this.listeners.add(listener);
         }
     }
-
+    
     public boolean removeJobIsExecutableChangeListener(JobIsExecutableChangeListener listener) {
         return this.listeners.remove(listener);
     }
-
+    
     public void clearJobIsExecutableChangeListeners() {
         this.listeners.clear();
     }
-
+    
     private void handleDataEnvelope(AbstractDataEnvelope dataEnvelope, boolean dataAvailable) {
+        LOGGER.info("received DataEnvelope for job evaluation, dataAvailable: " + dataAvailable);
+        
         for (WacodisJobWrapper job : this.scheduledWacodisJobs) {
             for (InputHelper input : job.getInputs()) {
                 boolean isMatch = this.matcher.match(dataEnvelope, job, input.getSubsetDefinition());
-
+                
                 if (isMatch) {
                     updateInput(input, dataAvailable);
                     updateExecutableWacodisJobs(job);
@@ -130,19 +132,20 @@ public class WacodisJobInputTracker {
     public List<WacodisJobWrapper> getExecutableJobs() {
         return Collections.unmodifiableList(this.executableWacodisJobs);
     }
-    
+
     /**
      * returns unmodifiable List of all scheduled jobs
-     * @return 
+     *
+     * @return
      */
-    public List<WacodisJobWrapper> getScheduledJobs(){
+    public List<WacodisJobWrapper> getScheduledJobs() {
         return Collections.unmodifiableList(this.scheduledWacodisJobs);
     }
-
+    
     private void updateInput(InputHelper pair, boolean isResourceAvailable) {
         pair.setResourceAvailable(isResourceAvailable);
     }
-
+    
     private void updateExecutableWacodisJobs(WacodisJobWrapper job) {
         if (job.isExecutable() && !this.executableWacodisJobs.contains(job)) {
             this.executableWacodisJobs.add(job);
@@ -152,10 +155,10 @@ public class WacodisJobInputTracker {
             notifyListeners(job, false);
         }
     }
-
+    
     private void notifyListeners(WacodisJobWrapper job, boolean isExecutable) {
         LOGGER.debug("Notify Listeners for Job " + job.getJobDefinition().getName() + ", isExecutable: " + isExecutable);
-        EvaluationStatus status = (isExecutable)? EvaluationStatus.EXECUTABLE : EvaluationStatus.NOTEXECUTABLE;
+        EvaluationStatus status = (isExecutable) ? EvaluationStatus.EXECUTABLE : EvaluationStatus.NOTEXECUTABLE;
         
         for (JobIsExecutableChangeListener listener : this.listeners) {
             listener.onJobIsExecutableChanged(job, status);
