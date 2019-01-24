@@ -14,6 +14,7 @@ import de.wacodis.core.models.CopernicusSubsetDefinition;
 import de.wacodis.core.models.GdiDeDataEnvelope;
 import de.wacodis.core.models.SensorWebDataEnvelope;
 import de.wacodis.core.models.SensorWebSubsetDefinition;
+import de.wacodis.coreengine.evaluator.configuration.DataEnvelopeMatchingConfiguration;
 import java.util.Arrays;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
@@ -27,31 +28,31 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicDataEnvelopeMatcher.class);
 
-    private float minimumOverlapPercentage;
+    private DataEnvelopeMatchingConfiguration config;
 
-    public BasicDataEnvelopeMatcher(float overlapPercentageThreshold) {
-        if (overlapPercentageThreshold > 100.0f || overlapPercentageThreshold < 0.0f) {
-            throw new IllegalArgumentException("overlapPercentageThreshold is " + overlapPercentageThreshold + " but must be between 0.0 and 100.0");
-        }
-
-        this.minimumOverlapPercentage = overlapPercentageThreshold;
+    public BasicDataEnvelopeMatcher(DataEnvelopeMatchingConfiguration config) {
+        this.config = config;
     }
 
     public BasicDataEnvelopeMatcher() {
-        this(100.0f);
+        this.config = new DataEnvelopeMatchingConfiguration();
+        this.config.setMinimumOverlapPercentage(100.0f);
     }
 
-    public float getMinimumOverlapPercentage() {
-        return minimumOverlapPercentage;
+    public DataEnvelopeMatchingConfiguration getConfig() {
+        return config;
     }
 
+    public void setConfig(DataEnvelopeMatchingConfiguration config) {
+        this.config = config;
+    }
+
+    public float getMinimumOverlapPercentage(){
+        return this.config.getMinimumOverlapPercentage();
+    }
+    
     public void setMinimumOverlapPercentage(float minimumOverlapPercentage) {
-        if (minimumOverlapPercentage > 100.0f || minimumOverlapPercentage < 0.0f) {
-            throw new IllegalArgumentException("overlapPercentageThreshold is " + minimumOverlapPercentage + " but must be between 0.0 and 100.0");
-        }
-
-        this.minimumOverlapPercentage = minimumOverlapPercentage;
-
+        this.config.setMinimumOverlapPercentage(minimumOverlapPercentage);
     }
 
     /**
@@ -146,7 +147,7 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
         Float[] aoiExtent = extentAreaOfInterest.getExtent().toArray(new Float[0]);
         Float[] envExtent = extentDataEnvelope.getExtent().toArray(new Float[0]);
 
-        return (calculateOverlapPercentage(aoiExtent, envExtent) >= this.minimumOverlapPercentage);
+        return (calculateOverlapPercentage(aoiExtent, envExtent) >= this.config.getMinimumOverlapPercentage());
     }
 
     private boolean matchGdiDeDataEnevelope(GdiDeDataEnvelope dataEnvelope, CatalogueSubsetDefinition subsetDefinition) {
@@ -157,7 +158,7 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
     private boolean matchCopernicusDataEnvelope(CopernicusDataEnvelope dataEnvelope, CopernicusSubsetDefinition subsetDefinition) {
         return dataEnvelope.getDatasetId().equals(subsetDefinition.getIdentifier())
                 && matchSatellite(dataEnvelope.getSatellite(), subsetDefinition.getSatellite())
-                && dataEnvelope.getCloudCoverage() <= subsetDefinition.getMaximumCloudCoverage(); //cloud coverage must no exceed max. cloud coverage
+                && dataEnvelope.getCloudCoverage() <= subsetDefinition.getMaximumCloudCoverage(); //cloud coverage must not exceed max. cloud coverage
     }
 
     private boolean matchSensorWebDataEnvelope(SensorWebDataEnvelope dataEnvelope, SensorWebSubsetDefinition subsetDefinition) {

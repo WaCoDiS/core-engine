@@ -38,36 +38,11 @@ public class BasicDataEnvelopeMatcherTest {
     }
 
     @Test
-    public void testSetMinimumOverlapPercentage_IllegalArgument() {
-        BasicDataEnvelopeMatcher basicMatcher = new BasicDataEnvelopeMatcher();
-
-        assertAll(
-                () -> assertThrows(java.lang.IllegalArgumentException.class, () -> basicMatcher.setMinimumOverlapPercentage(110.5f)),
-                () -> assertThrows(java.lang.IllegalArgumentException.class, () -> basicMatcher.setMinimumOverlapPercentage(-1.0f))
-        );
-    }
-
-    @Test
-    public void testSetMinimumOverlapPercentage_IllegalArgument_Constructor() {
-        assertAll(
-                () -> assertThrows(java.lang.IllegalArgumentException.class, () -> new BasicDataEnvelopeMatcher(110.5f)),
-                () -> assertThrows(java.lang.IllegalArgumentException.class, () -> new BasicDataEnvelopeMatcher(-1.0f))
-        );
-    }
-
-    @Test
     public void testSetMinimumOverlapPercentage() {
         BasicDataEnvelopeMatcher basicMatcher = new BasicDataEnvelopeMatcher();
 
         basicMatcher.setMinimumOverlapPercentage(0.0f);
         assertEquals(0.0f, basicMatcher.getMinimumOverlapPercentage());
-    }
-
-    @Test
-    public void testGetMinimumOverlapPercentage() {
-        BasicDataEnvelopeMatcher basicMatcher = new BasicDataEnvelopeMatcher(100.0f);
-
-        assertEquals(100.0f, basicMatcher.getMinimumOverlapPercentage());
     }
 
     @Test
