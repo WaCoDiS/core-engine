@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package de.wacodis.coreengine.scheduling.quartz;
+package de.wacodis.coreengine.scheduling.factory;
 
 import com.cronutils.mapper.CronMapper;
 import com.cronutils.model.Cron;
@@ -12,17 +12,19 @@ import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.parser.CronParser;
 import de.wacodis.core.models.WacodisJobDefinition;
 import static de.wacodis.coreengine.scheduling.quartz.WacodisSchedulingConstants.*;
+import de.wacodis.coreengine.scheduling.quartz.JobContext;
+import de.wacodis.coreengine.scheduling.quartz.WacodisJob;
 import java.text.ParseException;
 import java.time.ZoneId;
 import java.util.TimeZone;
 import org.quartz.CronExpression;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
-import static org.quartz.JobBuilder.newJob;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Trigger;
 import static org.quartz.TriggerBuilder.newTrigger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -32,6 +34,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class JobContextFactory {
+
+    @Autowired
+    private JobDetailFactory jobDetailFactory;
 
     /**
      * Creates a job context with default timezone trigger from a job definition
@@ -105,11 +110,8 @@ public class JobContextFactory {
      * @return job details
      */
     public JobDetail createJobDetail(WacodisJobDefinition jobDefinition) {
-        JobDetail detail = newJob(WacodisJob.class)
-                .withIdentity(createJobKey(jobDefinition))
-                .setJobData(createJobDataMap(jobDefinition))
-                .build();
-        return detail;
+        return jobDetailFactory.createJob(WacodisJob.class, false, false,
+                jobDefinition.getId().toString(), GROUP_NAME, createJobDataMap(jobDefinition));
     }
 
     /**

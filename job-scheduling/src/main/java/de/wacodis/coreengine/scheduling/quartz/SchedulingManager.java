@@ -5,19 +5,21 @@
  */
 package de.wacodis.coreengine.scheduling.quartz;
 
+import de.wacodis.coreengine.scheduling.factory.JobContextFactory;
 import de.wacodis.core.models.WacodisJobDefinition;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.logging.Level;
 import org.quartz.JobDetail;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Component;
 
 /**
+ * Manages the scheduling of jobs
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
@@ -27,11 +29,16 @@ public class SchedulingManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(SchedulingManager.class);
 
     @Autowired
-    private QuartzScheduler quartzScheduler;
+    private SchedulerFactoryBean schedulerFactoryBean;
 
     @Autowired
     private JobContextFactory jCFactory;
 
+    /**
+     * Schedules a new job
+     *
+     * @param jobDefinition definition for the job to be scheduled
+     */
     public void scheduleNewJob(WacodisJobDefinition jobDefinition) {
         try {
             JobContext jobContext = jCFactory.createJobContext(jobDefinition);
@@ -52,9 +59,9 @@ public class SchedulingManager {
         }
     }
 
-    public void scheduleNewJob(JobDetail jobDetail, Trigger trigger) {
+    private void scheduleNewJob(JobDetail jobDetail, Trigger trigger) {
         try {
-            Date date = quartzScheduler.getScheduler().scheduleJob(jobDetail, trigger);	//runs QuartzJob's execute()
+            Date date = schedulerFactoryBean.getScheduler().scheduleJob(jobDetail, trigger);	//runs QuartzJob's execute()
             LOGGER.info("Scheduling for job {} was successful. First fire time: {}", jobDetail.getKey(), date);
         } catch (SchedulerException ex) {
             LOGGER.error(ex.getMessage());
