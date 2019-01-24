@@ -9,6 +9,7 @@ import de.wacodis.core.models.WacodisJobDefinition;
 import org.springframework.stereotype.Component;
 
 /**
+ * Handler interface for job messages
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */

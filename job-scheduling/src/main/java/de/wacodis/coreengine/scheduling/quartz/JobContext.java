@@ -9,6 +9,7 @@ import org.quartz.JobDetail;
 import org.quartz.Trigger;
 
 /**
+ * Defines the context (job details and trigger) for a job
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */

@@ -5,6 +5,7 @@
  */
 package de.wacodis.coreengine.scheduling.quartz;
 
+import de.wacodis.coreengine.scheduling.factory.JobContextFactory;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionExecution;
 import static de.wacodis.coreengine.scheduling.quartz.WacodisSchedulingConstants.JOB_KEY_ID;

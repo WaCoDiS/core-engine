@@ -12,13 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
+ * Handler implementation for job messages
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
 public class JobMessageScheduleHandler implements JobMessageHandler {
-
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(JobMessageScheduleHandler.class);
 
     @Autowired
     private SchedulingManager schedulingManager;

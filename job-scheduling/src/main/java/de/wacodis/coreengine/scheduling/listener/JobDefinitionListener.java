@@ -13,21 +13,22 @@ import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 
 /**
+ * Listener for job definition messages
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @EnableBinding(JobDefinitionListenerChannel.class)
 public class JobDefinitionListener {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(JobDefinitionListener.class);
-    
+
     @Autowired
     private JobMessageHandler messageHandler;
-    
+
     @StreamListener(JobDefinitionListenerChannel.JOB_CREATION_INPUT)
-    public void evaluateJobDefinition(WacodisJobDefinition jobDefinition) {
+    public void jobDefinitionCreated(WacodisJobDefinition jobDefinition) {
         LOGGER.info("Received new job: {}", jobDefinition.toString());
         messageHandler.handleNewJob(jobDefinition);
     }
-    
+
 }

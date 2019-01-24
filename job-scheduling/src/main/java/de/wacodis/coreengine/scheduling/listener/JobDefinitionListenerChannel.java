@@ -9,6 +9,7 @@ import org.springframework.cloud.stream.annotation.Input;
 import org.springframework.messaging.SubscribableChannel;
 
 /**
+ * Defines the channels to listen on for job definition messages
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
