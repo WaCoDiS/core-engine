@@ -37,7 +37,7 @@ public class QuartzScheduler implements InitializingBean, DisposableBean {
 
         } catch (SchedulerException e) {
             LOGGER.warn(e.getMessage());
-            LOGGER.trace("Error during scheduling", e);
+            LOGGER.debug("Error during scheduling", e);
         }
     }
 

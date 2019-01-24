@@ -75,7 +75,7 @@ public class JobContextFactory {
         Trigger trigger = newTrigger()
                 .withIdentity(jobDefinition.getId().toString(), GROUP_NAME)
                 .withSchedule(cronSchedule(createCronSchedule(jobDefinition.getExecution().getPattern()))
-                        .inTimeZone(TimeZone.getTimeZone(DEFAULT_TIMEZONE)))
+                        .inTimeZone(TimeZone.getTimeZone(checkTimeZone(DEFAULT_TIMEZONE))))
                 .build();
         return trigger;
     }
