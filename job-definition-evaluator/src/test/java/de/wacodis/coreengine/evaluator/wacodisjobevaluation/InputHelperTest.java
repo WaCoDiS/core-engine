@@ -9,7 +9,6 @@ import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
 import java.util.ArrayList;
 import java.util.List;
-import org.assertj.core.util.Arrays;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
