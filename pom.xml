@@ -12,6 +12,7 @@
         <module>job-definition-executor</module>
         <module>core-models</module>
         <module>core-engine-app</module>
+        <module>core-engine-utils</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -50,6 +51,11 @@
             <dependency>
                 <groupId>de.wacodis</groupId>
                 <artifactId>job-scheduling</artifactId>
+                <version>${wacodis-core-engine.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.wacodis</groupId>                
+                <artifactId>core-engine-utils</artifactId>
                 <version>${wacodis-core-engine.version}</version>
             </dependency>
             <dependency>

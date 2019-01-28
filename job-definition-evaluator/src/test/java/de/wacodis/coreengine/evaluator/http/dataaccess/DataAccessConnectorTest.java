@@ -8,7 +8,7 @@ package de.wacodis.coreengine.evaluator.http.dataaccess;
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.DataAccessResourceSearchBody;
 import de.wacodis.core.models.PostResource;
-import de.wacodis.coreengine.evaluator.http.GenericPostRequest;
+import de.wacodis.core.engine.utils.http.GenericPostRequest;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;

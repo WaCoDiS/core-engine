@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package de.wacodis.coreengine.evaluator.http;
+package de.wacodis.core.engine.utils.http;
 
 import java.net.MalformedURLException;
 import java.net.URL;

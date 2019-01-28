@@ -16,6 +16,10 @@
             <artifactId>core-models</artifactId>
         </dependency>
         <dependency>
+            <groupId>de.wacodis</groupId>
+            <artifactId>core-engine-utils</artifactId>
+        </dependency>
+        <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
         </dependency>

@@ -5,9 +5,10 @@
  */
 package de.wacodis.coreengine.evaluator.http.dataaccess;
 
+import de.wacodis.core.engine.utils.http.dataretrieval.ResourceProvider;
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.DataAccessResourceSearchBody;
-import de.wacodis.coreengine.evaluator.http.GenericPostRequest;
+import de.wacodis.core.engine.utils.http.GenericPostRequest;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
