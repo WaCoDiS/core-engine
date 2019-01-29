@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("spring.evaluator.dataaccess")
 public class DataAccessConfiguration {
     
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataEnvelopeMatchingConfiguration.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataAccessConfiguration.class);
     
     private String uri;
 
