@@ -6,6 +6,8 @@
 package de.wacodis.core.engine.utils.http;
 
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -13,6 +15,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -30,6 +33,7 @@ public class GenericPostRequest<P, R> implements HTTPRequest<R> {
     private HttpHeaders headers;
     private Class<R> responseType;
     private ParameterizedTypeReference<R> responseTypeReference;
+    private List<ClientHttpRequestInterceptor> interceptors;
 
     /**
      * use if response type is a generic, e.g. collections
@@ -55,6 +59,7 @@ public class GenericPostRequest<P, R> implements HTTPRequest<R> {
         this.payload = payload;
         this.headers = headers;
         this.responseTypeReference = responseTypeReference;
+        this.interceptors = Arrays.asList(new RequestLoggingInterceptor());
     }
 
     /**
@@ -64,6 +69,7 @@ public class GenericPostRequest<P, R> implements HTTPRequest<R> {
     public GenericPostRequest(ParameterizedTypeReference<R> responseTypeReference) {
         this.headers = new HttpHeaders();
         this.responseTypeReference = responseTypeReference;
+        this.interceptors = Arrays.asList(new RequestLoggingInterceptor());
     }
 
     /**
@@ -90,6 +96,7 @@ public class GenericPostRequest<P, R> implements HTTPRequest<R> {
         this.payload = payload;
         this.headers = headers;
         this.responseType = responseType;
+        this.interceptors = Arrays.asList(new RequestLoggingInterceptor());
     }
 
     /**
@@ -99,6 +106,7 @@ public class GenericPostRequest<P, R> implements HTTPRequest<R> {
     public GenericPostRequest(Class<R> responseType) {
         this.headers = new HttpHeaders();
         this.responseType = responseType;
+        this.interceptors = Arrays.asList(new RequestLoggingInterceptor());
     }
 
     public URL getUrl() {
@@ -138,10 +146,9 @@ public class GenericPostRequest<P, R> implements HTTPRequest<R> {
     @Override
     public ResponseEntity<R> execute() {
         RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setInterceptors(interceptors);
         HttpEntity<P> request = new HttpEntity<>(payload, headers);
         ResponseEntity<R> response = null;
-
-        LOGGER.info("executing HTTP-Post to " + this.url.toString());
 
         if (this.responseType != null) {
             response = restTemplate.exchange(this.url.toString(), HttpMethod.POST, request, responseType);
