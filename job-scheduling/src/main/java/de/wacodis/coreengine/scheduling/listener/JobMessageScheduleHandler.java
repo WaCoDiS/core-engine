@@ -6,7 +6,7 @@
 package de.wacodis.coreengine.scheduling.listener;
 
 import de.wacodis.core.models.WacodisJobDefinition;
-import de.wacodis.coreengine.scheduling.manage.SchedulingManager;
+import de.wacodis.coreengine.scheduling.manage.QuartzSchedulingManager;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 public class JobMessageScheduleHandler implements JobMessageHandler {
 
     @Autowired
-    private SchedulingManager schedulingManager;
+    private QuartzSchedulingManager schedulingManager;
 
     @Override
     public void handleNewJob(WacodisJobDefinition jobDefinition) {
