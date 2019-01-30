@@ -5,7 +5,20 @@
  */
 package de.wacodis.coreengine.app;
 
+import de.wacodis.core.models.AbstractDataEnvelope;
+import de.wacodis.core.models.AbstractSubsetDefinition;
+import de.wacodis.coreengine.evaluator.JobEvaluatorRunner;
+import de.wacodis.coreengine.evaluator.WacodisJobInputTrackerProvider;
+import de.wacodis.coreengine.evaluator.configuration.DataAccessConfiguration;
 import de.wacodis.coreengine.evaluator.configuration.DataEnvelopeMatchingConfiguration;
+import de.wacodis.coreengine.evaluator.http.dataaccess.DataAccessConnector;
+import de.wacodis.coreengine.evaluator.wacodisjobevaluation.BasicDataEnvelopeMatcher;
+import de.wacodis.coreengine.evaluator.wacodisjobevaluation.DataEnvelopeMatcher;
+import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobInputTracker;
+import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
+import java.net.MalformedURLException;
+import java.net.URL;
+import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +40,19 @@ import org.springframework.context.annotation.ComponentScan;
 public class CoreEngineApp {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CoreEngineApp.class);
-
+    
     @Autowired
     private DataEnvelopeMatchingConfiguration dataMatchingConfiguration;
+    
+    @Autowired
+    private DataAccessConfiguration dataAccessConfiguration;
+    
+    @Autowired
+    private JobEvaluatorRunner jobEvaluator;
+    
+    @Autowired
+    private WacodisJobInputTrackerProvider provider;
+    
 
     /**
      * @param args the command line arguments
@@ -37,4 +60,26 @@ public class CoreEngineApp {
     public static void main(String[] args) {
         SpringApplication.run(CoreEngineApp.class, args);
     }
-}
+    
+    @PostConstruct
+    private void initialize() throws MalformedURLException{
+        //init DataEnvelopeMatcher
+        BasicDataEnvelopeMatcher dataMatcher = new BasicDataEnvelopeMatcher();
+        dataMatcher.setConfig(this.dataMatchingConfiguration);
+ 
+        //init InputTracker
+        WacodisJobInputTracker inputTracker = new WacodisJobInputTracker(dataMatcher);
+        this.provider.setInputTracker(inputTracker);
+        
+        //init DataAccessConnector
+        DataAccessConnector dataAccess = new DataAccessConnector();
+        //ToDo runtime changes of dataaccess configuration are not reflected
+        URL dataAccessURL = new URL(this.dataAccessConfiguration.getUri());
+        dataAccess.setUrl(dataAccessURL);
+        
+        //init JobEvaluatorRunner
+        this.jobEvaluator.setInputTracker(inputTracker);
+        this.jobEvaluator.setDataAccessConnector(dataAccess);
+    }     
+} 
+ 
