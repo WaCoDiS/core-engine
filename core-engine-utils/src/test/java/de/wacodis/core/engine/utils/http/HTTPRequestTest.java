@@ -5,7 +5,6 @@
  */
 package de.wacodis.core.engine.utils.http;
 
-import de.wacodis.core.engine.utils.http.HTTPRequest;
 import java.net.MalformedURLException;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;

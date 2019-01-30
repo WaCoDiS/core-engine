@@ -99,27 +99,6 @@ public class GenericPostRequestTest {
         assertThrows(IllegalArgumentException.class, () -> request.execute());
     }
 
-    /**
-     * Test of execute method, of class GenericPostRequest.
-     * Integration Test, needs Wacodis DataAcces on localhost:8080
-     * @throws java.lang.Exception
-     */
-    @Test
-    @Disabled
-    public void testExecute() throws Exception {
-        ParameterizedTypeReference<Map<String, List<AbstractResource>>> typeReference = new ParameterizedTypeReference<Map<String, List<AbstractResource>>>() {
-        };
-        GenericPostRequest<DataAccessResourceSearchBody, Map<String, List<AbstractResource>>> request = new GenericPostRequest<>(typeReference);
-        request.setUrl(HTTPRequest.stringToURL("http://localhost:8080/dataAccess/resources/search"));
-        request.getHeaders().add("accept", " application/json");
-        request.getHeaders().add("Content-Type", " application/json");
-        request.setPayload(this.postBody);
-
-        ResponseEntity<Map<String, List<AbstractResource>>> response = request.execute();
-        System.out.println(response.getBody());
-        assertTrue(response.hasBody());
-    }
-
     @BeforeEach
     private void initPostBody() {
         this.postBody = new DataAccessResourceSearchBody();
