@@ -12,8 +12,6 @@ import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.parser.CronParser;
 import de.wacodis.core.models.WacodisJobDefinition;
 import static de.wacodis.coreengine.scheduling.config.WacodisSchedulingConstants.*;
-import de.wacodis.coreengine.scheduling.job.JobContext;
-import de.wacodis.coreengine.scheduling.job.WacodisJob;
 import java.text.ParseException;
 import java.time.ZoneId;
 import java.util.TimeZone;
@@ -24,6 +22,7 @@ import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Trigger;
 import static org.quartz.TriggerBuilder.newTrigger;
+import org.quartz.TriggerKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -78,7 +77,7 @@ public class JobContextFactory {
      */
     public Trigger createTrigger(WacodisJobDefinition jobDefinition) throws ParseException {
         Trigger trigger = newTrigger()
-                .withIdentity(jobDefinition.getId().toString(), GROUP_NAME)
+                .withIdentity(createTriggerKey(jobDefinition))
                 .withSchedule(cronSchedule(createCronSchedule(jobDefinition.getExecution().getPattern()))
                         .inTimeZone(TimeZone.getTimeZone(checkTimeZone(DEFAULT_TIMEZONE))))
                 .build();
@@ -96,7 +95,7 @@ public class JobContextFactory {
      */
     public Trigger createTrigger(WacodisJobDefinition jobDefinition, String timeZoneId) throws ParseException {
         Trigger trigger = newTrigger()
-                .withIdentity(jobDefinition.getId().toString(), GROUP_NAME)
+                .withIdentity(createTriggerKey(jobDefinition))
                 .withSchedule(cronSchedule(createCronSchedule(jobDefinition.getExecution().getPattern()))
                         .inTimeZone(TimeZone.getTimeZone(checkTimeZone(timeZoneId))))
                 .build();
@@ -122,6 +121,16 @@ public class JobContextFactory {
      */
     public JobKey createJobKey(WacodisJobDefinition jobDefinition) {
         return new JobKey(jobDefinition.getId().toString(), GROUP_NAME);
+    }
+
+    /**
+     * Creates a trigger key from a job definition
+     *
+     * @param jobDefinition contains defintions for the job
+     * @return the trigger key
+     */
+    public TriggerKey createTriggerKey(WacodisJobDefinition jobDefinition) {
+        return new TriggerKey(jobDefinition.getId().toString(), GROUP_NAME);
     }
 
     /**
