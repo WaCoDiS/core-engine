@@ -3,13 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package de.wacodis.coreengine.scheduling.factory;
+package de.wacodis.coreengine.scheduling.job;
 
-import de.wacodis.coreengine.scheduling.factory.JobContextFactory;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionExecution;
-import de.wacodis.coreengine.scheduling.quartz.JobContext;
-import static de.wacodis.coreengine.scheduling.quartz.WacodisSchedulingConstants.JOB_KEY_ID;
+import static de.wacodis.coreengine.scheduling.config.WacodisSchedulingConstants.JOB_KEY_ID;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DateTimeException;

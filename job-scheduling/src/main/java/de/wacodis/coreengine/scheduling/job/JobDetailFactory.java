@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package de.wacodis.coreengine.scheduling.factory;
+package de.wacodis.coreengine.scheduling.job;
 
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;

@@ -5,7 +5,7 @@
  */
 package de.wacodis.coreengine.scheduling.config;
 
-import de.wacodis.coreengine.scheduling.factory.JobFactory;
+import de.wacodis.coreengine.scheduling.job.JobFactory;
 import java.util.Properties;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;

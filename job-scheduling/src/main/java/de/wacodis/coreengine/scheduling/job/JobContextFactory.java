@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package de.wacodis.coreengine.scheduling.factory;
+package de.wacodis.coreengine.scheduling.job;
 
 import com.cronutils.mapper.CronMapper;
 import com.cronutils.model.Cron;
@@ -11,9 +11,9 @@ import com.cronutils.model.CronType;
 import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.parser.CronParser;
 import de.wacodis.core.models.WacodisJobDefinition;
-import static de.wacodis.coreengine.scheduling.quartz.WacodisSchedulingConstants.*;
-import de.wacodis.coreengine.scheduling.quartz.JobContext;
-import de.wacodis.coreengine.scheduling.quartz.WacodisJob;
+import static de.wacodis.coreengine.scheduling.config.WacodisSchedulingConstants.*;
+import de.wacodis.coreengine.scheduling.job.JobContext;
+import de.wacodis.coreengine.scheduling.job.WacodisJob;
 import java.text.ParseException;
 import java.time.ZoneId;
 import java.util.TimeZone;

@@ -6,7 +6,7 @@
 package de.wacodis.coreengine.scheduling.listener;
 
 import de.wacodis.core.models.WacodisJobDefinition;
-import de.wacodis.coreengine.scheduling.quartz.SchedulingManager;
+import de.wacodis.coreengine.scheduling.manage.SchedulingManager;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
