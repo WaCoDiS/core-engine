@@ -7,6 +7,7 @@ package de.wacodis.coreengine.evaluator;
 
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
+import de.wacodis.core.models.CatalogueSubsetDefinition;
 import de.wacodis.core.models.DataAccessResourceSearchBody;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionExecution;
@@ -24,15 +25,33 @@ import java.util.Map;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationListener;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  *
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
+@ExtendWith(SpringExtension.class)
+@SpringBootTest(classes = JobEvaluatorRunner.class)
 public class JobEvaluatorRunnerTest {
 
+    @Autowired
+    private JobEvaluatorRunner evaluator;
+
     public JobEvaluatorRunnerTest() {
+    }
+
+    @BeforeEach
+    public void initJobEvaluatorRunner() {
+        WacodisJobInputTracker inputTracker = new WacodisJobInputTracker(new BasicDataEnvelopeMatcher());
+        this.evaluator.setInputTracker(inputTracker);
+        this.evaluator.setDataAccessConnector(new EmptyResponseDataAccessConnector());
     }
 
     /**
@@ -40,11 +59,10 @@ public class JobEvaluatorRunnerTest {
      */
     @Test
     public void testSetDataAccessConnector() {
-        JobEvaluatorRunner evaluator = new JobEvaluatorRunner();
         DataAccessConnector dataAccess = new EmptyResponseDataAccessConnector();
-        evaluator.setDataAccessConnector(dataAccess);
+        this.evaluator.setDataAccessConnector(dataAccess);
 
-        assertEquals(dataAccess, evaluator.getDataAccessConnector());
+        assertEquals(dataAccess, this.evaluator.getDataAccessConnector());
     }
 
     /**
@@ -52,24 +70,37 @@ public class JobEvaluatorRunnerTest {
      */
     @Test
     public void testSetInputTracker() {
-        JobEvaluatorRunner evaluator = new JobEvaluatorRunner();
         WacodisJobInputTracker inputTracker = new WacodisJobInputTracker(new BasicDataEnvelopeMatcher());
-        evaluator.setInputTracker(inputTracker);
+        this.evaluator.setInputTracker(inputTracker);
 
-        assertEquals(inputTracker, evaluator.getInputTracker());
+        assertEquals(inputTracker, this.evaluator.getInputTracker());
     }
 
     /**
-     *
+     * Test of setInputTracker method, of class JobEvaluatorRunner.
+     */
+    @Test
+    @DisplayName("register and deregister listener with inputtracker")
+    public void testSetInputTracker_InputTracker_Listener_Registered() {
+        WacodisJobInputTracker inputTracker = new WacodisJobInputTracker(new BasicDataEnvelopeMatcher());
+        this.evaluator.setInputTracker(inputTracker);
+        //listener must be add to inputTracker
+        assertTrue(inputTracker.containsJobIsExecutableChangeListener(this.evaluator.getExecutableJobListener()));
+
+        WacodisJobInputTracker inputTracker2 = new WacodisJobInputTracker(new BasicDataEnvelopeMatcher());
+        this.evaluator.setInputTracker(inputTracker2);
+
+        //listener must be removed from inputTracker and added to inputTracker2
+        assertFalse(inputTracker.containsJobIsExecutableChangeListener(this.evaluator.getExecutableJobListener()));
+        assertTrue(inputTracker2.containsJobIsExecutableChangeListener(this.evaluator.getExecutableJobListener()));
+    }
+
+    /**
+     * Test of evaluateJob method, of class JobEvaluatorRunner.
      */
     @Test
     @DisplayName("WacodisJob executable")
     public void testEvaluateJob_WacodisJobWrapper_Executable() {
-        DataEnvelopeMatcher matcher = new BasicDataEnvelopeMatcher();
-        WacodisJobInputTracker inputTracker = new WacodisJobInputTracker(matcher);
-        JobEvaluatorRunner evaluator = new JobEvaluatorRunner();
-        evaluator.setInputTracker(inputTracker);
-        evaluator.setDataAccessConnector(new EmptyResponseDataAccessConnector());
         WacodisJobDefinition jobDefinition = new WacodisJobDefinition();
         jobDefinition.setInputs(new ArrayList<>()); //no inputs
         WacodisJobDefinitionExecution execution = new WacodisJobDefinitionExecution();
@@ -82,8 +113,8 @@ public class JobEvaluatorRunnerTest {
 
         //job has no inputs, empty response
         assertAll(
-                () -> assertEquals(EvaluationStatus.EXECUTABLE, evaluator.evaluateJob(job)),
-                () -> assertEquals(EvaluationStatus.EXECUTABLE, evaluator.evaluateJob(job, false))
+                () -> assertEquals(EvaluationStatus.EXECUTABLE, this.evaluator.evaluateJob(job)),
+                () -> assertEquals(EvaluationStatus.EXECUTABLE, this.evaluator.evaluateJob(job, false))
         );
 
     }
@@ -94,11 +125,6 @@ public class JobEvaluatorRunnerTest {
     @Test
     @DisplayName("WacodisJob not executable because of missing resources")
     public void testEvaluateJob_WacodisJobWrapper_NotExecutable() {
-        DataEnvelopeMatcher matcher = new BasicDataEnvelopeMatcher();
-        WacodisJobInputTracker inputTracker = new WacodisJobInputTracker(matcher);
-        JobEvaluatorRunner evaluator = new JobEvaluatorRunner();
-        evaluator.setInputTracker(inputTracker);
-        evaluator.setDataAccessConnector(new EmptyResponseDataAccessConnector());
         WacodisJobDefinition jobDefinition = new WacodisJobDefinition();
         jobDefinition.setInputs(new ArrayList<>());
         jobDefinition.addInputsItem(new AbstractSubsetDefinition()); //add input
@@ -111,12 +137,11 @@ public class JobEvaluatorRunnerTest {
         jobDefinition.setExecution(execution);
 
         WacodisJobWrapper job = new WacodisJobWrapper(jobDefinition, new DateTime());
-        EvaluationStatus status = evaluator.evaluateJob(job, true);
 
         //job has one input, empty response
         assertAll(
-                () -> assertEquals(EvaluationStatus.NOTEXECUTABLE, evaluator.evaluateJob(job)),
-                () -> assertEquals(EvaluationStatus.NOTEXECUTABLE, evaluator.evaluateJob(job, false))
+                () -> assertEquals(EvaluationStatus.NOTEXECUTABLE, this.evaluator.evaluateJob(job)),
+                () -> assertEquals(EvaluationStatus.NOTEXECUTABLE, this.evaluator.evaluateJob(job, false))
         );
     }
 
@@ -126,11 +151,8 @@ public class JobEvaluatorRunnerTest {
     @Test
     @DisplayName("WacodisJob unevaluated because data access request fails")
     public void testEvaluateJob_WacodisJobWrapper_Unevaluated() {
-        DataEnvelopeMatcher matcher = new BasicDataEnvelopeMatcher();
-        WacodisJobInputTracker inputTracker = new WacodisJobInputTracker(matcher);
-        JobEvaluatorRunner evaluator = new JobEvaluatorRunner();
-        evaluator.setInputTracker(inputTracker);
-        evaluator.setDataAccessConnector(new IOExceptionDataAccessConnector()); //always throws exception
+        this.evaluator.setDataAccessConnector(new IOExceptionDataAccessConnector()); //always throws exception
+
         WacodisJobDefinition jobDefinition = new WacodisJobDefinition();
         jobDefinition.setInputs(new ArrayList<>());
         jobDefinition.addInputsItem(new AbstractSubsetDefinition()); //add input
@@ -143,12 +165,11 @@ public class JobEvaluatorRunnerTest {
         jobDefinition.setExecution(execution);
 
         WacodisJobWrapper job = new WacodisJobWrapper(jobDefinition, new DateTime());
-        EvaluationStatus status = evaluator.evaluateJob(job, true);
 
         //expect UNEVALUATED because data access request throws exception
         assertAll(
-                () -> assertEquals(EvaluationStatus.UNEVALUATED, evaluator.evaluateJob(job)),
-                () -> assertEquals(EvaluationStatus.UNEVALUATED, evaluator.evaluateJob(job, false))
+                () -> assertEquals(EvaluationStatus.UNEVALUATED, this.evaluator.evaluateJob(job)),
+                () -> assertEquals(EvaluationStatus.UNEVALUATED, this.evaluator.evaluateJob(job, false))
         );
     }
 
@@ -158,13 +179,9 @@ public class JobEvaluatorRunnerTest {
     @Test
     @DisplayName("check job is added to InputTracker")
     public void testEvaluateJob_boolean_InputTrackerContainsJob() {
-        DataEnvelopeMatcher matcher = new BasicDataEnvelopeMatcher();
-        WacodisJobInputTracker inputTracker = new WacodisJobInputTracker(matcher);
-        JobEvaluatorRunner evaluator = new JobEvaluatorRunner();
-        evaluator.setInputTracker(inputTracker);
-        evaluator.setDataAccessConnector(new EmptyResponseDataAccessConnector());
         WacodisJobDefinition jobDefinition = new WacodisJobDefinition();
-        jobDefinition.setInputs(new ArrayList<>()); //no inputs
+        jobDefinition.setInputs(new ArrayList<>());
+        jobDefinition.getInputs().add(new CatalogueSubsetDefinition()); //add input
         WacodisJobDefinitionExecution execution = new WacodisJobDefinitionExecution();
         execution.setPattern("0 0 1 * *"); //executes on the 1st day of each month (00:00:00)
         WacodisJobDefinitionTemporalCoverage tempCov = new WacodisJobDefinitionTemporalCoverage();
@@ -173,21 +190,18 @@ public class JobEvaluatorRunnerTest {
         jobDefinition.setExecution(execution);
         WacodisJobWrapper job = new WacodisJobWrapper(jobDefinition, new DateTime());
 
-        evaluator.evaluateJob(job, true);
-        assertTrue(inputTracker.containsJob(job));
+        //job has one input, empty response, waiting for further data
+        EvaluationStatus status = this.evaluator.evaluateJob(job, true);
+        assertEquals(EvaluationStatus.NOTEXECUTABLE, status);
+        assertTrue(this.evaluator.getInputTracker().containsJob(job));
     }
-    
-        /**
+
+    /**
      * Test of evaluateJob method, of class JobEvaluatorRunner.
      */
     @Test
     @DisplayName("check job is not added to InputTracker")
     public void testEvaluateJob_boolean_JobNotAdded() {
-        DataEnvelopeMatcher matcher = new BasicDataEnvelopeMatcher();
-        WacodisJobInputTracker inputTracker = new WacodisJobInputTracker(matcher);
-        JobEvaluatorRunner evaluator = new JobEvaluatorRunner();
-        evaluator.setInputTracker(inputTracker);
-        evaluator.setDataAccessConnector(new EmptyResponseDataAccessConnector());
         WacodisJobDefinition jobDefinition = new WacodisJobDefinition();
         jobDefinition.setInputs(new ArrayList<>()); //no inputs
         WacodisJobDefinitionExecution execution = new WacodisJobDefinitionExecution();
@@ -199,7 +213,38 @@ public class JobEvaluatorRunnerTest {
         WacodisJobWrapper job = new WacodisJobWrapper(jobDefinition, new DateTime());
 
         evaluator.evaluateJob(job, false);
-        assertFalse(inputTracker.containsJob(job));
+        assertFalse(this.evaluator.getInputTracker().containsJob(job));
+    }
+
+    @Test
+    @DisplayName("check event is published when job is executable")
+    public void testEvaluateJob_WacodisJobWrapper_Executable_EventPublished() {
+        WacodisJobDefinition jobDefinition = new WacodisJobDefinition();
+        jobDefinition.setInputs(new ArrayList<>()); //no inputs
+        WacodisJobDefinitionExecution execution = new WacodisJobDefinitionExecution();
+        execution.setPattern("0 0 1 * *"); //executes on the 1st day of each month (00:00:00)
+        WacodisJobDefinitionTemporalCoverage tempCov = new WacodisJobDefinitionTemporalCoverage();
+        tempCov.setPreviousExecution(Boolean.TRUE);
+        jobDefinition.setTemporalCoverage(tempCov);
+        jobDefinition.setExecution(execution);
+        WacodisJobWrapper job = new WacodisJobWrapper(jobDefinition, new DateTime());
+
+        ApplicationListener executableEventListener = new AbstractTestJobExecutableListerner(this.evaluator, job) {
+            
+            @Override
+            public void onApplicationEvent(WacodisJobExecutableEvent event) {
+                //event was published if this code is executed           
+                assertAll(
+                        () -> assertEquals(super.evalutor, event.getSource()),
+                        () -> assertEquals(super.job, event.getJob()),
+                        () -> assertEquals(EvaluationStatus.EXECUTABLE, event.getStatus())
+                );
+            }
+
+        };
+        
+        //job has one input, empty response
+        evaluator.evaluateJob(job, false);
     }
 
     /**
@@ -226,5 +271,23 @@ public class JobEvaluatorRunnerTest {
         }
 
     }
+    
+    
+    private abstract class AbstractTestJobExecutableListerner implements ApplicationListener<WacodisJobExecutableEvent>{
+        private final JobEvaluatorRunner evalutor;
+        private final WacodisJobWrapper job;
 
+        public AbstractTestJobExecutableListerner(JobEvaluatorRunner evalutor, WacodisJobWrapper job) {
+            this.evalutor = evalutor;
+            this.job = job;
+        }
+
+        public JobEvaluatorRunner getEvalutor() {
+            return evalutor;
+        }
+
+        public WacodisJobWrapper getJob() {
+            return job;
+        }
+    }
 }

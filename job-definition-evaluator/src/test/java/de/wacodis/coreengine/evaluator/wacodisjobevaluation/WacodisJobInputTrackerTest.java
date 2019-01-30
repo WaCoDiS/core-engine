@@ -72,6 +72,20 @@ public class WacodisJobInputTrackerTest {
         this.inputTracker.removeJob(job);
         assertFalse(this.inputTracker.getScheduledJobs().contains(job));
     }
+    
+    @Test
+    public void testContainsJobIsExecutableChangeListener(){
+        JobIsExecutableChangeListener listener = new JobIsExecutableChangeListener(){
+            @Override
+            public void onJobIsExecutableChanged(WacodisJobInputTracker eventSource, WacodisJobWrapper job, EvaluationStatus status) {}  
+        };
+        
+        this.inputTracker.addJobIsExecutableChangeListener(listener);
+        assertTrue(this.inputTracker.containsJobIsExecutableChangeListener(listener));
+        
+        this.inputTracker.removeJobIsExecutableChangeListener(listener);
+        assertFalse(this.inputTracker.containsJobIsExecutableChangeListener(listener));
+    }
 
     /**
      * Test of clearJobs method, of class WacodisJobInputTracker.
@@ -159,7 +173,7 @@ public class WacodisJobInputTrackerTest {
      */
     @Test
     public void testAddJobIsExecutableChangeListener() {
-        JobIsExecutableChangeListener listener = (WacodisJobWrapper Job, EvaluationStatus status) -> {
+        JobIsExecutableChangeListener listener = (WacodisJobInputTracker inputTracker, WacodisJobWrapper Job, EvaluationStatus status) -> {
         };
         WacodisJobInputTrackerTestSubclass tracker = new WacodisJobInputTrackerTestSubclass(this.inputTracker.getMatcher());
 
@@ -173,7 +187,7 @@ public class WacodisJobInputTrackerTest {
      */
     @Test
     public void testRemoveJobIsExecutableChangeListener() {
-        JobIsExecutableChangeListener listener = (WacodisJobWrapper Job, EvaluationStatus status) -> {
+        JobIsExecutableChangeListener listener = (WacodisJobInputTracker inputTracker, WacodisJobWrapper Job, EvaluationStatus status) -> {
         };
         WacodisJobInputTrackerTestSubclass tracker = new WacodisJobInputTrackerTestSubclass(this.inputTracker.getMatcher());
 
@@ -188,7 +202,7 @@ public class WacodisJobInputTrackerTest {
      */
     @Test
     public void testClearJobIsExecutableChangeListeners() {
-        JobIsExecutableChangeListener listener = (WacodisJobWrapper Job, EvaluationStatus status) -> {
+        JobIsExecutableChangeListener listener = (WacodisJobInputTracker inputTracker, WacodisJobWrapper Job, EvaluationStatus status) -> {
         };
         WacodisJobInputTrackerTestSubclass tracker = new WacodisJobInputTrackerTestSubclass(this.inputTracker.getMatcher());
 
@@ -284,7 +298,7 @@ public class WacodisJobInputTrackerTest {
         }
 
         @Override
-        public void onJobIsExecutableChanged(WacodisJobWrapper job, EvaluationStatus status) {
+        public void onJobIsExecutableChanged(WacodisJobInputTracker eventOrigin, WacodisJobWrapper job, EvaluationStatus status) {
             this.eventOccured = true;
             this.executable_LastEvent = status.equals(EvaluationStatus.EXECUTABLE);
         }

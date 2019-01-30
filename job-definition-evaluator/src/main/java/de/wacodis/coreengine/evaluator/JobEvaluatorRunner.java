@@ -8,7 +8,7 @@ package de.wacodis.coreengine.evaluator;
 import de.wacodis.core.models.AbstractDataEnvelopeTimeFrame;
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.DataAccessResourceSearchBody;
-import de.wacodis.coreengine.evaluator.http.dataaccess.ResourceProvider;
+import de.wacodis.core.engine.utils.http.dataretrieval.ResourceProvider;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.JobIsExecutableChangeListener;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobInputTracker;
@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import javax.annotation.PostConstruct;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +36,18 @@ public class JobEvaluatorRunner {
 
     private ResourceProvider<Map<String, List<AbstractResource>>, DataAccessResourceSearchBody> dataAccessConnector;
     private WacodisJobInputTracker inputTracker;
-    
+    private EvaluatorListener executableJobListener;
+
     @Autowired
     private ApplicationEventPublisher jobExecutablePublisher;
 
-    public JobEvaluatorRunner() {}
+    @PostConstruct
+    private void initListener() {
+        this.executableJobListener = new EvaluatorListener(this.jobExecutablePublisher, this);
+    }
+
+    public JobEvaluatorRunner() {
+    }
 
     public JobEvaluatorRunner(ResourceProvider<Map<String, List<AbstractResource>>, DataAccessResourceSearchBody> dataAccessConnector) {
         this.dataAccessConnector = dataAccessConnector;
@@ -58,9 +66,19 @@ public class JobEvaluatorRunner {
     }
 
     public void setInputTracker(WacodisJobInputTracker inputTracker) {
+        if (this.inputTracker != null) {
+            this.inputTracker.removeJobIsExecutableChangeListener(this.executableJobListener);
+        }
+
         this.inputTracker = inputTracker;
+
+        this.inputTracker.addJobIsExecutableChangeListener(executableJobListener);
     }
-    
+
+    public JobIsExecutableChangeListener getExecutableJobListener() {
+        return executableJobListener;
+    }
+
     /**
      *
      * @param job
@@ -85,7 +103,7 @@ public class JobEvaluatorRunner {
         if (addJobToInputTracker) {
             this.inputTracker.addJob(job);
         }
-        
+
         return status;
     }
 
@@ -135,33 +153,54 @@ public class JobEvaluatorRunner {
             input.setResourceAvailable(false);
         }
     }
-    
-    private class EvaluatorListener implements JobIsExecutableChangeListener{
-        
-        private final WacodisJobInputTracker inputTracker;
-        private final ApplicationEventPublisher publisher;
-        private final Object eventSource;
 
-        public EvaluatorListener(WacodisJobInputTracker inputTracker, ApplicationEventPublisher publisher, Object eventSource) {
-            this.inputTracker = inputTracker;
+    private class EvaluatorListener implements JobIsExecutableChangeListener {
+
+        private ApplicationEventPublisher publisher;
+        private Object eventOrigin;
+
+        public EvaluatorListener(ApplicationEventPublisher publisher, Object eventSource) {
             this.publisher = publisher;
-            this.eventSource = eventSource;
+            this.eventOrigin = eventSource;
+        }
+
+        public EvaluatorListener() {
+        }
+
+        public ApplicationEventPublisher getPublisher() {
+            return publisher;
+        }
+
+        public void setPublisher(ApplicationEventPublisher publisher) {
+            this.publisher = publisher;
+        }
+
+        public Object getEventOrigin() {
+            return eventOrigin;
+        }
+
+        public void setEventOrigin(Object eventOrigin) {
+            this.eventOrigin = eventOrigin;
         }
 
         @Override
-        public void onJobIsExecutableChanged(WacodisJobWrapper job, EvaluationStatus status) {
-            if(status.equals(EvaluationStatus.EXECUTABLE)){
+        public void onJobIsExecutableChanged(WacodisJobInputTracker eventSource, WacodisJobWrapper job, EvaluationStatus status) {
+            if (status.equals(EvaluationStatus.EXECUTABLE)) {
+                LOGGER.info("Received notification on executable WacodisJob " + job.getJobDefinition().getName() + ", initiating final validity check");
                 //check again (items might have been removed from DataAccess during waiting time)
                 EvaluationStatus validityCheck = evaluateJob(job);
-                
-                if(validityCheck.equals(EvaluationStatus.EXECUTABLE)){
-                    WacodisJobExecutableEvent event = new WacodisJobExecutableEvent(this.eventSource, job, validityCheck);
+
+                if (validityCheck.equals(EvaluationStatus.EXECUTABLE)) {
+                    LOGGER.info("Validity Check for WacodisJob " + job.getJobDefinition().getName() + " succeeded, publishing event");
+                    WacodisJobExecutableEvent event = new WacodisJobExecutableEvent(this.eventOrigin, job, validityCheck);
                     this.publisher.publishEvent(event);
-                    this.inputTracker.removeJob(job); 
+                    eventSource.removeJob(job);
+                } else {
+                    LOGGER.info("Validity Check for WacodisJob " + job.getJobDefinition().getName() + " failed");
+                    //else wait for further DataEnvelopes           
                 }
-                //else wait for further DataEnvelopes               
             }
         }
-        
+
     }
 }

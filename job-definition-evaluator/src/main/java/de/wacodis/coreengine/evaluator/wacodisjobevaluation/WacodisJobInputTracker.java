@@ -109,6 +109,10 @@ public class WacodisJobInputTracker {
         this.listeners.clear();
     }
     
+    public boolean containsJobIsExecutableChangeListener(JobIsExecutableChangeListener listener){
+        return this.listeners.contains(listener);
+    }
+    
     private void handleDataEnvelope(AbstractDataEnvelope dataEnvelope, boolean dataAvailable) {
         LOGGER.info("received DataEnvelope for job evaluation, dataAvailable: " + dataAvailable);
         
@@ -161,7 +165,7 @@ public class WacodisJobInputTracker {
         EvaluationStatus status = (isExecutable) ? EvaluationStatus.EXECUTABLE : EvaluationStatus.NOTEXECUTABLE;
         
         for (JobIsExecutableChangeListener listener : this.listeners) {
-            listener.onJobIsExecutableChanged(job, status);
+            listener.onJobIsExecutableChanged(this, job, status);
         }
     }
 }
