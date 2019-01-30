@@ -3,11 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package de.wacodis.coreengine.scheduling.quartz;
+package de.wacodis.coreengine.scheduling.factory;
 
 import de.wacodis.coreengine.scheduling.factory.JobContextFactory;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionExecution;
+import de.wacodis.coreengine.scheduling.quartz.JobContext;
 import static de.wacodis.coreengine.scheduling.quartz.WacodisSchedulingConstants.JOB_KEY_ID;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -24,16 +25,22 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.quartz.CronExpression;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Trigger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
+@ExtendWith(SpringExtension.class)
+@SpringBootTest(classes = {JobContextFactory.class, JobDetailFactory.class})
 public class JobContextFactoryTest {
 
     private static final String GROUP_NAME = "de.hsbo.wacodis";
@@ -42,12 +49,13 @@ public class JobContextFactoryTest {
     private static final String QUARTZ_CRON_EXPRESSION = "0 0 0 1 * ? *";
     private static final String DEFAULT_TIMEZONE = "Europe/Berlin";
 
+    @Autowired
     private JobContextFactory jobContextFactory;
+
     private WacodisJobDefinition jobDefinition;
 
     @BeforeEach
     public void setup() {
-        jobContextFactory = new JobContextFactory();
         jobDefinition = new WacodisJobDefinition();
         jobDefinition.setId(JOB_KEY);
         jobDefinition.setExecution(new WacodisJobDefinitionExecution().pattern(UNIX_CRON_EXPRESSION));
