@@ -29,10 +29,8 @@ public class DataEnvelopeListener {
 
     @StreamListener(DataEnvelopeListenerChannel.DATAENVELOPE_INPUT)
     public void evaluateDateEnvelope(AbstractDataEnvelope dataEnvelope) {
-        LOGGER.info("Received :\n" + dataEnvelope.toString());
-        
-        System.out.println(this.inputTrackerProvider.getInputTracker().toString());
-        
+        LOGGER.info("Received :" + System.lineSeparator() + dataEnvelope.toString());
+
         WacodisJobInputTracker inputTracker = this.inputTrackerProvider.getInputTracker();
         inputTracker.publishDataEnvelope(dataEnvelope);
     }
