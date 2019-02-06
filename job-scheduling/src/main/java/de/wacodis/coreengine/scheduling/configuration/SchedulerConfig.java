@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package de.wacodis.coreengine.scheduling.config;
+package de.wacodis.coreengine.scheduling.configuration;
 
 import de.wacodis.coreengine.scheduling.job.JobFactory;
 import java.util.Properties;
