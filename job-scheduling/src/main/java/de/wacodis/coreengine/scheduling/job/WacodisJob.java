@@ -5,7 +5,15 @@
  */
 package de.wacodis.coreengine.scheduling.job;
 
+import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.coreengine.evaluator.JobEvaluatorRunner;
+import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
+import static de.wacodis.coreengine.scheduling.configuration.WacodisSchedulingConstants.JOB_KEY_ID;
+import de.wacodis.coreengine.scheduling.http.jobrepository.JobRepositoryProvider;
+import de.wacodis.coreengine.scheduling.http.jobrepository.JobRepositoryRequestException;
+import java.util.UUID;
+import java.util.logging.Level;
+import org.joda.time.DateTime;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -25,11 +33,22 @@ public class WacodisJob extends QuartzJobBean {
     @Autowired
     private JobEvaluatorRunner evaluator;
 
+    @Autowired
+    private JobRepositoryProvider jobRepositoryProvider;
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         LOGGER.info("Executing job: {}", context.getJobDetail().getKey());
-        // TODO fetch JobDefinition
-        // TODO execute evaluator
+        String id = context.getJobDetail().getJobDataMap().getString(JOB_KEY_ID);
+
+        try {
+            WacodisJobDefinition job = jobRepositoryProvider.getJobDefinitionForId(id);
+            WacodisJobWrapper jobWrapper = new WacodisJobWrapper(job, new DateTime(context.getFireTime()));
+//            evaluator.evaluateJob(jobWrapper);
+        } catch (JobRepositoryRequestException ex) {
+            LOGGER.error(ex.getMessage());
+            LOGGER.debug("Error while requesting JobDefinition.", ex);
+        }
     }
 
 }

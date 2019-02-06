@@ -11,7 +11,7 @@ import com.cronutils.model.CronType;
 import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.parser.CronParser;
 import de.wacodis.core.models.WacodisJobDefinition;
-import static de.wacodis.coreengine.scheduling.config.WacodisSchedulingConstants.*;
+import static de.wacodis.coreengine.scheduling.configuration.WacodisSchedulingConstants.*;
 import java.text.ParseException;
 import java.time.ZoneId;
 import java.util.TimeZone;

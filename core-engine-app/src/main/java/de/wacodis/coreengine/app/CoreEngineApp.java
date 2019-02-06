@@ -5,17 +5,13 @@
  */
 package de.wacodis.coreengine.app;
 
-import de.wacodis.core.models.AbstractDataEnvelope;
-import de.wacodis.core.models.AbstractSubsetDefinition;
 import de.wacodis.coreengine.evaluator.JobEvaluatorRunner;
 import de.wacodis.coreengine.evaluator.WacodisJobInputTrackerProvider;
 import de.wacodis.coreengine.evaluator.configuration.DataAccessConfiguration;
 import de.wacodis.coreengine.evaluator.configuration.DataEnvelopeMatchingConfiguration;
 import de.wacodis.coreengine.evaluator.http.dataaccess.DataAccessConnector;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.BasicDataEnvelopeMatcher;
-import de.wacodis.coreengine.evaluator.wacodisjobevaluation.DataEnvelopeMatcher;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobInputTracker;
-import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javax.annotation.PostConstruct;
@@ -53,7 +49,7 @@ public class CoreEngineApp {
     @Autowired
     private WacodisJobInputTrackerProvider provider;
     
-
+    
     /**
      * @param args the command line arguments
      */
