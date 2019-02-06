@@ -5,7 +5,6 @@
  */
 package de.wacodis.coreengine.evaluator.http.dataaccess;
 
-import de.wacodis.core.engine.utils.http.dataretrieval.ResourceProvider;
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.DataAccessResourceSearchBody;
 import de.wacodis.core.engine.utils.http.GenericPostRequest;
@@ -21,7 +20,7 @@ import org.springframework.http.ResponseEntity;
  * search data-access-api for available resources
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
-public class DataAccessConnector implements ResourceProvider<Map<String, List<AbstractResource>>, DataAccessResourceSearchBody> {
+public class DataAccessConnector implements DataAccessResourceProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataAccessConnector.class);
     
