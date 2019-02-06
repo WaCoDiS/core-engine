@@ -5,10 +5,10 @@
  */
 package de.wacodis.coreengine.evaluator;
 
-import de.wacodis.core.engine.utils.http.dataretrieval.ResourceProvider;
 import de.wacodis.core.models.AbstractDataEnvelopeTimeFrame;
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.DataAccessResourceSearchBody;
+import de.wacodis.coreengine.evaluator.http.dataaccess.DataAccessResourceProvider;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.JobIsExecutableChangeListener;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobInputTracker;
@@ -34,7 +34,7 @@ public class JobEvaluatorRunner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JobEvaluatorRunner.class);
 
-    private ResourceProvider<Map<String, List<AbstractResource>>, DataAccessResourceSearchBody> dataAccessConnector;
+    private DataAccessResourceProvider<Map<String, List<AbstractResource>>, DataAccessResourceSearchBody> dataAccessConnector;
     private WacodisJobInputTracker inputTracker;
     private EvaluatorListener executableJobListener;
 
@@ -49,15 +49,15 @@ public class JobEvaluatorRunner {
     public JobEvaluatorRunner() {
     }
 
-    public JobEvaluatorRunner(ResourceProvider<Map<String, List<AbstractResource>>, DataAccessResourceSearchBody> dataAccessConnector) {
+    public JobEvaluatorRunner(DataAccessResourceProvider<Map<String, List<AbstractResource>>, DataAccessResourceSearchBody> dataAccessConnector) {
         this.dataAccessConnector = dataAccessConnector;
     }
 
-    public ResourceProvider<Map<String, List<AbstractResource>>, DataAccessResourceSearchBody> getDataAccessConnector() {
+    public DataAccessResourceProvider<Map<String, List<AbstractResource>>, DataAccessResourceSearchBody> getDataAccessConnector() {
         return dataAccessConnector;
     }
 
-    public void setDataAccessConnector(ResourceProvider<Map<String, List<AbstractResource>>, DataAccessResourceSearchBody> dataAccessConnector) {
+    public void setDataAccessConnector(DataAccessResourceProvider<Map<String, List<AbstractResource>>, DataAccessResourceSearchBody> dataAccessConnector) {
         this.dataAccessConnector = dataAccessConnector;
     }
 
