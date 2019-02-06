@@ -7,7 +7,7 @@ package de.wacodis.coreengine.scheduling.job;
 
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionExecution;
-import static de.wacodis.coreengine.scheduling.config.WacodisSchedulingConstants.JOB_KEY_ID;
+import static de.wacodis.coreengine.scheduling.configuration.WacodisSchedulingConstants.JOB_KEY_ID;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
