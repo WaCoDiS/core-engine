@@ -6,6 +6,7 @@
 package de.wacodis.coreengine.scheduling.http.jobrepository;
 
 import de.wacodis.core.models.WacodisJobDefinition;
+import java.util.List;
 
 /**
  *
@@ -14,5 +15,7 @@ import de.wacodis.core.models.WacodisJobDefinition;
 public interface JobRepositoryProvider {
 
     WacodisJobDefinition getJobDefinitionForId(String id) throws JobRepositoryRequestException;
+
+    List<WacodisJobDefinition> getJobDefinitions() throws JobRepositoryRequestException;
 
 }
