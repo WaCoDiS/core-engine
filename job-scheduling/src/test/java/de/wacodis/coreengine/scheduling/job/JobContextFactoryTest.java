@@ -90,8 +90,8 @@ public class JobContextFactoryTest {
         CronExpression expr = jobContextFactory.createCronSchedule(jobDefinition.getExecution().getPattern());
 
         assertThat(expr.getCronExpression(), is(equalTo(QUARTZ_CRON_EXPRESSION)));
-        assertThat(sdf.format(expr.getNextValidTimeAfter(new DateTime("2019-01-01T00:00:00").toDate())),
-                is(equalTo(sdf.format(new DateTime("2019-02-01T00:00:00").toDate()))));
+        assertThat(sdf.format(expr.getNextValidTimeAfter(new DateTime("2022-01-01T00:00:00").toDate())),
+                is(equalTo(sdf.format(new DateTime("2022-02-01T00:00:00").toDate()))));
     }
 
     @Test
@@ -129,8 +129,8 @@ public class JobContextFactoryTest {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone(timeZoneId));
 
-        assertThat(sdf.format(trigger.getFireTimeAfter(new DateTime("2019-01-01T00:00:00").toDate())),
-                is(equalTo(sdf.format(new DateTime("2019-02-01T00:00:00").toDate()))));
+        assertThat(sdf.format(trigger.getFireTimeAfter(new DateTime("2022-01-01T00:00:00").toDate())),
+                is(equalTo(sdf.format(new DateTime("2022-02-01T00:00:00").toDate()))));
         assertThat(trigger.getKey().getName(), is(equalTo(JOB_KEY.toString())));
         assertThat(trigger.getKey().getGroup(), is(equalTo(GROUP_NAME)));
     }
@@ -143,8 +143,8 @@ public class JobContextFactoryTest {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone(timeZoneId));
 
-        assertThat(sdf.format(jobContext.getTrigger().getFireTimeAfter(new DateTime("2019-01-01T00:00:00").toDate())),
-                is(equalTo(sdf.format(new DateTime("2019-02-01T00:00:00").toDate()))));
+        assertThat(sdf.format(jobContext.getTrigger().getFireTimeAfter(new DateTime("2022-01-01T00:00:00").toDate())),
+                is(equalTo(sdf.format(new DateTime("2022-02-01T00:00:00").toDate()))));
         assertThat(jobContext.getTrigger().getKey().getName(), is(equalTo(JOB_KEY.toString())));
         assertThat(jobContext.getTrigger().getKey().getGroup(), is(equalTo(GROUP_NAME)));
         assertThat(jobContext.getJobDetails().getKey().getName(), is(equalTo(JOB_KEY.toString())));
