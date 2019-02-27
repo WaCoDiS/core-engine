@@ -27,5 +27,6 @@
 nb*.xml
 /target/
 /core-engine-app/target/
+/core-models/
 /core-engine-utils/target/
 /core-engine-utils/nbproject/
