@@ -9,4 +9,12 @@
     <artifactId>job-definition-executor</artifactId>
     <packaging>jar</packaging>
     <name>WaCoDiS Job Definition Executor</name>
+    
+    
+    <dependencies>
+        <dependency>
+            <groupId>de.wacodis</groupId>
+            <artifactId>job-definition-evaluator</artifactId>
+        </dependency>
+    </dependencies>
 </project>
