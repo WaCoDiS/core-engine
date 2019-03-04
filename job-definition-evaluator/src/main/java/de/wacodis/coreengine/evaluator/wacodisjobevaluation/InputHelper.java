@@ -89,4 +89,12 @@ public class InputHelper {
     public void setResourceAvailable(boolean resourceAvailable) {
         this.resourceAvailable = resourceAvailable;
     }
+    
+    /**
+     * returns the ID of the wrapped SubsetDefinition
+     * @return 
+     */
+    public String getSubsetDefinitionIdentifier(){
+        return this.subsetDefinition.getIdentifier();
+    }
 }
