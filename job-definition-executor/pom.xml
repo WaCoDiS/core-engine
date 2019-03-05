@@ -10,11 +10,14 @@
     <packaging>jar</packaging>
     <name>WaCoDiS Job Definition Executor</name>
     
-    
     <dependencies>
         <dependency>
             <groupId>de.wacodis</groupId>
             <artifactId>job-definition-evaluator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.n52.geoprocessing</groupId>
+            <artifactId>wps-client-lib</artifactId>
         </dependency>
     </dependencies>
 </project>

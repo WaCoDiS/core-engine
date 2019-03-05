@@ -7,22 +7,31 @@ package de.wacodis.coreengine.executor.events;
 
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.coreengine.evaluator.EvaluationStatus;
-import de.wacodis.coreengine.evaluator.wacodisjobevaluation.JobIsExecutableChangeListener;
-import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobInputTracker;
+import org.springframework.stereotype.Component;
+import org.springframework.context.ApplicationListener;
+import de.wacodis.coreengine.evaluator.WacodisJobExecutableEvent;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
+import de.wacodis.coreengine.executor.JobExecutor;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
 
 /**
  *
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
-public class WacodisJobExecutableStateChangedHandler implements JobIsExecutableChangeListener{
+@Component
+public class WacodisJobExecutableStateChangedHandler implements ApplicationListener<WacodisJobExecutableEvent>{
+
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WacodisJobExecutableStateChangedHandler.class);
+    
 
     @Override
-    public void onJobIsExecutableChanged(WacodisJobInputTracker eventSource, WacodisJobWrapper job, EvaluationStatus status) {
-        if(status.equals(EvaluationStatus.EXECUTABLE)){
-            //if job executable, call WPS Process
-            WacodisJobDefinition jobDef = job.getJobDefinition();
-        }
+    public void onApplicationEvent(WacodisJobExecutableEvent event) {
+        WacodisJobWrapper job = event.getJob();
+        WacodisJobDefinition jobDef = job.getJobDefinition();
     }
+
+    
     
 }
