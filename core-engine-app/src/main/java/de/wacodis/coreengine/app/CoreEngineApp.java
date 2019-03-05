@@ -31,7 +31,8 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan({
     "de.wacodis.coreengine.app",
     "de.wacodis.coreengine.evaluator",
-    "de.wacodis.coreengine.scheduling"})
+    "de.wacodis.coreengine.scheduling",
+    "de.wacodis.coreengine.executor"})
 @RefreshScope
 public class CoreEngineApp {
 
