@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.context.ApplicationListener;
 import de.wacodis.coreengine.evaluator.WacodisJobExecutableEvent;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
-import de.wacodis.coreengine.executor.JobExecutor;
+import de.wacodis.coreengine.executor.WacodisJobTaskStarter;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -25,13 +25,25 @@ public class WacodisJobExecutableStateChangedHandler implements ApplicationListe
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WacodisJobExecutableStateChangedHandler.class);
     
-
+    @Autowired
+    private WacodisJobTaskStarter jobExecutor;
+    
     @Override
     public void onApplicationEvent(WacodisJobExecutableEvent event) {
         WacodisJobWrapper job = event.getJob();
         WacodisJobDefinition jobDef = job.getJobDefinition();
+        
+        LOGGER.debug("received " + event.getClass().getSimpleName() + " for job " + jobDef.getId().toString());
+        
+        if(event.getStatus().equals(EvaluationStatus.EXECUTABLE)){
+            LOGGER.info("EvaluationStatus for job " + jobDef.getId().toString() + " is "  + event.getStatus().toString() + ", handle job execution");
+        
+            //execute wacodis job
+            this.jobExecutor.executeWacodisJob(job);
+               
+        }else{
+            LOGGER.warn("EvaluationStatus for job " + jobDef.getId().toString() + " is "  + event.getStatus().toString() + ", excpected " + EvaluationStatus.EXECUTABLE.toString() + ", job is not executed");
+        }
     }
 
-    
-    
 }
