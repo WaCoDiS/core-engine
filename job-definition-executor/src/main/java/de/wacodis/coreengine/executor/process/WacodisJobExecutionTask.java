@@ -34,19 +34,18 @@ public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutp
         // 3) call WPS-Storage-Process
         
         ProcessContext toolOutput = this.toolProcess.execute(this.toolContext);
-        ProcessContext cleanUpContext = buildCleanUpToolContextFromToolOutput(toolOutput);
+        ProcessContext cleanUpContext = buildCleanUpToolContextFromToolOutput(buildCleanUpToolContextFromToolOutput(toolOutput));
         ProcessContext cleanUpOutput = this.cleanUpProcess.execute(cleanUpContext);
         
         WacodisJobExecutionOutput jobOutput = buildJobExecutionOutput(toolOutput, cleanUpOutput);
-        
-        
-        return new WacodisJobExecutionOutput();
+            
+        return jobOutput;
     }
     
     
     
     private ProcessContext buildCleanUpToolContextFromToolOutput(ProcessContext toolOutput){
-        return new ProcessContext();
+        return toolOutput;
     }
     
     private WacodisJobExecutionOutput buildJobExecutionOutput(ProcessContext toolOutput, ProcessContext cleanUpOutput){
