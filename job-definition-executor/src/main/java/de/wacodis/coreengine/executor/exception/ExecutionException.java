@@ -5,8 +5,9 @@
  */
 package de.wacodis.coreengine.executor.exception;
 
-/** 
- * use to signal a failure during the execution of a process (e.g. Wacodis Job)
+/**
+ * use to signal a failure during the execution of a process
+ *
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 public class ExecutionException extends Exception {
@@ -27,13 +28,12 @@ public class ExecutionException extends Exception {
     public ExecutionException(String msg) {
         super(msg);
     }
-    
-    public ExecutionException(String msg, Throwable cause){
+
+    public ExecutionException(String msg, Throwable cause) {
         super(msg, cause);
     }
- 
-    
-        public ExecutionException(Throwable cause){
+
+    public ExecutionException(Throwable cause) {
         super(cause);
     }
 }

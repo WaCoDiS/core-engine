@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- *
+ *  build ProcessContext for a Wacodis Job applicable for a WPSProcess
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 public class WPSProcessContextBuilder implements ProcessContextBuilder {
@@ -24,10 +24,12 @@ public class WPSProcessContextBuilder implements ProcessContextBuilder {
     public ProcessContext buildProcessContext(WacodisJobWrapper job) {
         ProcessContext context = new ProcessContext();
 
+        context.setProcessID(job.getJobDefinition().getId().toString());
+        
         List<InputHelper> jobInputs = job.getInputs();
         //ToDo handle Maps
         Map<String, AbstractResource> inputResources = jobInputs.stream().filter(inputHelper -> inputHelper.hasResource()).collect(Collectors.toMap(InputHelper::getSubsetDefinitionIdentifier, inputHelper -> inputHelper.getResource().get().get(0)));
-        context.setProcessResources(inputResources);
+        context.setInputResources(inputResources);
 
         return context;
     }

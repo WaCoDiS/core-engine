@@ -11,6 +11,7 @@ import de.wacodis.core.models.PostResource;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
 import de.wacodis.coreengine.executor.exception.ExecutionException;
 import de.wacodis.coreengine.executor.process.ProcessContext;
+import de.wacodis.coreengine.executor.process.ProcessOutput;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
@@ -22,9 +23,10 @@ import org.n52.geoprocessing.wps.client.ExecuteRequestBuilder;
 import org.n52.geoprocessing.wps.client.WPSClientException;
 import org.n52.geoprocessing.wps.client.WPSClientSession;
 import org.n52.geoprocessing.wps.client.model.ComplexInputDescription;
+import org.n52.geoprocessing.wps.client.model.ExceptionReport;
 import org.n52.geoprocessing.wps.client.model.InputDescription;
 import org.n52.geoprocessing.wps.client.model.LiteralInputDescription;
-import org.n52.geoprocessing.wps.client.model.OutputDescription;
+import org.n52.geoprocessing.wps.client.model.OWSExceptionElement;
 import org.n52.geoprocessing.wps.client.model.Process;
 import org.n52.geoprocessing.wps.client.model.Result;
 import org.n52.geoprocessing.wps.client.model.StatusInfo;
@@ -79,36 +81,51 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
     }
 
     @Override
-    public ProcessContext execute(ProcessContext context) throws ExecutionException {
+    public ProcessOutput execute(ProcessContext context) throws ExecutionException {
+        LOGGER.info("start execution of process " + context.getProcessID() + System.lineSeparator() + "wps url: " + this.wpsURL + ", wps version: " + this.wpsVersion + " wps process: " + this.processID);
+        
         if (!this.isInitialized || !this.isConnected) {
             init();
         }
 
-        ExecuteRequestBuilder executeRequestBuilder = new ExecuteRequestBuilder(this.wpsProcessDescription);
-        setWPSInputs(context.getProcessResources(), executeRequestBuilder);
-        setWPSOutputs(executeRequestBuilder);
-        executeRequestBuilder.setAsynchronousExecute();
-        Execute executeRequest = executeRequestBuilder.getExecute();
+        //get execute request
+        Execute executeRequest = buildExecuteRequest(context);
 
-        ProcessContext outputContext = new ProcessContext();
-
+        //submit execute request
         try {
-            Object output = this.wpsClient.execute(this.wpsURL, executeRequest, this.wpsVersion);
-            outputContext.setProcessResources(processWPSOutput(output));
+            Object wpsOutput = this.wpsClient.execute(this.wpsURL, executeRequest, this.wpsVersion); //submit 
+            Result wpsProcessResult = parseWPSOutput(wpsOutput);
+            ProcessOutput processOutput =  buildProcessOutput(wpsProcessResult);
+            
+            LOGGER.info("successfully executed process " + context.getProcessID());
+            return processOutput;
         } catch (WPSClientException | IOException ex) {
             throw new ExecutionException("execution of wps process " + this.processID + " failed", ex);
         }
-
-        return outputContext;
     }
 
+    private Execute buildExecuteRequest(ProcessContext context) {
+        ExecuteRequestBuilder executeRequestBuilder = new ExecuteRequestBuilder(this.wpsProcessDescription); //build execute request
+        setWPSInputs(context.getInputResources(), executeRequestBuilder); //register inputs
+        setWPSOutputs(context.getExpectedOutputs(), executeRequestBuilder); //register outputs
+        executeRequestBuilder.setAsynchronousExecute(); //make execute request asynchronous
+        
+        return executeRequestBuilder.getExecute();
+    }
+
+    /**
+     * register inputs for wps process
+     *
+     * @param availableInputs
+     * @param executeRequestBuilder
+     */
     private void setWPSInputs(Map<String, AbstractResource> availableInputs, ExecuteRequestBuilder executeRequestBuilder) {
         AbstractResource inputResource;
         String inputID;
 
         for (InputDescription processInput : this.wpsProcessDescription.getInputs()) {
             inputID = processInput.getId();
-            inputResource = availableInputs.get(inputID);
+            inputResource = availableInputs.get(inputID); //get corresponding input resources
 
             //handle missing mandatory inputs
             if (!isInputOptional(processInput) && inputResource == null) {
@@ -119,41 +136,40 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
             //ToDo properley handle body of PostResource
             if (inputResource != null) {
 
-                String mimeType = (inputResource instanceof PostResource) ? ((PostResource) inputResource).getContentType() : WPSProcess.TEXTPLAIN_MIMETYPE;
+                String mimeType = "";  //(inputResource instanceof PostResource) ? ((PostResource) inputResource).getContentType() : WPSProcess.TEXTXML_MIMETYPE;
 
-                if (processInput instanceof LiteralInputDescription) {
+                if (processInput instanceof LiteralInputDescription) { //Literal Input
+                    //set input, use url as value
                     executeRequestBuilder.addLiteralData(inputID, inputResource.getUrl(), null, null, mimeType); //input id, value, schema, encoding, mime type
-                } else if (processInput instanceof ComplexInputDescription) {
+                } else if (processInput instanceof ComplexInputDescription) { //Complex Input (always as reference?)
+
                     try {
-                        //complex inputs always by reference?
-                        executeRequestBuilder.addComplexDataReference(processInput.getId(), inputResource.getUrl(), WPSProcess.GML3SCHEMA, null, WPSProcess.TEXTXML_MIMETYPE); //schema?
+                        //set input, use url as value
+                        executeRequestBuilder.addComplexDataReference(processInput.getId(), inputResource.getUrl(), WPSProcess.GML3SCHEMA, null, WPSProcess.TEXTXML_MIMETYPE); //schema?, mimety
                     } catch (MalformedURLException ex) {
                         throw new IllegalArgumentException("invalid reference, malformed url " + inputResource.getUrl(), ex);
                     }
-                }//else if (processInput instanceof BoundingBoxInputDescription){}
+                }//else if (processInput instanceof BoundingBoxInputDescription){} //TODO: handle further input types
 
             }
         }
 
     }
 
-    private void setWPSOutputs(ExecuteRequestBuilder executeRequestBuilder) {
-        List<OutputDescription> processOutputs = this.wpsProcessDescription.getOutputs();
-
-        if (processOutputs.size() != 1) {
-            LOGGER.warn("wps process " + this.wpsProcessDescription.getId() + " has " + processOutputs.size() + " outputs, expected 1 output");
-        }
-
-        String outputID;
-
-        for (OutputDescription processOutput : processOutputs) {
-            outputID = processOutput.getId();
-            executeRequestBuilder.addOutput(outputID, null, null, WPSProcess.TEXTPLAIN_MIMETYPE); //output type?
+    /**
+     * register each expected output
+     *
+     * @param executeRequestBuilder
+     * @param expectedOutputs
+     */
+    private void setWPSOutputs(List<String> expectedOutputs, ExecuteRequestBuilder executeRequestBuilder) {
+        for (String expectedOutputID : expectedOutputs) {
+            executeRequestBuilder.setResponseDocument(expectedOutputID, null, null, ""); //output type? mime type?
         }
     }
 
     private boolean isInputOptional(InputDescription input) {
-        return (input.getMinOccurs() > 0);
+        return (input.getMinOccurs() == 0);
     }
 
     private boolean isResourceAvailable(InputHelper inputHelper) {
@@ -169,38 +185,104 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         }
     }
 
-    private Map<String, AbstractResource> processWPSOutput(Object wpsOutput) throws ExecutionException {
-        Map<String, AbstractResource> outputResources = new HashMap<>();
-        
-        Result processResult;
-        
+    /**
+     * check type of wps output, apply type cast and return wps result
+     *
+     * @param wpsOutput
+     * @return
+     * @throws ExecutionException if wps process raised exceptions during
+     * processing or wps output is not unparsable
+     */
+    private Result parseWPSOutput(Object wpsOutput) throws ExecutionException {
+        Result wpsProcessResult;
+
         if (wpsOutput instanceof Result) {
-            processResult = ((Result) wpsOutput);
+            wpsProcessResult = ((Result) wpsOutput);
         } else if (wpsOutput instanceof StatusInfo) {
-            processResult = (((StatusInfo) wpsOutput).getResult());
-        }else{
+            wpsProcessResult = (((StatusInfo) wpsOutput).getResult());
+        } else if (wpsOutput instanceof ExceptionReport) {
+            LOGGER.warn("wps output contained errors, raise ExecutionException");
+            List<OWSExceptionElement> exceptions = ((ExceptionReport) wpsOutput).getExceptions();
+            throw new ExecutionException("executing process " + this.processID + " raised exceptions:" + System.lineSeparator() + buildExceptionText(exceptions));
+        } else {
+            if (wpsOutput != null) {
+                LOGGER.warn("unexpected response format for wps process " + this.processID + ":" + System.lineSeparator() + wpsOutput.toString());
+            }
+
             throw new ExecutionException("unparsable response for wps process " + this.processID);
         }
+
+        LOGGER.debug("successfully parsed output of wps process " + this.processID);
         
-        AbstractResource outputResource;
-
-        for(Data output : processResult.getOutputs()){
-            outputResource = new GetResource();
-            outputResource.setMethod(AbstractResource.MethodEnum.GETRESOURCE);
-            outputResource.setUrl((String) output.getValue());
-            outputResources.put(output.getId(), outputResource);
-        }
-
-        return outputResources;
+        return wpsProcessResult;
     }
 
+    /**
+     * TODO: handle PostResouces
+     *
+     * @param wpsProcessResult
+     * @return
+     */
+    private ProcessOutput buildProcessOutput(Result wpsProcessResult) {
+        ProcessOutput processOutput = new ProcessOutput();
+        AbstractResource outputResource;
+
+        //create resource for each wps process output 
+        for (Data output : wpsProcessResult.getOutputs()) {
+            //create Resource for Ouput
+            outputResource = new GetResource();
+            outputResource.setMethod(AbstractResource.MethodEnum.GETRESOURCE); //ToDo PostResources
+            outputResource.setUrl((String) output.getValue());
+            //add Resource to ProcessOutput
+            processOutput.addOutputResource(output.getId(), outputResource);
+        }
+        
+        LOGGER.debug("built process output for wps process " + this.processID);
+
+        return processOutput;
+    }
+
+    /**
+     * append exception messages
+     *
+     * @param exceptions
+     * @return
+     */
+    private String buildExceptionText(List<OWSExceptionElement> exceptions) {
+        StringBuilder exceptionTextBuilder = new StringBuilder();
+
+        for (int i = 0; i < exceptions.size(); i++) {
+            exceptionTextBuilder.append("Exception ").append((i + 1)).append(":").append(System.lineSeparator()).
+                    append("code: ").append(exceptions.get(i).getExceptionCode()).append(System.lineSeparator()).
+                    append(exceptions.get(i).getExceptionText());
+
+            if (i != (exceptions.size() - 1)) { //no linebreak after last exception
+                exceptionTextBuilder.append(System.lineSeparator());
+            }
+        }
+
+        return exceptionTextBuilder.toString();
+    }
+
+    /**
+     * context must include resources for all mandatory process inputs of the
+     * wps process, context must not include expected outputs that are not
+     * returned by the wps rpcoess, context must include at least one expected
+     * output
+     *
+     * @param context
+     * @return true if context is valid for the wps output
+     */
     @Override
     public boolean validateContext(ProcessContext context) {
         List<String> mandatoryInputs = this.wpsProcessDescription.getInputs().stream().filter(id -> !isInputOptional(id)).map(id -> id.getId()).collect(Collectors.toList());
-        Set<String> availableInputs = context.getProcessResources().keySet();
+        List<String> offeredOutputs = this.wpsProcessDescription.getOutputs().stream().map(od -> od.getId()).collect(Collectors.toList());
+        Set<String> availableInputs = context.getInputResources().keySet();
 
         boolean allMandatoryInputsAvailable = availableInputs.containsAll(mandatoryInputs);
-        return allMandatoryInputsAvailable;
+        boolean processOffersExpectedOutputs = offeredOutputs.containsAll(context.getExpectedOutputs());
+
+        return (allMandatoryInputsAvailable && processOffersExpectedOutputs && !context.getExpectedOutputs().isEmpty());
     }
 
 }

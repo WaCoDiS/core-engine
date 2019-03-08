@@ -10,7 +10,7 @@ import de.wacodis.coreengine.executor.exception.ExecutionException;
 
 
 /**
- *
+ * abitrary process
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 public interface Process {
@@ -19,8 +19,9 @@ public interface Process {
      * execute Process
      * @param context
      * @return 
+     * @throws de.wacodis.coreengine.executor.exception.ExecutionException 
      */
-    ProcessContext execute(ProcessContext context) throws ExecutionException;
+    ProcessOutput execute(ProcessContext context) throws ExecutionException;
     
     /**
      * check if context object is applicable for the specific implementation of Process

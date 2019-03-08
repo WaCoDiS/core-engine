@@ -9,7 +9,9 @@ import java.util.concurrent.Callable;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * execute wacodis job,
+ * 1) execute processing tool,
+ * 2) execute cleanUp tool
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutput>{
@@ -27,28 +29,37 @@ public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutp
     }
 
     @Override
-    public WacodisJobExecutionOutput call() throws Exception {
-        //ToDo
-        // 1) call WPS-Tool-Process
-        // 2) get result async
-        // 3) call WPS-Storage-Process
+    public WacodisJobExecutionOutput call() throws Exception {     
+        LOGGER.debug("new thread started for process " + toolContext.getProcessID() +", toolProcess: " + toolProcess + " cleaUpProcess: " + cleanUpProcess);
         
-        ProcessContext toolOutput = this.toolProcess.execute(this.toolContext);
-        ProcessContext cleanUpContext = buildCleanUpToolContextFromToolOutput(buildCleanUpToolContextFromToolOutput(toolOutput));
-        ProcessContext cleanUpOutput = this.cleanUpProcess.execute(cleanUpContext);
+        //execute processing tool
+        ProcessOutput toolOutput = this.toolProcess.execute(this.toolContext);
+        LOGGER.debug("Process: "+ toolContext.getProcessID() +",executed toolProcess " + toolProcess);
+        
+        //execute cleanup tool
+        ProcessContext cleanUpContext = buildCleanUpToolContextFromToolOutput(toolOutput);
+        ProcessOutput cleanUpOutput = this.cleanUpProcess.execute(cleanUpContext);
+        LOGGER.debug("Process: "+ toolContext.getProcessID() + ",executed cleanUpProcess " + cleanUpProcess);
         
         WacodisJobExecutionOutput jobOutput = buildJobExecutionOutput(toolOutput, cleanUpOutput);
-            
+        
+        LOGGER.info("Process: "+ toolContext.getProcessID() +",finished execution");
+        
         return jobOutput;
     }
     
     
     
-    private ProcessContext buildCleanUpToolContextFromToolOutput(ProcessContext toolOutput){
-        return toolOutput;
+    private ProcessContext buildCleanUpToolContextFromToolOutput(ProcessOutput toolOutput){
+        ProcessContext cleanUpContext = new ProcessContext();
+        cleanUpContext.setInputResources(toolOutput.getOutputResources());
+        
+        //ToDo: expected outputs cleanUp process
+        
+        return cleanUpContext;
     }
     
-    private WacodisJobExecutionOutput buildJobExecutionOutput(ProcessContext toolOutput, ProcessContext cleanUpOutput){
+    private WacodisJobExecutionOutput buildJobExecutionOutput(ProcessOutput toolOutput, ProcessOutput cleanUpOutput){
         return new WacodisJobExecutionOutput();
     }
 

@@ -8,7 +8,7 @@ package de.wacodis.coreengine.executor.process;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 
 /**
- *
+ * build ProcessContext for a Wacodis Job
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 public interface ProcessContextBuilder {

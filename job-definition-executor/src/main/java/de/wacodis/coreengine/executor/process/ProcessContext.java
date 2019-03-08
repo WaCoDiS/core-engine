@@ -6,43 +6,74 @@
 package de.wacodis.coreengine.executor.process;
 
 import de.wacodis.core.models.AbstractResource;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
- * 
+ * helper class to provide execution information for a process
+ * (inputs, expected outputs)
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 public class ProcessContext {
-    
-    private Map<String, AbstractResource> processResources;
+
+    private Map<String, AbstractResource> inputResources;
+    private List<String> expectedOutputs;
+    private String processID;
 
     public ProcessContext() {
-        this.processResources = new HashMap<>();
+        this.inputResources = new HashMap<>();
+        this.expectedOutputs = new ArrayList<>();
     }
 
-    public Map<String, AbstractResource> getProcessResources() {
-        return processResources;
+    public String getProcessID() {
+        return processID;
     }
 
-    public void setProcessResources(Map<String, AbstractResource> processResources) {
-        this.processResources = processResources;
+    public void setProcessID(String processID) {
+        this.processID = processID;
     }
     
-    public void addProcessResource(String inputID, AbstractResource inputResource){
-        setProcessResource(inputID, inputResource);
+    public Map<String, AbstractResource> getInputResources() {
+        return inputResources;
     }
-    
-    public void removeProcessResource(String inputID){
-        this.processResources.remove(inputID);
+
+    public void setInputResources(Map<String, AbstractResource> inputResources) {
+        this.inputResources = inputResources;
     }
-    
-    public AbstractResource getProcessResource(String inputID){
-        return this.processResources.get(inputID);
+
+    public void addInputResource(String inputID, AbstractResource inputResource) {
+        setInputResource(inputID, inputResource);
     }
-    
-    public void setProcessResource(String inputID, AbstractResource inputResource){
-        this.processResources.put(inputID, inputResource);
+
+    public void removeInputResource(String inputID) {
+        this.inputResources.remove(inputID);
     }
-   
+
+    public AbstractResource getInputResource(String inputID) {
+        return this.inputResources.get(inputID);
+    }
+
+    public void setInputResource(String inputID, AbstractResource inputResource) {
+        this.inputResources.put(inputID, inputResource);
+    }
+
+    public List<String> getExpectedOutputs() {
+        return expectedOutputs;
+    }
+
+    public void setExpectedOutputs(List<String> expectedOutputs) {
+        this.expectedOutputs = expectedOutputs;
+    }
+
+    public void addExpectedOutput(String expectedOutput) {
+        this.expectedOutputs.add(expectedOutput);
+    }
+
+    public void removeExpectedOutput(String expectedOutput) {
+        this.expectedOutputs.remove(expectedOutput);
+    }
+
+
 }

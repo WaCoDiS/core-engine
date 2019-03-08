@@ -39,7 +39,7 @@ public class WacodisJobTaskStarter {
     private ProcessContextBuilder contextBuilder;
     
     @Autowired
-    private WacodisJobExecutorConfiguration executorConfiguration;
+    private WacodisJobExecutorConfiguration executorConfig;
     
     @Autowired
     private WebProcessingServiceConfiguration wpsConfig;
@@ -54,12 +54,14 @@ public class WacodisJobTaskStarter {
     
     public void executeWacodisJob(WacodisJobWrapper job){
         String toolProcessID = job.getJobDefinition().getProcessingTool();
-        String cleanUpProcessID = this.executorConfiguration.getCleanUpTool();
+        String cleanUpProcessID = this.executorConfig.getCleanUpTool();
         ProcessContext toolContext = this.contextBuilder.buildProcessContext(job);
         
         Process toolProcess = new WPSProcess(this.wpsClient, this.wpsConfig.getUri(), this.wpsConfig.getVersion(), toolProcessID);
         Process cleanUpProcess = new WPSProcess(this.wpsClient, this.wpsConfig.getUri(), this.wpsConfig.getVersion(), cleanUpProcessID);
-                
+        
+        LOGGER.info("execute Wacodis Job " + job.getJobDefinition().getId().toString() + " using processing tool " + toolProcessID +" and cleanUp tool " + cleanUpProcessID);
+        LOGGER.debug("start thread for process "  + job.getJobDefinition().getId().toString());
         Future<WacodisJobExecutionOutput> jobExecutionResult = this.wacodisJobExecutionService.submit(new WacodisJobExecutionTask(toolProcess, toolContext, cleanUpProcess));
     }
 
