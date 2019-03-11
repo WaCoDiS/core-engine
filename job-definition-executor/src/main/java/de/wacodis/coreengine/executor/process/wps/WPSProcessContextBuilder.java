@@ -11,14 +11,18 @@ import de.wacodis.coreengine.executor.process.ProcessContext;
 import de.wacodis.coreengine.executor.process.ProcessContextBuilder;
 import java.util.List;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
+import de.wacodis.coreengine.executor.process.ResourceDescription;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  *  build ProcessContext for a Wacodis Job applicable for a WPSProcess
+ * 
+ * TODO: Handle MimeType
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 public class WPSProcessContextBuilder implements ProcessContextBuilder {
+    
+    private static final String DEFAULT_MIME_TYPE = "text/xml";
 
     @Override
     public ProcessContext buildProcessContext(WacodisJobWrapper job) {
@@ -27,9 +31,18 @@ public class WPSProcessContextBuilder implements ProcessContextBuilder {
         context.setProcessID(job.getJobDefinition().getId().toString());
         
         List<InputHelper> jobInputs = job.getInputs();
-        //ToDo handle Maps
-        Map<String, AbstractResource> inputResources = jobInputs.stream().filter(inputHelper -> inputHelper.hasResource()).collect(Collectors.toMap(InputHelper::getSubsetDefinitionIdentifier, inputHelper -> inputHelper.getResource().get().get(0)));
-        context.setInputResources(inputResources);
+        
+        for(InputHelper jobInput : jobInputs){ //set inputs
+            if(jobInput.hasResource()){
+                String mimeType = DEFAULT_MIME_TYPE; //TODO handle mimeTypes
+                
+                for(AbstractResource resource : jobInput.getResource().get()){
+                    context.setInputResource(jobInput.getSubsetDefinitionIdentifier(), new ResourceDescription(resource, mimeType));
+                }  
+            }        
+        }
+
+        //TODO expected outputs?
 
         return context;
     }

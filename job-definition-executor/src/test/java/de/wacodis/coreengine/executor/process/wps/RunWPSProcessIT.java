@@ -12,7 +12,9 @@ import org.n52.geoprocessing.wps.client.WPSClientSession;
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.GetResource;
 import de.wacodis.coreengine.executor.exception.ExecutionException;
+import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ProcessOutput;
+import de.wacodis.coreengine.executor.process.ResourceDescription;
 import org.junit.jupiter.api.Disabled;
 
 /**
@@ -28,30 +30,36 @@ public class RunWPSProcessIT {
     @Disabled
     public void runWPSProcess() throws ExecutionException {
         String wpsURL = "http://geoprocessing.demo.52north.org:8080/wps/WebProcessingService";
-        String wpsProcessID = "org.n52.wps.server.algorithm.test.LongRunningDummyTestClass";
+        String wpsProcessID = "org.n52.wps.server.algorithm.test.DummyTestClass";
 
         WPSClientSession wpsClient = WPSClientSession.getInstance();
 
         de.wacodis.coreengine.executor.process.Process wpsProcess = new WPSProcess(wpsClient, wpsURL, "2.0.0", wpsProcessID);
         ProcessContext inputContext = buildInputContext();
         ProcessOutput processOutput = wpsProcess.execute(inputContext);
-        
+
         System.out.println("Outputs:" + System.lineSeparator() + processOutput.getOutputResources().toString());
     }
-    
-    
-    
-    private ProcessContext buildInputContext(){
+
+    private ProcessContext buildInputContext() {
         AbstractResource literalInput = new GetResource();
         literalInput.setMethod(AbstractResource.MethodEnum.GETRESOURCE);
         literalInput.setUrl("http://www.example.com");
-        
+
+        AbstractResource complexInput = new GetResource();
+        complexInput.setMethod(AbstractResource.MethodEnum.GETRESOURCE);
+        complexInput.setUrl("a,b,c");
+
+
         ProcessContext inputContext = new ProcessContext();
-        inputContext.addInputResource("LiteralInputData", literalInput);
-        inputContext.addExpectedOutput("LiteralOutputData");
+        inputContext.addInputResource("LiteralInputData", new ResourceDescription(literalInput, "text/xml"));
+        inputContext.addInputResource("ComplexInputData", new ResourceDescription(complexInput, "text/csv"));
+
+        inputContext.addExpectedOutput(new ExpectedProcessOutput("LiteralOutputData", "text/xml"));
+        inputContext.addExpectedOutput(new ExpectedProcessOutput("ComplexOutputData", "text/csv"));
 
         inputContext.setProcessID("dummyProcess");
-        
+
         return inputContext;
     }
 

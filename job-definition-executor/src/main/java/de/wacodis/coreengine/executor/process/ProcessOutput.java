@@ -15,21 +15,21 @@ import java.util.Map;
  */
 public class ProcessOutput {
 
-    private Map<String, AbstractResource> outputResources;
+    private Map<String, ResourceDescription> outputResources;
 
     public ProcessOutput() {
         this.outputResources = new HashMap<>();
     }
 
-    public Map<String, AbstractResource> getOutputResources() {
+    public Map<String, ResourceDescription> getOutputResources() {
         return outputResources;
     }
 
-    public void setOutputResources(Map<String, AbstractResource> outputResources) {
+    public void setOutputResources(Map<String, ResourceDescription> outputResources) {
         this.outputResources = outputResources;
     }
 
-    public void addOutputResource(String outputID, AbstractResource outputResource) {
+    public void addOutputResource(String outputID, ResourceDescription outputResource) {
         setOutputResource(outputID, outputResource);
     }
 
@@ -37,11 +37,11 @@ public class ProcessOutput {
         this.outputResources.remove(outputID);
     }
 
-    public AbstractResource getOutputResource(String outputID) {
+    public ResourceDescription getOutputResource(String outputID) {
         return this.outputResources.get(outputID);
     }
 
-    public void setOutputResource(String outputID, AbstractResource outputResource) {
+    public void setOutputResource(String outputID, ResourceDescription outputResource) {
         this.outputResources.put(outputID, outputResource);
     }
 
