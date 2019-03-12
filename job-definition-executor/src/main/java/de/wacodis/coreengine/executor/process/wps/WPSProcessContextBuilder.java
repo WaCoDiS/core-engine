@@ -12,7 +12,6 @@ import de.wacodis.coreengine.executor.process.ProcessContextBuilder;
 import java.util.List;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
-import java.util.Map;
 
 /**
  *  build ProcessContext for a Wacodis Job applicable for a WPSProcess

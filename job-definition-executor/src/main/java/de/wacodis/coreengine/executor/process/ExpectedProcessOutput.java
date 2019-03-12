@@ -16,7 +16,7 @@ public class ExpectedProcessOutput {
 
     public ExpectedProcessOutput(String identifier, String mimeType) {
         this.identifier = identifier;
-        this.mimeType = mimeType;
+        this.mimeType = (mimeType != null) ? mimeType : "";
     }
 
     public String getIdentifier() {
@@ -26,4 +26,10 @@ public class ExpectedProcessOutput {
     public String getMimeType() {
         return mimeType;
     }
+
+    @Override
+    public String toString() {
+        return "ExpectedProcessOutput{" + "identifier=" + identifier + ", mimeType=" + mimeType + '}';
+    }
+    
 }

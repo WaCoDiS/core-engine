@@ -18,7 +18,7 @@ public class ResourceDescription {
 
     public ResourceDescription(AbstractResource resource, String mimeType) {
         this.resource = resource;
-        this.mimeType = mimeType;
+        this.mimeType = (mimeType != null) ? mimeType : "";
     }
 
     public AbstractResource getResource() {
