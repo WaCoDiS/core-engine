@@ -144,27 +144,23 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
 
                 for (ResourceDescription resource : availableResources) {
 
-                    mimeType = resource.getMimeType();
+                    mimeType = (resource.getMimeType() != null) ? resource.getMimeType() : "";
 
                     if (processInput instanceof LiteralInputDescription) { //Literal Input
                         //set input, use url as value
                         executeRequestBuilder.addLiteralData(inputID, resource.getResource().getUrl(), "", "", mimeType); //input id, value, schema, encoding, mime type
-                    } else if (processInput instanceof ComplexInputDescription) {
-                        try {
+                    } else if (processInput instanceof ComplexInputDescription) { // Complex Input
                             //Complex Input (always as reference?)
-
-                            executeRequestBuilder.addComplexData(inputID, resource.getResource().getUrl(), "", "", mimeType);
-
-//                    try {
-//                        //set input, use url as value
-//                        executeRequestBuilder.addComplexDataReference(inputID, availableResources.getUrl(), WPSProcess.GML3SCHEMA, null, WPSProcess.TEXTXML_MIMETYPE); //schema?, mimety
-//                    } catch (MalformedURLException ex) {
-//                        throw new IllegalArgumentException("invalid reference, malformed url " + availableResources.getUrl(), ex);
-//                    }
-                        } catch (WPSClientException ex) {
-                            LOGGER.error("could not add complex input", ex);
-                        }
+                    try {
+                        //set input, use url as value
+                        executeRequestBuilder.addComplexDataReference(inputID, resource.getResource().getUrl(), WPSProcess.GML3SCHEMA, null, WPSProcess.TEXTXML_MIMETYPE); //schema?, mimety
+                    } catch (MalformedURLException ex) {
+                        throw new IllegalArgumentException("cannot add complex input " + inputID + " as reference, invalid reference, malformed url " + resource.getResource().getUrl(), ex);
+                    }
                     }//else if (processInput instanceof BoundingBoxInputDescription){} //TODO: handle further input types
+                    else{
+                        LOGGER.warn("cannot handle input " + inputID + " of type " + processInput.getClass().getSimpleName() + ", ignore input " + inputID); 
+                    }
                 }
             }
         }
@@ -241,7 +237,8 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
     private ProcessOutput buildProcessOutput(ProcessContext context, Result wpsProcessResult) {
         ProcessOutput processOutput = new ProcessOutput();
         AbstractResource outputResource;
-        String mimeType;
+        String actualMimeType;
+        String expectedMimeType;
 
         //create resource for each wps process output 
         for (Data output : wpsProcessResult.getOutputs()) {
@@ -250,10 +247,15 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
             outputResource.setMethod(AbstractResource.MethodEnum.GETRESOURCE); //ToDo PostResources
             outputResource.setUrl((String) output.getValue());
             //set mime type
-            mimeType = (output.getFormat() != null && output.getFormat().getMimeType() != null) ? output.getFormat().getMimeType() : "";
+            actualMimeType = (output.getFormat() != null && output.getFormat().getMimeType() != null) ? output.getFormat().getMimeType() : "";
+            expectedMimeType = getExpectedMimeType(output.getId(), context);
+            
+            if(!actualMimeType.equalsIgnoreCase(expectedMimeType)){
+                LOGGER.warn("unexpected mime type for output " + output.getId() + ", expected: " + expectedMimeType + ", actual: " + actualMimeType + System.lineSeparator() + "set mime type to " + actualMimeType);
+            }
             
             //add Resource to ProcessOutput
-            processOutput.addOutputResource(output.getId(), new ResourceDescription(outputResource, mimeType));
+            processOutput.addOutputResource(output.getId(), new ResourceDescription(outputResource, actualMimeType));
         }
 
         LOGGER.debug("built process output for wps process " + this.processID);
@@ -295,6 +297,14 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         }
         
         return output;
+    }
+    
+    private String getExpectedMimeType(String outputID, ProcessContext context){
+        //get expected mime type
+        ExpectedProcessOutput expectedOutput = findExpectedProcessOutputByID(context, outputID);
+        String expectedMimeType = expectedOutput.getMimeType();
+        
+        return expectedMimeType;
     }
     
 
