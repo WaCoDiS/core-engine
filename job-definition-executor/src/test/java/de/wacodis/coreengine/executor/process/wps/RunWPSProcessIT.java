@@ -29,8 +29,8 @@ public class RunWPSProcessIT {
     @Test
     @Disabled
     public void runWPSProcess() throws ExecutionException {
-        String wpsURL = "http://geoprocessing.demo.52north.org:8080/wps/WebProcessingService";
-        String wpsProcessID = "org.n52.wps.server.algorithm.test.DummyTestClass";
+        String wpsURL = "http://localhost:8080/wps/service";
+        String wpsProcessID = "de.hsbo.wacodis.land_cover_classification";
 
         WPSClientSession wpsClient = WPSClientSession.getInstance();
 
@@ -42,23 +42,31 @@ public class RunWPSProcessIT {
     }
 
     private ProcessContext buildInputContext() {
-        AbstractResource literalInput = new GetResource();
-        literalInput.setMethod(AbstractResource.MethodEnum.GETRESOURCE);
-        literalInput.setUrl("http://www.example.com");
+        AbstractResource opticalImgType = new GetResource();
+        opticalImgType.setMethod(AbstractResource.MethodEnum.GETRESOURCE);
+        opticalImgType.setUrl("Aerial_Image");
 
-        AbstractResource complexInput = new GetResource();
-        complexInput.setMethod(AbstractResource.MethodEnum.GETRESOURCE);
-        complexInput.setUrl("a,b,c");
+        AbstractResource opticalImgSrc = new GetResource();
+        opticalImgSrc.setMethod(AbstractResource.MethodEnum.GETRESOURCE);
+        opticalImgSrc.setUrl("http://www.example.com");
 
+        AbstractResource refDataType = new GetResource();
+        refDataType.setMethod(AbstractResource.MethodEnum.GETRESOURCE);
+        refDataType.setUrl("MANUAL");
+
+        AbstractResource refData = new GetResource();
+        refData.setMethod(AbstractResource.MethodEnum.GETRESOURCE);
+        refData.setUrl("http://geoprocessing.demo.52north.org:8080/geoserver/wfs?SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=topp:tasmania_roads&SRS=EPSG:4326&OUTPUTFORMAT=GML3");
 
         ProcessContext inputContext = new ProcessContext();
-        inputContext.addInputResource("LiteralInputData", new ResourceDescription(literalInput, "text/xml"));
-        inputContext.addInputResource("ComplexInputData", new ResourceDescription(complexInput, "text/csv"));
+        inputContext.addInputResource("OPTICAL_IMAGES_TYPE", new ResourceDescription(opticalImgType, "text/xml"));
+        inputContext.addInputResource("OPTICAL_IMAGES_SOURCES", new ResourceDescription(opticalImgSrc, "text/xml"));
+        inputContext.addInputResource("REFERENCE_DATA_TYPE", new ResourceDescription(refDataType, "text/xml"));
+        inputContext.addInputResource("REFERENCE_DATA", new ResourceDescription(refData, "text/xml"));
 
-        inputContext.addExpectedOutput(new ExpectedProcessOutput("LiteralOutputData", "text/xml"));
-        inputContext.addExpectedOutput(new ExpectedProcessOutput("ComplexOutputData", "text/csv"));
+        inputContext.addExpectedOutput(new ExpectedProcessOutput("PRODUCT", "text/xml"));
 
-        inputContext.setProcessID("dummyProcess");
+        inputContext.setProcessID("dummyLandCoverClassificationProcess");
 
         return inputContext;
     }
