@@ -30,3 +30,4 @@ nb*.xml
 /core-models/
 /core-engine-utils/target/
 /core-engine-utils/nbproject/
+/job-definition-executor/nbproject/

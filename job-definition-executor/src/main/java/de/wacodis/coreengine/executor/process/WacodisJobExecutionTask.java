@@ -7,6 +7,8 @@ package de.wacodis.coreengine.executor.process;
 
 import java.util.concurrent.Callable;
 import org.slf4j.LoggerFactory;
+import java.util.Map;
+import java.util.List;
 
 /**
  * execute wacodis job, 1) execute processing tool, 2) execute cleanUp tool
@@ -16,7 +18,7 @@ import org.slf4j.LoggerFactory;
 public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutput> {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WacodisJobExecutionTask.class);
-
+    
     private final de.wacodis.coreengine.executor.process.Process toolProcess;
     private final de.wacodis.coreengine.executor.process.Process cleanUpProcess;
     private final ProcessContext toolContext;
@@ -49,11 +51,9 @@ public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutp
 
     private ProcessContext buildCleanUpToolContext(ProcessOutput toolOutput) {
         ProcessContext cleanUpContext = new ProcessContext();
-
-        for (String inputID : toolOutput.getOutputResources().keySet()) { //create input for each output
-            ResourceDescription input = toolOutput.getOutputResources().get(inputID);
-            cleanUpContext.setInputResource(inputID, input);
-        }
+        
+        Map<String, List<ResourceDescription>> outputs = toolOutput.getOutputResources(); //use tool outputs as cleanUp inputs
+        cleanUpContext.setInputResources(outputs);
 
         //ToDo: expected outputs cleanUp process
         return cleanUpContext;
@@ -62,5 +62,5 @@ public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutp
     private WacodisJobExecutionOutput buildJobExecutionOutput(ProcessOutput toolOutput, ProcessOutput cleanUpOutput) {
         return new WacodisJobExecutionOutput();
     }
-
+    
 }

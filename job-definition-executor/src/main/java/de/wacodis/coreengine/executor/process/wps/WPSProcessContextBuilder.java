@@ -13,6 +13,7 @@ import java.util.List;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
 import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
+import java.util.Arrays;
 
 /**
  *  build ProcessContext for a Wacodis Job applicable for a WPSProcess
@@ -25,7 +26,7 @@ public class WPSProcessContextBuilder implements ProcessContextBuilder {
     private static final String DEFAULT_MIME_TYPE = "text/xml";
 
     @Override
-    public ProcessContext buildProcessContext(WacodisJobWrapper job) {
+    public ProcessContext buildProcessContext(WacodisJobWrapper job, ExpectedProcessOutput... expectedOutputs) {
         ProcessContext context = new ProcessContext();
 
         context.setProcessID(job.getJobDefinition().getId().toString());
@@ -41,10 +42,8 @@ public class WPSProcessContextBuilder implements ProcessContextBuilder {
                 }  
             }        
         }
-
-        //TODO variable outputs
-        ExpectedProcessOutput expectedOutput = new ExpectedProcessOutput("LiteralOutputData", DEFAULT_MIME_TYPE);
-        context.addExpectedOutput(expectedOutput);
+   
+        context.setExpectedOutputs(Arrays.asList(expectedOutputs)); //set expected outputs
 
         return context;
     }

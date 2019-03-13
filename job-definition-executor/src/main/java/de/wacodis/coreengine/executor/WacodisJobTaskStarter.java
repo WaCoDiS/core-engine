@@ -15,7 +15,6 @@ import de.wacodis.coreengine.executor.process.WacodisJobExecutionTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import org.n52.geoprocessing.wps.client.WPSClientSession;
 import org.slf4j.LoggerFactory;
@@ -32,21 +31,23 @@ import de.wacodis.coreengine.executor.process.wps.WPSProcessContextBuilder;
  */
 @Component
 public class WacodisJobTaskStarter {
-    
+
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WacodisJobTaskStarter.class);
     
+    private static final String DEFAULT_OUTPUT = "PRODUCT";
+    private static final String DEFAULT_MIMETYPE = "text/xml";
+
     private final WPSClientSession wpsClient;
     private final ExecutorService wacodisJobExecutionService;
     private final ProcessContextBuilder contextBuilder;
-    
+
     @Autowired
     private WacodisJobExecutorConfiguration executorConfig;
-    
+
     @Autowired
     private WebProcessingServiceConfiguration wpsConfig;
-    
-    
-    public WacodisJobTaskStarter(){
+
+    public WacodisJobTaskStarter() {
         this.wpsClient = WPSClientSession.getInstance();
         this.wacodisJobExecutionService = Executors.newCachedThreadPool();
         this.contextBuilder = new WPSProcessContextBuilder();
@@ -66,27 +67,30 @@ public class WacodisJobTaskStarter {
 
     public WebProcessingServiceConfiguration getWpsConfig() {
         return wpsConfig;
-    }    
-    
-    
-    public void executeWacodisJob(WacodisJobWrapper job){
+    }
+
+    public void executeWacodisJob(WacodisJobWrapper job) {
         String toolProcessID = job.getJobDefinition().getProcessingTool();
         String cleanUpProcessID = this.executorConfig.getCleanUpTool();
-        ProcessContext toolContext = this.contextBuilder.buildProcessContext(job);
-        
+        ExpectedProcessOutput expectedOutput = getDefaultExpectedOutput();
+        ProcessContext toolContext = this.contextBuilder.buildProcessContext(job, expectedOutput);
+
         Process toolProcess = new WPSProcess(this.wpsClient, this.wpsConfig.getUri(), this.wpsConfig.getVersion(), toolProcessID);
         Process cleanUpProcess = new WPSProcess(this.wpsClient, this.wpsConfig.getUri(), this.wpsConfig.getVersion(), cleanUpProcessID);
-        
-        LOGGER.info("execute Wacodis Job " + job.getJobDefinition().getId().toString() + " using processing tool " + toolProcessID +" and cleanUp tool " + cleanUpProcessID);
-        LOGGER.debug("start thread for process "  + job.getJobDefinition().getId().toString());
+
+        LOGGER.info("execute Wacodis Job " + job.getJobDefinition().getId().toString() + " using processing tool " + toolProcessID + " and cleanUp tool " + cleanUpProcessID);
+        LOGGER.debug("start thread for process " + job.getJobDefinition().getId().toString());
         Future<WacodisJobExecutionOutput> jobExecutionResult = this.wacodisJobExecutionService.submit(new WacodisJobExecutionTask(toolProcess, toolContext, cleanUpProcess));
     }
 
-
     @PreDestroy
-    private void shutdownJobExecutionService(){
+    private void shutdownJobExecutionService() {
         this.wacodisJobExecutionService.shutdown();
         LOGGER.debug("shutdown executor service");
     }
-    
+
+    private ExpectedProcessOutput getDefaultExpectedOutput() {
+        return new ExpectedProcessOutput(DEFAULT_OUTPUT, DEFAULT_MIMETYPE);
+    }
+
 }

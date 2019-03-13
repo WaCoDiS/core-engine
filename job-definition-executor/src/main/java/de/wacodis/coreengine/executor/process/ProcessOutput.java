@@ -5,9 +5,10 @@
  */
 package de.wacodis.coreengine.executor.process;
 
-import de.wacodis.core.models.AbstractResource;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 /**
  *
@@ -15,17 +16,17 @@ import java.util.Map;
  */
 public class ProcessOutput {
 
-    private Map<String, ResourceDescription> outputResources;
+    private Map<String, List<ResourceDescription>> outputResources;
 
     public ProcessOutput() {
         this.outputResources = new HashMap<>();
     }
 
-    public Map<String, ResourceDescription> getOutputResources() {
+    public Map<String, List<ResourceDescription>> getOutputResources() {
         return outputResources;
     }
 
-    public void setOutputResources(Map<String, ResourceDescription> outputResources) {
+    public void setOutputResources(Map<String, List<ResourceDescription>> outputResources) {
         this.outputResources = outputResources;
     }
 
@@ -37,12 +38,14 @@ public class ProcessOutput {
         this.outputResources.remove(outputID);
     }
 
-    public ResourceDescription getOutputResource(String outputID) {
+    public List<ResourceDescription> getOutputResource(String outputID) {
         return this.outputResources.get(outputID);
     }
 
     public void setOutputResource(String outputID, ResourceDescription outputResource) {
-        this.outputResources.put(outputID, outputResource);
+        List<ResourceDescription> currentOutputResources = this.outputResources.getOrDefault(outputID, new ArrayList());
+        currentOutputResources.add(outputResource);
+        this.outputResources.put(outputID, currentOutputResources);
     }
 
 }
