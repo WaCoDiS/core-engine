@@ -5,7 +5,6 @@
  */
 package de.wacodis.coreengine.executor.process;
 
-import de.wacodis.core.models.AbstractResource;
 import java.util.concurrent.Callable;
 import org.slf4j.LoggerFactory;
 

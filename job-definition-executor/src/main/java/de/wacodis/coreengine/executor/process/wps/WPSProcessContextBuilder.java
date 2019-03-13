@@ -11,12 +11,13 @@ import de.wacodis.coreengine.executor.process.ProcessContext;
 import de.wacodis.coreengine.executor.process.ProcessContextBuilder;
 import java.util.List;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
+import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
 
 /**
  *  build ProcessContext for a Wacodis Job applicable for a WPSProcess
  * 
- * TODO: Handle MimeType
+ * TODO: Handle MimeType, handle outputs
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 public class WPSProcessContextBuilder implements ProcessContextBuilder {
@@ -41,7 +42,9 @@ public class WPSProcessContextBuilder implements ProcessContextBuilder {
             }        
         }
 
-        //TODO expected outputs?
+        //TODO variable outputs
+        ExpectedProcessOutput expectedOutput = new ExpectedProcessOutput("LiteralOutputData", DEFAULT_MIME_TYPE);
+        context.addExpectedOutput(expectedOutput);
 
         return context;
     }

@@ -27,6 +27,14 @@ public class WacodisJobExecutableStateChangedHandler implements ApplicationListe
     
     @Autowired
     private WacodisJobTaskStarter jobExecutor;
+
+    public WacodisJobTaskStarter getJobExecutor() {
+        return jobExecutor;
+    }
+
+    public void setJobExecutor(WacodisJobTaskStarter jobExecutor) {
+        this.jobExecutor = jobExecutor;
+    } 
     
     @Override
     public void onApplicationEvent(WacodisJobExecutableEvent event) {

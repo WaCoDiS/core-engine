@@ -8,6 +8,7 @@ package de.wacodis.coreengine.executor;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.configuration.WacodisJobExecutorConfiguration;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
+import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.wps.WPSProcess;
 import de.wacodis.coreengine.executor.process.WacodisJobExecutionOutput;
 import de.wacodis.coreengine.executor.process.WacodisJobExecutionTask;
@@ -34,9 +35,9 @@ public class WacodisJobTaskStarter {
     
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WacodisJobTaskStarter.class);
     
-    private WPSClientSession wpsClient;
-    private ExecutorService wacodisJobExecutionService;
-    private ProcessContextBuilder contextBuilder;
+    private final WPSClientSession wpsClient;
+    private final ExecutorService wacodisJobExecutionService;
+    private final ProcessContextBuilder contextBuilder;
     
     @Autowired
     private WacodisJobExecutorConfiguration executorConfig;
@@ -45,11 +46,27 @@ public class WacodisJobTaskStarter {
     private WebProcessingServiceConfiguration wpsConfig;
     
     
-    public void JobExecutor(){
+    public WacodisJobTaskStarter(){
         this.wpsClient = WPSClientSession.getInstance();
         this.wacodisJobExecutionService = Executors.newCachedThreadPool();
         this.contextBuilder = new WPSProcessContextBuilder();
     }
+
+    public void setExecutorConfig(WacodisJobExecutorConfiguration executorConfig) {
+        this.executorConfig = executorConfig;
+    }
+
+    public void setWpsConfig(WebProcessingServiceConfiguration wpsConfig) {
+        this.wpsConfig = wpsConfig;
+    }
+
+    public WacodisJobExecutorConfiguration getExecutorConfig() {
+        return executorConfig;
+    }
+
+    public WebProcessingServiceConfiguration getWpsConfig() {
+        return wpsConfig;
+    }    
     
     
     public void executeWacodisJob(WacodisJobWrapper job){
@@ -71,11 +88,5 @@ public class WacodisJobTaskStarter {
         this.wacodisJobExecutionService.shutdown();
         LOGGER.debug("shutdown executor service");
     }
-    
-    /*
-    @PostConstruct
-    private void initExecutor(){
-        
-    }*/
     
 }
