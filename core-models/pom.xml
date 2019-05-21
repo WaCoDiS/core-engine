@@ -107,6 +107,7 @@
                                     <url>https://raw.githubusercontent.com/WaCoDiS/apis-and-workflows/master/openapi/src/main/definitions/wacodis-schemas.yml</url>
                                     <unpack>false</unpack>
                                     <outputDirectory>${project.basedir}/src/main/resources/definitions</outputDirectory>
+                                    <skipCache>true</skipCache>
                                 </configuration>
                             </execution>                                   
                         </executions>
