@@ -16,6 +16,7 @@ import java.util.List;
  */
 public class ProcessOutput {
 
+    private String jobIdentifier;
     private Map<String, List<ResourceDescription>> outputResources;
 
     public ProcessOutput() {
@@ -46,6 +47,14 @@ public class ProcessOutput {
         List<ResourceDescription> currentOutputResources = this.outputResources.getOrDefault(outputID, new ArrayList());
         currentOutputResources.add(outputResource);
         this.outputResources.put(outputID, currentOutputResources);
+    }
+
+    public String getJobIdentifier() {
+        return jobIdentifier;
+    }
+
+    public void setJobIdentifier(String jobIdentifier) {
+        this.jobIdentifier = jobIdentifier;
     }
 
 }

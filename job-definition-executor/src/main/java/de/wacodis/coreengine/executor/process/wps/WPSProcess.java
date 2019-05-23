@@ -88,7 +88,6 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
 
         //get execute request
         Execute executeRequest = buildExecuteRequest(context);
-
         //submit execute request
         try {
             Object wpsOutput = this.wpsClient.execute(this.wpsURL, executeRequest, this.wpsVersion); //submit 
@@ -201,10 +200,13 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
     private Result parseWPSOutput(Object wpsOutput) throws ExecutionException {
         Result wpsProcessResult;
 
-        if (wpsOutput instanceof Result) {
+        if (wpsOutput instanceof StatusInfo) {
+            wpsProcessResult = ((StatusInfo) wpsOutput).getResult();
+            if(wpsProcessResult.getJobId() == null){
+                wpsProcessResult.setJobId(((StatusInfo) wpsOutput).getJobId());
+            }
+        } else if (wpsOutput instanceof Result) {
             wpsProcessResult = ((Result) wpsOutput);
-        } else if (wpsOutput instanceof StatusInfo) {
-            wpsProcessResult = (((StatusInfo) wpsOutput).getResult());
         } else if (wpsOutput instanceof ExceptionReport) {
             LOGGER.warn("wps output contained errors, raise ExecutionException");
             List<OWSExceptionElement> exceptions = ((ExceptionReport) wpsOutput).getExceptions();
@@ -217,7 +219,8 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
             throw new ExecutionException("unparsable response for wps process " + this.processID);
         }
 
-        LOGGER.debug("successfully parsed output of wps process " + this.processID);
+        LOGGER.debug(
+                "successfully parsed output of wps process " + this.processID);
 
         return wpsProcessResult;
     }
@@ -252,6 +255,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
             processOutput.addOutputResource(output.getId(), new ResourceDescription(outputResource, actualMimeType));
         }
 
+        processOutput.setJobIdentifier(wpsProcessResult.getJobId());
         LOGGER.debug("built process output for wps process " + this.processID);
 
         return processOutput;

@@ -75,6 +75,7 @@ public class WacodisJobExecutorIT {
         input1.setIdentifier("LiteralInputData");
         jobDef.addInputsItem(input1);
         jobDef.setProcessingTool(PROCESSTOOL);
+        jobDef.setProductCollection("testMosaic");
         AbstractResource input1Resource = new AbstractResource();
         input1Resource.setUrl("test input");
         

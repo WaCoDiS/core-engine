@@ -8,6 +8,7 @@ package de.wacodis.coreengine.executor;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.configuration.WacodisJobExecutorConfiguration;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
+import de.wacodis.coreengine.executor.messaging.NewProductPublisherChannel;
 import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.wps.WPSProcess;
 import de.wacodis.coreengine.executor.process.WacodisJobExecutionOutput;
@@ -34,13 +35,16 @@ public class WacodisJobTaskStarter {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WacodisJobTaskStarter.class);
     
-    private static final String DEFAULT_OUTPUT = "PRODUCT";
+    private static final String DEFAULT_OUTPUT = "PRODUCT"
     private static final String DEFAULT_MIMETYPE = "text/xml";
 
     private final WPSClientSession wpsClient;
     private final ExecutorService wacodisJobExecutionService;
     private final ProcessContextBuilder contextBuilder;
 
+    @Autowired
+    NewProductPublisherChannel newProductPublisher;
+    
     @Autowired
     private WacodisJobExecutorConfiguration executorConfig;
 
@@ -80,7 +84,7 @@ public class WacodisJobTaskStarter {
 
         LOGGER.info("execute Wacodis Job " + job.getJobDefinition().getId().toString() + " using processing tool " + toolProcessID + " and cleanUp tool " + cleanUpProcessID);
         LOGGER.debug("start thread for process " + job.getJobDefinition().getId().toString());
-        Future<WacodisJobExecutionOutput> jobExecutionResult = this.wacodisJobExecutionService.submit(new WacodisJobExecutionTask(toolProcess, toolContext, cleanUpProcess));
+        Future<WacodisJobExecutionOutput> jobExecutionResult = this.wacodisJobExecutionService.submit(new WacodisJobExecutionTask(toolProcess, toolContext, cleanUpProcess, job.getJobDefinition(), this.newProductPublisher));
     }
 
     @PreDestroy
