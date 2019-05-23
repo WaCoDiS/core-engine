@@ -35,7 +35,7 @@ public class WacodisJobTaskStarter {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WacodisJobTaskStarter.class);
     
-    private static final String DEFAULT_OUTPUT = "PRODUCT"
+    private static final String DEFAULT_OUTPUT = "PRODUCT";
     private static final String DEFAULT_MIMETYPE = "text/xml";
 
     private final WPSClientSession wpsClient;
