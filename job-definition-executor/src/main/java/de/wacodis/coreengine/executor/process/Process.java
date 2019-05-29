@@ -21,7 +21,7 @@ public interface Process {
      * @return 
      * @throws de.wacodis.coreengine.executor.exception.ExecutionException 
      */
-    ProcessOutput execute(ProcessContext context) throws ExecutionException;
+    ProcessOutputDescription execute(ProcessContext context) throws ExecutionException;
     
     /**
      * check if context object is applicable for the specific implementation of Process

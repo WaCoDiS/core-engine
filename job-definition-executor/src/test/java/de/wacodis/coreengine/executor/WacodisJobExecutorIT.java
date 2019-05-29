@@ -63,7 +63,6 @@ public class WacodisJobExecutorIT {
         //simulate event
         WacodisJobExecutableEvent event = new WacodisJobExecutableEvent(this, testJob, EvaluationStatus.EXECUTABLE);
         this.eventHandler.onApplicationEvent(event);
-        
     }
     
     

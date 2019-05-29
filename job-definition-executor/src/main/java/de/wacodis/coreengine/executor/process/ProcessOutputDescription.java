@@ -18,7 +18,7 @@ public class ProcessOutputDescription {
     private Set<String> outputIdentifiers;
 
     public ProcessOutputDescription() {
-        this.outputIdentifiers = new HashSet();
+        this.outputIdentifiers = new HashSet<>();
     }
 
     /**

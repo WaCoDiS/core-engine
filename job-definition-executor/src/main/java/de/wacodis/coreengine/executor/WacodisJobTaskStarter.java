@@ -9,7 +9,6 @@ import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.configuration.WacodisJobExecutorConfiguration;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
 import de.wacodis.coreengine.executor.messaging.NewProductPublisherChannel;
-import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.wps.WPSProcess;
 import de.wacodis.coreengine.executor.process.WacodisJobExecutionOutput;
 import de.wacodis.coreengine.executor.process.WacodisJobExecutionTask;
@@ -35,9 +34,8 @@ public class WacodisJobTaskStarter {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WacodisJobTaskStarter.class);
     
-    private static final String DEFAULT_OUTPUT = "PRODUCT";
-    private static final String DEFAULT_MIMETYPE = "text/xml";
-
+    private static final String[] DEFAULT_OUTPUTS = new String[] {"PRODUCT"};
+    
     private final WPSClientSession wpsClient;
     private final ExecutorService wacodisJobExecutionService;
     private final ProcessContextBuilder contextBuilder;
@@ -76,8 +74,7 @@ public class WacodisJobTaskStarter {
     public void executeWacodisJob(WacodisJobWrapper job) {
         String toolProcessID = job.getJobDefinition().getProcessingTool();
         String cleanUpProcessID = this.executorConfig.getCleanUpTool();
-        ExpectedProcessOutput expectedOutput = getDefaultExpectedOutput();
-        ProcessContext toolContext = this.contextBuilder.buildProcessContext(job, expectedOutput);
+        ProcessContext toolContext = this.contextBuilder.buildProcessContext(job, DEFAULT_OUTPUTS); //expect default outputs (as long as jobdefinition provides no output information)
 
         Process toolProcess = new WPSProcess(this.wpsClient, this.wpsConfig.getUri(), this.wpsConfig.getVersion(), toolProcessID);
         Process cleanUpProcess = new WPSProcess(this.wpsClient, this.wpsConfig.getUri(), this.wpsConfig.getVersion(), cleanUpProcessID);
@@ -91,10 +88,6 @@ public class WacodisJobTaskStarter {
     private void shutdownJobExecutionService() {
         this.wacodisJobExecutionService.shutdown();
         LOGGER.debug("shutdown executor service");
-    }
-
-    private ExpectedProcessOutput getDefaultExpectedOutput() {
-        return new ExpectedProcessOutput(DEFAULT_OUTPUT, DEFAULT_MIMETYPE);
     }
 
 }

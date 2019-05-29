@@ -26,7 +26,7 @@ public class WPSProcessContextBuilder implements ProcessContextBuilder {
     private static final String DEFAULT_MIME_TYPE = "text/xml";
 
     @Override
-    public ProcessContext buildProcessContext(WacodisJobWrapper job, ExpectedProcessOutput... expectedOutputs) {
+    public ProcessContext buildProcessContext(WacodisJobWrapper job, String... expectedProcessOutputIdentifiers) {
         ProcessContext context = new ProcessContext();
 
         context.setProcessID(job.getJobDefinition().getId().toString());
@@ -43,7 +43,7 @@ public class WPSProcessContextBuilder implements ProcessContextBuilder {
             }        
         }
    
-        context.setExpectedOutputs(Arrays.asList(expectedOutputs)); //set expected outputs
+        context.setExpectedOutputs(Arrays.asList(expectedProcessOutputIdentifiers)); //set expected outputs
 
         return context;
     }

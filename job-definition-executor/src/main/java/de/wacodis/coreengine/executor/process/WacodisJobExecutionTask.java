@@ -11,8 +11,6 @@ import de.wacodis.coreengine.executor.messaging.NewProductPublisherChannel;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import org.slf4j.LoggerFactory;
-import java.util.Map;
-import java.util.List;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
@@ -52,7 +50,7 @@ public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutp
         LOGGER.debug("new thread started for process " + toolContext.getProcessID() + ", toolProcess: " + toolProcess + " cleaUpProcess: " + cleanUpProcess);
 
         //execute processing tool
-        ProcessOutput toolOutput = this.toolProcess.execute(this.toolContext);
+        ProcessOutputDescription toolOutput = this.toolProcess.execute(this.toolContext);
         LOGGER.debug("Process: " + toolContext.getProcessID() + ",executed toolProcess " + toolProcess);
 
         if(this.newProductPublisher != null){
@@ -64,38 +62,43 @@ public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutp
         
         //execute cleanup tool
         ProcessContext cleanUpContext = buildCleanUpToolContext(toolOutput);
-        ProcessOutput cleanUpOutput = this.cleanUpProcess.execute(cleanUpContext);
+        //ProcessOutputDescription cleanUpOutput = this.cleanUpProcess.execute(cleanUpContext);
         LOGGER.debug("Process: " + toolContext.getProcessID() + ",executed cleanUpProcess " + cleanUpProcess);
 
-        WacodisJobExecutionOutput jobOutput = buildJobExecutionOutput(toolOutput, cleanUpOutput);
+        WacodisJobExecutionOutput jobOutput = buildJobExecutionOutput(toolOutput, null);
 
         LOGGER.info("Process: " + toolContext.getProcessID() + ",finished execution");
 
         return jobOutput;
     }
 
-    private ProcessContext buildCleanUpToolContext(ProcessOutput toolOutput) {
+    /**
+     * TODO
+     * @param toolOutputDescription
+     * @return 
+     */
+    private ProcessContext buildCleanUpToolContext(ProcessOutputDescription toolOutputDescription) {
         ProcessContext cleanUpContext = new ProcessContext();
-        
-        Map<String, List<ResourceDescription>> outputs = toolOutput.getOutputResources(); //use tool outputs as cleanUp inputs
-        cleanUpContext.setInputResources(outputs);
 
-        //ToDo: expected outputs cleanUp process
         return cleanUpContext;
     }
 
-    private WacodisJobExecutionOutput buildJobExecutionOutput(ProcessOutput toolOutput, ProcessOutput cleanUpOutput) {
+    /**
+     * TODO
+     * @param toolOutputDescription
+     * @param cleanUpOutputDescription
+     * @return 
+     */
+    private WacodisJobExecutionOutput buildJobExecutionOutput(ProcessOutputDescription toolOutputDescription, ProcessOutputDescription cleanUpOutputDescription) {
         return new WacodisJobExecutionOutput();
     }
     
-    private ProductDescription createMessagePayload(ProcessOutput output, WacodisJobDefinition jobDefinition){
+    private ProductDescription createMessagePayload(ProcessOutputDescription outputDescription, WacodisJobDefinition jobDefinition){
         ProductDescription payload = new ProductDescription();
-        
-        List<String> outputIdentifiers = new ArrayList<>(output.getOutputResources().keySet());
-        
-        payload.setJobIdentifier(output.getJobIdentifier());
+
+        payload.setJobIdentifier(outputDescription.getProcessIdentifier());
         payload.setProductCollection(jobDefinition.getProductCollection());
-        payload.setOutputIdentifiers(outputIdentifiers);
+        payload.setOutputIdentifiers(new ArrayList<>(outputDescription.getOutputIdentifiers()));
         
         return payload;
     }

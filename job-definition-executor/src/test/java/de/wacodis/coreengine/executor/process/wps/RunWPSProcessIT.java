@@ -10,8 +10,7 @@ import org.n52.geoprocessing.wps.client.WPSClientSession;
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.GetResource;
 import de.wacodis.coreengine.executor.exception.ExecutionException;
-import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
-import de.wacodis.coreengine.executor.process.ProcessOutput;
+import de.wacodis.coreengine.executor.process.ProcessOutputDescription;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
 
 /**
@@ -36,8 +35,8 @@ public class RunWPSProcessIT {
         System.out.println("context is valid: " +  validContext);
         
         System.out.println("execute wps process " +  wpsProcessID);
-        ProcessOutput processOutput = wpsProcess.execute(inputContext);
-        System.out.println("Outputs:" + System.lineSeparator() + processOutput.getOutputResources().toString());
+        ProcessOutputDescription outputDescription = wpsProcess.execute(inputContext);
+        System.out.println("Outputs:" + System.lineSeparator() + outputDescription.getOutputIdentifiers().toString());
     }
 
     private ProcessContext buildInputContext() {
@@ -68,7 +67,7 @@ public class RunWPSProcessIT {
         inputContext.addInputResource("REFERENCE_DATA_TYPE", new ResourceDescription(refDataType, "text/xml"));
         inputContext.addInputResource("REFERENCE_DATA", new ResourceDescription(refData, "text/xml"));
 
-        inputContext.addExpectedOutput(new ExpectedProcessOutput("PRODUCT", "text/xml"));
+        inputContext.addExpectedOutput("PRODUCT");
 
         inputContext.setProcessID("dummyLandCoverClassificationProcess");
 

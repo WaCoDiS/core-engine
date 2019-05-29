@@ -5,7 +5,6 @@
  */
 package de.wacodis.coreengine.executor.process;
 
-import de.wacodis.core.models.AbstractResource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +19,7 @@ import java.util.Map;
 public class ProcessContext {
 
     private Map<String, List<ResourceDescription>> inputResources;
-    private List<ExpectedProcessOutput> expectedOutputs;
+    private List<String> expectedOutputs;
     private String processID;
 
     public ProcessContext() {
@@ -63,19 +62,19 @@ public class ProcessContext {
     }
 
 
-    public List<ExpectedProcessOutput> getExpectedOutputs() {
+    public List<String> getExpectedOutputs() {
         return expectedOutputs;
     }
 
-    public void setExpectedOutputs(List<ExpectedProcessOutput> expectedOutputs) {
+    public void setExpectedOutputs(List<String> expectedOutputs) {
         this.expectedOutputs = expectedOutputs;
     }
 
-    public void addExpectedOutput(ExpectedProcessOutput expectedOutput) {
+    public void addExpectedOutput(String expectedOutput) {
         this.expectedOutputs.add(expectedOutput);
     }
 
-    public void removeExpectedOutput(ExpectedProcessOutput expectedOutput) {
+    public void removeExpectedOutput(String expectedOutput) {
         this.expectedOutputs.remove(expectedOutput);
     }
 
