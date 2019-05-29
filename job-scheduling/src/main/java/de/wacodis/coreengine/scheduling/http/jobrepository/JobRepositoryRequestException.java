@@ -5,11 +5,13 @@
  */
 package de.wacodis.coreengine.scheduling.http.jobrepository;
 
+import java.io.IOException;
+
 /**
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
-public class JobRepositoryRequestException extends Exception{
+public class JobRepositoryRequestException extends IOException {
 
     public JobRepositoryRequestException() {
     }
@@ -25,5 +27,5 @@ public class JobRepositoryRequestException extends Exception{
     public JobRepositoryRequestException(Throwable cause) {
         super(cause);
     }
-    
+
 }

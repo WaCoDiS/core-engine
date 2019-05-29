@@ -16,6 +16,6 @@ public interface JobRepositoryProvider {
 
     WacodisJobDefinition getJobDefinitionForId(String id) throws JobRepositoryRequestException;
 
-    List<WacodisJobDefinition> getJobDefinitions() throws JobRepositoryRequestException;
+    List<WacodisJobDefinition> getJobDefinitionList() throws JobRepositoryRequestException;
 
 }
