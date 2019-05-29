@@ -10,6 +10,8 @@ import java.util.Properties;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.quartz.QuartzProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,6 +54,12 @@ public class SchedulerConfig {
         factory.setQuartzProperties(properties);
         factory.setJobFactory(jobFactory);
         return factory;
+    }
+
+    @Bean
+    @ConfigurationProperties(prefix = "spring.datasource.core.quartz-data-source")
+    public DataSource primaryDataSource() {
+        return DataSourceBuilder.create().build();
     }
 
 }
