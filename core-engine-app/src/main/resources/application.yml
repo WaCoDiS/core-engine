@@ -1,11 +1,11 @@
 spring:
   application:
-    name: datasource-observer
+    name: core-engine
   profiles:
     active: docker
   scheduler:
      jobrepository:
-        uri: http://localhost:8090
+        uri: http://localhost:8081
   evaluator:
     matching:
         minimumOverlapPercentage: 50.0
@@ -15,12 +15,12 @@ spring:
     stream:
     #InputChannel
       bindings:
-        newDataEnvelope:
-          destination: wacodis.dataenvelope.creation
+        dataenvelope-creation:
+          destination: wacodis.test.dataenvelopes.new
           binder: wacodis_rabbit
           content-type: application/json
-        jobCreation:
-          destination: wacodis.jobs.creation
+        job-creation:
+          destination: wacodis.test.jobs.new
           binder: wacodis_rabbit
           content-type: application/json
       #MessageBroker
@@ -37,7 +37,7 @@ spring:
   datasource.core.quartz-data-source:
     name: quartzDataSource
     driverClassName: org.h2.Driver
-    url: jdbc:h2:file:./src/main/resources/h2_Jobstore
+    jdbc-url: jdbc:h2:file:./src/main/resources/h2_Jobstore
     username: sa
     password:
   quartz:

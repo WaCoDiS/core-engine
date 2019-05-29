@@ -15,7 +15,7 @@ import org.springframework.messaging.SubscribableChannel;
  */
 public interface JobDefinitionListenerChannel {
 
-    String JOB_CREATION_INPUT = "jobCreation";
+    String JOB_CREATION_INPUT = "job-creation";
 
     @Input(JOB_CREATION_INPUT)
     SubscribableChannel jobCreation();

@@ -15,7 +15,7 @@ import org.springframework.messaging.SubscribableChannel;
  */
 public interface DataEnvelopeListenerChannel {
         //reference to config f binding
-    	String DATAENVELOPE_INPUT = "newDataEnvelope";
+    	String DATAENVELOPE_INPUT = "dataenvelope-creation";
 
 	@Input(DATAENVELOPE_INPUT)
 	SubscribableChannel newDataEnvelope();
