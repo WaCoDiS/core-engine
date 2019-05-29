@@ -14,7 +14,7 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 
 /**
- * Interceptor for logging HTTP request
+ * Interceptor for logging HTTP requests
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
