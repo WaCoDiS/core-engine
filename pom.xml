@@ -29,7 +29,7 @@
         <quartz.version>2.3.0</quartz.version>
         <cron-utils.version>8.0.0</cron-utils.version>
         <h2.version>1.4.196</h2.version>
-        <wps-client-lib.version>1.0.2-SNAPSHOT</wps-client-lib.version>
+        <wps-client-lib.version>1.0.3</wps-client-lib.version>
     </properties>
     
     <dependencyManagement>

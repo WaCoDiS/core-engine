@@ -31,8 +31,8 @@ public class SchedulerConfig {
     @Autowired
     private QuartzProperties quartzProperties;
 
-    @Autowired
-    private DataSource dataSource;
+//    @Autowired
+//    private DataSource dataSource;
 
     /**
      * Creates a configured scheduler factory
@@ -50,7 +50,7 @@ public class SchedulerConfig {
 
         SchedulerFactoryBean factory = new SchedulerFactoryBean();
         factory.setOverwriteExistingJobs(true);
-        factory.setDataSource(dataSource);
+        factory.setDataSource(quartzDataSource());
         factory.setQuartzProperties(properties);
         factory.setJobFactory(jobFactory);
         return factory;
@@ -58,7 +58,7 @@ public class SchedulerConfig {
 
     @Bean
     @ConfigurationProperties(prefix = "spring.datasource.core.quartz-data-source")
-    public DataSource primaryDataSource() {
+    public DataSource quartzDataSource() {
         return DataSourceBuilder.create().build();
     }
 
