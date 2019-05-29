@@ -58,6 +58,8 @@ public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutp
             Message newProductMessage = MessageBuilder.withPayload(createMessagePayload(toolOutput, this.jobDefinition)).build();
             newProductPublisher.newProduct().send(newProductMessage);
             LOGGER.info("publish newProduct message " + System.lineSeparator() + newProductMessage.getPayload().toString());
+        }else{
+            LOGGER.debug("newProductPubliser is null, could not publish ProductDescription message for process " + toolContext.getProcessID());
         }
         
         //execute cleanup tool
