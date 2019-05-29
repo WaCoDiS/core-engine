@@ -5,23 +5,16 @@
  */
 package de.wacodis.coreengine.executor.process.wps;
 
-import de.wacodis.core.models.AbstractResource;
-import de.wacodis.core.models.GetResource;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
 import de.wacodis.coreengine.executor.exception.ExecutionException;
-import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ProcessContext;
-import de.wacodis.coreengine.executor.process.ProcessOutput;
 import de.wacodis.coreengine.executor.process.ProcessOutputDescription;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.n52.geoprocessing.wps.client.ExecuteRequestBuilder;
 import org.n52.geoprocessing.wps.client.WPSClientException;
@@ -31,7 +24,6 @@ import org.n52.geoprocessing.wps.client.model.ExceptionReport;
 import org.n52.geoprocessing.wps.client.model.InputDescription;
 import org.n52.geoprocessing.wps.client.model.LiteralInputDescription;
 import org.n52.geoprocessing.wps.client.model.OWSExceptionElement;
-import org.n52.geoprocessing.wps.client.model.OutputDescription;
 import org.n52.geoprocessing.wps.client.model.Process;
 import org.n52.geoprocessing.wps.client.model.Result;
 import org.n52.geoprocessing.wps.client.model.StatusInfo;
@@ -273,28 +265,6 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
 
         return exceptionTextBuilder.toString();
     }
-
-    /*
-    private ExpectedProcessOutput findExpectedProcessOutputByID(ProcessContext context, String id) {
-        ExpectedProcessOutput output = null;
-
-        for (ExpectedProcessOutput o : context.getExpectedOutputs()) {
-            if (o.getIdentifier().equals(id)) {
-                output = o;
-                break;
-            }
-        }
-
-        return output;
-    }
-
-    private String getExpectedMimeType(String outputID, ProcessContext context) {
-        //get expected mime type
-        ExpectedProcessOutput expectedOutput = findExpectedProcessOutputByID(context, outputID);
-        String expectedMimeType = expectedOutput.getMimeType();
-
-        return expectedMimeType;
-    }*/
 
     /**
      * get all identifiers of outputs included in a wps process result
