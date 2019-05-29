@@ -11,8 +11,6 @@ import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import static de.wacodis.coreengine.scheduling.configuration.WacodisSchedulingConstants.JOB_KEY_ID;
 import de.wacodis.coreengine.scheduling.http.jobrepository.JobRepositoryProvider;
 import de.wacodis.coreengine.scheduling.http.jobrepository.JobRepositoryRequestException;
-import java.util.UUID;
-import java.util.logging.Level;
 import org.joda.time.DateTime;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -35,7 +33,7 @@ public class WacodisJob extends QuartzJobBean {
 
     @Autowired
     private JobRepositoryProvider jobRepositoryProvider;
-
+    
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         LOGGER.info("Executing job: {}", context.getJobDetail().getKey());
@@ -44,7 +42,7 @@ public class WacodisJob extends QuartzJobBean {
         try {
             WacodisJobDefinition job = jobRepositoryProvider.getJobDefinitionForId(id);
             WacodisJobWrapper jobWrapper = new WacodisJobWrapper(job, new DateTime(context.getFireTime()));
-//            evaluator.evaluateJob(jobWrapper);
+            evaluator.evaluateJob(jobWrapper);
         } catch (JobRepositoryRequestException ex) {
             LOGGER.error(ex.getMessage());
             LOGGER.debug("Error while requesting JobDefinition.", ex);

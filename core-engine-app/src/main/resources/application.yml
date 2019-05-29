@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: datasource-observer
+  profiles:
+    active: docker
+  scheduler:
+     jobrepository:
+        uri: http://localhost:8090
+  evaluator:
+    matching:
+        minimumOverlapPercentage: 50.0
+    dataaccess:
+        uri: http://localhost:9000
+  cloud:
+    stream:
+    #InputChannel
+      bindings:
+        newDataEnvelope:
+          destination: wacodis.dataenvelope.creation
+          binder: wacodis_rabbit
+          content-type: application/json
+        jobCreation:
+          destination: wacodis.jobs.creation
+          binder: wacodis_rabbit
+          content-type: application/json
+      #MessageBroker
+      binders:
+        wacodis_rabbit:
+          type: rabbit
+          environment:
+            spring:
+              rabbitmq:
+                host: localhost
+                port: 5672
+                username: rabbitmq
+                password: rabbitmq
+  datasource.core.quartz-data-source:
+    name: quartzDataSource
+    driverClassName: org.h2.Driver
+    url: jdbc:h2:file:./src/main/resources/h2_Jobstore
+    username: sa
+    password:
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: always
+    properties:
+      org.quartz.jobStore:
+        dataSource: quartzDataSource
+        class: org.quartz.impl.jdbcjobstore.JobStoreTX
+        driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+        useProperties: true
+        misfireThreshold: 60000
+        tablePrefix: QRTZ_
+        isClustered: true

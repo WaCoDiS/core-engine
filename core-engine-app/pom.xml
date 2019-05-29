@@ -8,7 +8,7 @@
     </parent>
     <artifactId>core-engine-app</artifactId>
     <packaging>jar</packaging>
-    <name>Core Engine App</name>
+    <name>WaCoDiS Core Engine App</name>
     
     <dependencies>
         <dependency>
@@ -44,12 +44,6 @@
             <artifactId>spring-cloud-starter-config</artifactId>
         </dependency>
         
-        <!-- Test Scope -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
     
     <build>

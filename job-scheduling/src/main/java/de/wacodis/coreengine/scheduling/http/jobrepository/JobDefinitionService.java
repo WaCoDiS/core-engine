@@ -15,6 +15,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -39,42 +41,36 @@ public class JobDefinitionService implements JobRepositoryProvider {
 
     @Override
     public WacodisJobDefinition getJobDefinitionForId(String id) throws JobRepositoryRequestException {
-        ResponseEntity<WacodisJobDefinition> response = jobRepositoryService
-                .getForEntity(SINGLE_JOB_DEFINITION_ENDPOINT + id, WacodisJobDefinition.class);
-        WacodisJobDefinition def = null;
-
-        LOGGER.debug("GET request for JobDefinition {} was sent with response code: {}",
-                id, response.getStatusCode());
-
-        if (!response.hasBody()) {
-            throw new JobRepositoryRequestException("Requested JobDefinition resource "
-                    + id + "is not available. Reponse status code: "
-                    + response.getStatusCode());
+        try {
+            ResponseEntity<WacodisJobDefinition> response = jobRepositoryService
+                    .getForEntity(SINGLE_JOB_DEFINITION_ENDPOINT + id, WacodisJobDefinition.class);
+            return response.getBody();
+        } catch (HttpStatusCodeException ex) {
+            LOGGER.debug("GET request for JobDefinition {} returned status code: {}.",
+                    id, ex.getStatusCode());
+            throw new JobRepositoryRequestException("HTTP client error while requesting JobDefinition resource " + id, ex);
+        } catch (RestClientException ex) {
+            throw new JobRepositoryRequestException("Unexpected client error while requesting JobDefinition resource " + id, ex);
         }
-
-        return response.getBody();
     }
 
     @Override
-    public List<WacodisJobDefinition> getJobDefinitions() throws JobRepositoryRequestException {
-        ResponseEntity<List<WacodisJobDefinition>> response = jobRepositoryService
-                .exchange(
-                        JOB_DEFINITIONS_ENDPOINT,
-                        HttpMethod.GET,
-                        null,
-                        new ParameterizedTypeReference<List<WacodisJobDefinition>>() {
-                });
-
-        LOGGER.debug("GET request for JobDefinition was sent with response code: {}",
-                response.getStatusCode());
-
-        if (!response.hasBody()) {
-            throw new JobRepositoryRequestException("Requested JobDefinition resources "
-                    + "are not available. Reponse status code: "
-                    + response.getStatusCode());
+    public List<WacodisJobDefinition> getJobDefinitionList() throws JobRepositoryRequestException {
+        try {
+            ResponseEntity<List<WacodisJobDefinition>> response = jobRepositoryService
+                    .exchange(
+                            JOB_DEFINITIONS_ENDPOINT,
+                            HttpMethod.GET,
+                            null,
+                            new ParameterizedTypeReference<List<WacodisJobDefinition>>() {
+                    });
+            return response.getBody();
+        } catch (HttpStatusCodeException ex) {
+            LOGGER.debug("GET request for JobDefinitions returned status code: {}.",
+                    ex.getStatusCode());
+            throw new JobRepositoryRequestException("HTTP client error while requesting JobDefinition resources.", ex);
+        } catch (RestClientException ex) {
+            throw new JobRepositoryRequestException("Unexpected client error while requesting JobDefinition resources.", ex);
         }
-
-        return response.getBody();
     }
-
 }

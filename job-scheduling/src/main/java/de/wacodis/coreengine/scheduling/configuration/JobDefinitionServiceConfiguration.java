@@ -76,7 +76,6 @@ public class JobDefinitionServiceConfiguration {
 
         return builder
                 .rootUri(uri)
-                .rootUri("http://localhost:8081")
                 .additionalInterceptors(new RequestLoggingInterceptor())
                 .requestFactory(() -> new HttpComponentsClientHttpRequestFactory(httpClient))
                 .build();
