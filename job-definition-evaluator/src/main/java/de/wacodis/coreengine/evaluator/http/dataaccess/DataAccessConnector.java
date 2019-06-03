@@ -84,7 +84,7 @@ public class DataAccessConnector implements DataAccessResourceProvider {
         } catch (HttpStatusCodeException ex) {
             throw new java.io.IOException("Unable to retrieve resources from DataAccess (" + this.dataAccessRequest.getUrl().toString() + "), status code: " + ex.getStatusCode().toString() + System.lineSeparator() + "search body: " + searchBody.toString(), ex);
         } catch (RestClientException ex) {
-            throw new java.io.IOException("Could not retrieve resources from DataAccess (" + this.dataAccessRequest.getUrl().toString() + ") due to unexpected RestClientException", ex);
+            throw new java.io.IOException("Could not retrieve resources from DataAccess (" + this.dataAccessRequest.getUrl().toString() + ") due to unexpected RestClientException" + System.lineSeparator() + "search body: " + searchBody.toString(), ex);
         }
     }
 
