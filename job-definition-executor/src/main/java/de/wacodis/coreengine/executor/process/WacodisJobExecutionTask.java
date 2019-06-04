@@ -22,7 +22,7 @@ import org.springframework.messaging.support.MessageBuilder;
 public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutput> {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WacodisJobExecutionTask.class);
-    
+
     private final de.wacodis.coreengine.executor.process.Process toolProcess;
     private final de.wacodis.coreengine.executor.process.Process cleanUpProcess;
     private final ProcessContext toolContext;
@@ -36,38 +36,36 @@ public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutp
         this.jobDefinition = jobDefinition;
     }
 
-    public WacodisJobExecutionTask(Process toolProcess,  ProcessContext toolContext, Process cleanUpProcess, WacodisJobDefinition jobDefinition, NewProductPublisherChannel newProductPublisher) {
+    public WacodisJobExecutionTask(Process toolProcess, ProcessContext toolContext, Process cleanUpProcess, WacodisJobDefinition jobDefinition, NewProductPublisherChannel newProductPublisher) {
         this.toolProcess = toolProcess;
         this.cleanUpProcess = cleanUpProcess;
         this.toolContext = toolContext;
         this.jobDefinition = jobDefinition;
         this.newProductPublisher = newProductPublisher;
     }
-    
-    
+
     @Override
     public WacodisJobExecutionOutput call() throws Exception {
         LOGGER.debug("new thread started for process " + toolContext.getProcessID() + ", toolProcess: " + toolProcess + " cleaUpProcess: " + cleanUpProcess);
 
         //execute processing tool
-        ProcessOutputDescription toolOutput = this.toolProcess.execute(this.toolContext);
+        ProcessOutputDescription toolOutputDescription = this.toolProcess.execute(this.toolContext);
         LOGGER.debug("Process: " + toolContext.getProcessID() + ",executed toolProcess " + toolProcess);
 
-        if(this.newProductPublisher != null){
-            //publish newProduct message via broker
-            Message newProductMessage = MessageBuilder.withPayload(createMessagePayload(toolOutput, this.jobDefinition)).build();
-            newProductPublisher.newProduct().send(newProductMessage);
-            LOGGER.info("publish newProduct message " + System.lineSeparator() + newProductMessage.getPayload().toString());
-        }else{
-            LOGGER.debug("newProductPubliser is null, could not publish ProductDescription message for process " + toolContext.getProcessID());
+        //publish newProduct message
+        if (this.newProductPublisher != null) {
+            publishNewProductMessage(this.jobDefinition, toolOutputDescription);
+        } else {
+            LOGGER.error("newProductPubliser is null, could not publish ProductDescription message for process " + toolContext.getProcessID());
         }
-        
-        //execute cleanup tool
-        ProcessContext cleanUpContext = buildCleanUpToolContext(toolOutput);
-        //ProcessOutputDescription cleanUpOutput = this.cleanUpProcess.execute(cleanUpContext);
+
+        //execute cleanup tool, TODO
+        ProcessContext cleanUpContext = buildCleanUpToolContext(toolOutputDescription);
+        ProcessOutputDescription cleanUpOutput = this.cleanUpProcess.execute(cleanUpContext);
         LOGGER.debug("Process: " + toolContext.getProcessID() + ",executed cleanUpProcess " + cleanUpProcess);
 
-        WacodisJobExecutionOutput jobOutput = buildJobExecutionOutput(toolOutput, null);
+        //build internal output, ToDo
+        WacodisJobExecutionOutput jobOutput = buildJobExecutionOutput(toolOutputDescription, null);
 
         LOGGER.info("Process: " + toolContext.getProcessID() + ",finished execution");
 
@@ -76,8 +74,9 @@ public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutp
 
     /**
      * TODO
+     *
      * @param toolOutputDescription
-     * @return 
+     * @return
      */
     private ProcessContext buildCleanUpToolContext(ProcessOutputDescription toolOutputDescription) {
         ProcessContext cleanUpContext = new ProcessContext();
@@ -87,21 +86,29 @@ public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutp
 
     /**
      * TODO
+     *
      * @param toolOutputDescription
      * @param cleanUpOutputDescription
-     * @return 
+     * @return
      */
     private WacodisJobExecutionOutput buildJobExecutionOutput(ProcessOutputDescription toolOutputDescription, ProcessOutputDescription cleanUpOutputDescription) {
         return new WacodisJobExecutionOutput();
     }
-    
-    private ProductDescription createMessagePayload(ProcessOutputDescription outputDescription, WacodisJobDefinition jobDefinition){
+
+    private void publishNewProductMessage(WacodisJobDefinition jobDefinition, ProcessOutputDescription toolOutputDescription) {
+        //publish newProduct message via broker
+        Message newProductMessage = MessageBuilder.withPayload(createMessagePayload(toolOutputDescription, this.jobDefinition)).build();
+        newProductPublisher.newProduct().send(newProductMessage);
+        LOGGER.info("publish newProduct message " + System.lineSeparator() + newProductMessage.getPayload().toString());
+    }
+
+    private ProductDescription createMessagePayload(ProcessOutputDescription outputDescription, WacodisJobDefinition jobDefinition) {
         ProductDescription payload = new ProductDescription();
 
         payload.setJobIdentifier(outputDescription.getProcessIdentifier());
         payload.setProductCollection(jobDefinition.getProductCollection());
         payload.setOutputIdentifiers(new ArrayList<>(outputDescription.getOutputIdentifiers()));
-        
+
         return payload;
     }
 }

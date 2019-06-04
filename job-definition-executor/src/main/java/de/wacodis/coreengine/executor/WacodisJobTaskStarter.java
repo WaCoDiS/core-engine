@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import de.wacodis.coreengine.executor.process.Process;
 import de.wacodis.coreengine.executor.process.ProcessContext;
 import de.wacodis.coreengine.executor.process.ProcessContextBuilder;
+import de.wacodis.coreengine.executor.process.dummy.EmptyDummyProcess;
 import de.wacodis.coreengine.executor.process.wps.WPSProcessContextBuilder;
 
 /**
@@ -77,7 +78,7 @@ public class WacodisJobTaskStarter {
         ProcessContext toolContext = this.contextBuilder.buildProcessContext(job, DEFAULT_OUTPUTS); //expect default outputs (as long as jobdefinition provides no output information)
 
         Process toolProcess = new WPSProcess(this.wpsClient, this.wpsConfig.getUri(), this.wpsConfig.getVersion(), toolProcessID);
-        Process cleanUpProcess = new WPSProcess(this.wpsClient, this.wpsConfig.getUri(), this.wpsConfig.getVersion(), cleanUpProcessID);
+        Process cleanUpProcess = new EmptyDummyProcess(); //ToDo implement correct clean up process
 
         LOGGER.info("execute Wacodis Job " + job.getJobDefinition().getId().toString() + " using processing tool " + toolProcessID + " and cleanUp tool " + cleanUpProcessID);
         LOGGER.debug("start thread for process " + job.getJobDefinition().getId().toString());
