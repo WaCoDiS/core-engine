@@ -3,20 +3,14 @@ spring:
     name: core-engine
   profiles:
     active: docker
-  scheduler:
-     jobrepository:
-        uri: http://localhost:8081
-  evaluator:
-    matching:
-        minimumOverlapPercentage: 50.0
-    dataaccess:
-        uri: http://localhost:9000
   cloud:
+    config:
+      url: http://localhost:8888
     stream:
     #InputChannel
       bindings:
-        dataenvelope-creation:
-          destination: wacodis.test.dataenvelopes.new
+        input-data-envelope:
+          destination: wacodis.test.data.available
           binder: wacodis_rabbit
           content-type: application/json
         job-creation:
@@ -27,17 +21,24 @@ spring:
       binders:
         wacodis_rabbit:
           type: rabbit
-          environment:
-            spring:
-              rabbitmq:
-                host: localhost
-                port: 5672
-                username: rabbitmq
-                password: rabbitmq
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: rabbitmq
+    password: rabbitmq
+  scheduler:
+     jobrepository:
+        uri: http://localhost:8081
+  evaluator:
+    matching:
+        minimumOverlapPercentage: 50.0
+    dataaccess:
+        uri: http://localhost:8082
   datasource.core.quartz-data-source:
     name: quartzDataSource
     driverClassName: org.h2.Driver
-    jdbc-url: jdbc:h2:file:./src/main/resources/h2_Jobstore
+    # jdbc-url: jdbc:h2:file:./src/main/resources/h2_Jobstore
+    jdbc-url: jdbc:h2:file:/usr/share/wacodis/data/h2_wacodis_core_jobs
     username: sa
     password:
   quartz:
