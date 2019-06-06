@@ -46,10 +46,11 @@ public class JobDefinitionService implements JobRepositoryProvider {
                     .getForEntity(SINGLE_JOB_DEFINITION_ENDPOINT + id, WacodisJobDefinition.class);
             return response.getBody();
         } catch (HttpStatusCodeException ex) {
-            LOGGER.debug("GET request for JobDefinition {} returned status code: {}.",
+            LOGGER.error("GET request for JobDefinition {} returned status code: {}.",
                     id, ex.getStatusCode());
             throw new JobRepositoryRequestException("HTTP client error while requesting JobDefinition resource " + id, ex);
         } catch (RestClientException ex) {
+            LOGGER.error(ex.getMessage());
             throw new JobRepositoryRequestException("Unexpected client error while requesting JobDefinition resource " + id, ex);
         }
     }
@@ -66,10 +67,11 @@ public class JobDefinitionService implements JobRepositoryProvider {
                     });
             return response.getBody();
         } catch (HttpStatusCodeException ex) {
-            LOGGER.debug("GET request for JobDefinitions returned status code: {}.",
+            LOGGER.error("GET request for JobDefinitions returned status code: {}.",
                     ex.getStatusCode());
             throw new JobRepositoryRequestException("HTTP client error while requesting JobDefinition resources.", ex);
         } catch (RestClientException ex) {
+            LOGGER.error(ex.getMessage());
             throw new JobRepositoryRequestException("Unexpected client error while requesting JobDefinition resources.", ex);
         }
     }
