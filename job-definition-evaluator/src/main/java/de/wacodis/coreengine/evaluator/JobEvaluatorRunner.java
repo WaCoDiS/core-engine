@@ -80,31 +80,38 @@ public class JobEvaluatorRunner {
     }
 
     /**
-     *
-     * @param job
-     * @return
+     * Evaluates a job but does not inform the input tracker on execution status
+     * changes
+     * 
+     * @param job the job
+     * @return info on the executable state
      */
     public EvaluationStatus evaluateJob(WacodisJobWrapper job) {
+        return this.evaluateJob(job, false);
+    }
+
+    /**
+     * Evaluates a job executability
+     * 
+     * @param job the job
+     * @param addJobToInputTracker if the input tracker should be informed about the execution status
+     * @return info on the executable state
+     */
+    public EvaluationStatus evaluateJob(WacodisJobWrapper job, boolean addJobToInputTracker) {        
         try {
             DataAccessResourceSearchBody query = generateDataAccessQuery(job);
             Map<String, List<AbstractResource>> searchResult = this.dataAccessConnector.searchResources(query);
             boolean isExecutable = editJobWrapperInputs(searchResult, job);
 
+            if (addJobToInputTracker) {
+                this.inputTracker.addJob(job);
+            }
+            
             return (isExecutable) ? EvaluationStatus.EXECUTABLE : EvaluationStatus.NOTEXECUTABLE;
         } catch (IOException ex) {
             LOGGER.error("Wacodis-Job could not be evaluated, unable to retrieve resources from data-access, ", ex);
             return EvaluationStatus.UNEVALUATED;
         }
-    }
-
-    public EvaluationStatus evaluateJob(WacodisJobWrapper job, boolean addJobToInputTracker) {
-        EvaluationStatus status = evaluateJob(job);
-
-        if (addJobToInputTracker) {
-            this.inputTracker.addJob(job);
-        }
-
-        return status;
     }
 
     private Map<String, List<AbstractResource>> retrieveAvailableResourcesFromDataAccess(WacodisJobWrapper job) throws IOException {

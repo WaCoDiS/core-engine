@@ -42,7 +42,7 @@ public class WacodisJob extends QuartzJobBean {
         try {
             WacodisJobDefinition job = jobRepositoryProvider.getJobDefinitionForId(id);
             WacodisJobWrapper jobWrapper = new WacodisJobWrapper(job, new DateTime(context.getFireTime()));
-            evaluator.evaluateJob(jobWrapper);
+            evaluator.evaluateJob(jobWrapper, true);
         } catch (JobRepositoryRequestException ex) {
             LOGGER.error(ex.getMessage());
             LOGGER.debug("Error while requesting JobDefinition.", ex);
