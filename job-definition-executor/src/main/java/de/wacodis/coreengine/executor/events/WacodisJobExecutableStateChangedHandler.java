@@ -12,6 +12,7 @@ import org.springframework.context.ApplicationListener;
 import de.wacodis.coreengine.evaluator.WacodisJobExecutableEvent;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.WacodisJobTaskStarter;
+import javax.annotation.PostConstruct;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -21,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 @Component
-public class WacodisJobExecutableStateChangedHandler implements ApplicationListener<WacodisJobExecutableEvent>{
+public class WacodisJobExecutableStateChangedHandler implements ApplicationListener<WacodisJobExecutableEvent> {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WacodisJobExecutableStateChangedHandler.class);
     
@@ -34,7 +35,12 @@ public class WacodisJobExecutableStateChangedHandler implements ApplicationListe
 
     public void setJobExecutor(WacodisJobTaskStarter jobExecutor) {
         this.jobExecutor = jobExecutor;
-    } 
+    }
+    
+    @PostConstruct
+    public void init() {
+        LOGGER.info("started {}", getClass().getName());
+    }
     
     @Override
     public void onApplicationEvent(WacodisJobExecutableEvent event) {

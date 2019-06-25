@@ -17,6 +17,10 @@
         </dependency>
         <dependency>
             <groupId>de.wacodis</groupId>
+            <artifactId>job-definition-executor</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.wacodis</groupId>
             <artifactId>job-scheduling</artifactId>
         </dependency>
         <dependency>
