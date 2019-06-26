@@ -25,6 +25,10 @@ spring:
           destination: wacodis.test.tools.execute
           binder: wacodis_rabbit
           content-type: application/json
+        toolFailure:
+          destination: wacodis.test.tools.failure
+          binder: wacodis_rabbit
+          content-type: application/json
       #MessageBroker
       binders:
         wacodis_rabbit:
