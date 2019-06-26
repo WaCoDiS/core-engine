@@ -72,6 +72,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         }
 
         this.wpsProcessDescription = this.wpsClient.getProcessDescription(this.wpsURL, this.processID, this.wpsVersion);
+        LOGGER.info("retrieved process description {}", this.wpsProcessDescription);
         this.isInitialized = true;
     }
 
@@ -83,11 +84,14 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
             init();
         }
 
+        LOGGER.info("Building WPS Execute request");
         //get execute request
         Execute executeRequest = buildExecuteRequest(context);
         //submit execute request
         try {
+            LOGGER.info("Executing request: {}", executeRequest);
             Object wpsOutput = this.wpsClient.execute(this.wpsURL, executeRequest, this.wpsVersion); //submit 
+            LOGGER.info("Processing result: {}", wpsOutput);
             Result wpsProcessResult = parseWPSOutput(wpsOutput);
             ProcessOutputDescription outputDescription = buildProcessOutput(context, wpsProcessResult);
 
@@ -180,6 +184,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
     private void connectWPS() {
         try {
             this.isConnected = this.wpsClient.connect(this.wpsURL, this.wpsVersion);
+            LOGGER.info("Connected to WPS at {}", this.wpsURL);
         } catch (WPSClientException ex) {
             this.isConnected = false;
             throw new IllegalStateException("could not connect to web processing service with url: " + this.wpsURL, ex);
