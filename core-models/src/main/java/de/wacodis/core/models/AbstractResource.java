@@ -15,7 +15,7 @@ import javax.validation.constraints.*;
 /**
  * AbstractResource
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-05-29T10:21:33.264+02:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-06-26T11:36:14.192+02:00[Europe/Berlin]")
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "method", visible = true)
 @JsonSubTypes({

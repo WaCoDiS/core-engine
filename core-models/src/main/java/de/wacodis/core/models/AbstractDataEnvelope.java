@@ -18,9 +18,9 @@ import javax.validation.constraints.*;
 /**
  * AbstractDataEnvelope
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-05-29T10:21:33.264+02:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-06-26T11:36:14.192+02:00[Europe/Berlin]")
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "sourceType", visible = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "sourceType", visible = true)
 @JsonSubTypes({
   @JsonSubTypes.Type(value = SensorWebDataEnvelope.class, name = "SensorWebDataEnvelope"),
   @JsonSubTypes.Type(value = CopernicusDataEnvelope.class, name = "CopernicusDataEnvelope"),

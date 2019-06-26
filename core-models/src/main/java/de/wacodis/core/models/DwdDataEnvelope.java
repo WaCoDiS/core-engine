@@ -17,7 +17,7 @@ import javax.validation.constraints.*;
 /**
  * DwdDataEnvelope
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-05-29T10:21:33.264+02:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-06-26T11:36:14.192+02:00[Europe/Berlin]")
 
 public class DwdDataEnvelope extends AbstractDataEnvelope implements Serializable {
   private static final long serialVersionUID = 1L;
