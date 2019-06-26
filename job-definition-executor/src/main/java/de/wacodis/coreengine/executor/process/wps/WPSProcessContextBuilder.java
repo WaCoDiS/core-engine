@@ -14,6 +14,8 @@ import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
 import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
 import java.util.Arrays;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *  build ProcessContext for a Wacodis Job applicable for a WPSProcess
@@ -22,6 +24,8 @@ import java.util.Arrays;
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 public class WPSProcessContextBuilder implements ProcessContextBuilder {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(WPSProcessContextBuilder.class);
     
     private static final String DEFAULT_MIME_TYPE = "text/xml";
 
@@ -34,10 +38,12 @@ public class WPSProcessContextBuilder implements ProcessContextBuilder {
         List<InputHelper> jobInputs = job.getInputs();
         
         for(InputHelper jobInput : jobInputs){ //set inputs
+            LOG.info("Processing input: {}", jobInput);
             if(jobInput.hasResource()){
                 String mimeType = DEFAULT_MIME_TYPE; //TODO handle mimeTypes
                 
                 for(AbstractResource resource : jobInput.getResource().get()){
+                    LOG.info("Setting input resource: {} - {}, {}", jobInput.getSubsetDefinitionIdentifier(), resource, mimeType);
                     context.setInputResource(jobInput.getSubsetDefinitionIdentifier(), new ResourceDescription(resource, mimeType));
                 }  
             }        

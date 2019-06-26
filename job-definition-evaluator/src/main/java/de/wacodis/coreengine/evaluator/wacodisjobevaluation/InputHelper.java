@@ -97,4 +97,10 @@ public class InputHelper {
     public String getSubsetDefinitionIdentifier(){
         return this.subsetDefinition.getIdentifier();
     }
+
+    @Override
+    public String toString() {
+        return "InputHelper{" + "subsetDefinition=" + subsetDefinition + ", resourceAvailable=" + resourceAvailable + ", resource=" + resource + '}';
+    }
+    
 }

@@ -7,9 +7,11 @@ package de.wacodis.coreengine.executor.process;
 
 import de.wacodis.core.models.ProductDescription;
 import de.wacodis.core.models.WacodisJobDefinition;
+import de.wacodis.core.models.WacodisJobExecution;
 import de.wacodis.coreengine.executor.messaging.NewProductPublisherChannel;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
+import org.joda.time.DateTime;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -48,6 +50,9 @@ public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutp
     public WacodisJobExecutionOutput call() throws Exception {
         LOGGER.debug("new thread started for process " + toolContext.getProcessID() + ", toolProcess: " + toolProcess + " cleaUpProcess: " + cleanUpProcess);
 
+        // publish message for execution start
+        publishNewToolExecution(this.jobDefinition);
+        
         //execute processing tool
         ProcessOutputDescription toolOutputDescription = this.toolProcess.execute(this.toolContext);
         LOGGER.debug("Process: " + toolContext.getProcessID() + ",executed toolProcess " + toolProcess);
@@ -100,6 +105,17 @@ public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutp
         Message newProductMessage = MessageBuilder.withPayload(createMessagePayload(toolOutputDescription, this.jobDefinition)).build();
         newProductPublisher.newProduct().send(newProductMessage);
         LOGGER.info("publish newProduct message " + System.lineSeparator() + newProductMessage.getPayload().toString());
+    }
+    
+    private void publishNewToolExecution(WacodisJobDefinition jobDefinition) {
+        //publish newProduct message via broker
+        WacodisJobExecution msg = new WacodisJobExecution();
+        msg.setJobIdentifier(jobDefinition.getId().toString());
+        msg.setCreated(new DateTime());
+        msg.setProcessingTool(jobDefinition.getProcessingTool());
+        msg.setProductCollection(jobDefinition.getProductCollection());
+        newProductPublisher.toolExecution().send(MessageBuilder.withPayload(msg).build());
+        LOGGER.info("publish toolExecution message " + System.lineSeparator() + msg.toString());
     }
 
     private ProductDescription createMessagePayload(ProcessOutputDescription outputDescription, WacodisJobDefinition jobDefinition) {

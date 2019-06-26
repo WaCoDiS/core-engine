@@ -15,7 +15,12 @@ import org.springframework.messaging.MessageChannel;
 public interface NewProductPublisherChannel {
 
     String NEW_PRODUCT = "newProduct";
+    String TOOL_EXECUTION = "toolExecution";
 
     @Output(NEW_PRODUCT)
     MessageChannel newProduct();
+    
+    @Output(TOOL_EXECUTION)
+    MessageChannel toolExecution();
+    
 }
