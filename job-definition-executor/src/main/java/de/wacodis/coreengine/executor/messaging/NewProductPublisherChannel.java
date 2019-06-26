@@ -16,11 +16,15 @@ public interface NewProductPublisherChannel {
 
     String NEW_PRODUCT = "newProduct";
     String TOOL_EXECUTION = "toolExecution";
+    String TOOL_FAILURE = "toolFailure";
 
     @Output(NEW_PRODUCT)
     MessageChannel newProduct();
     
     @Output(TOOL_EXECUTION)
     MessageChannel toolExecution();
+    
+    @Output(TOOL_FAILURE)
+    MessageChannel toolFailure();
     
 }

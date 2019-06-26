@@ -8,6 +8,8 @@ package de.wacodis.coreengine.executor.process;
 import de.wacodis.core.models.ProductDescription;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobExecution;
+import de.wacodis.core.models.WacodisJobFailed;
+import de.wacodis.coreengine.executor.exception.ExecutionException;
 import de.wacodis.coreengine.executor.messaging.NewProductPublisherChannel;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
@@ -54,8 +56,20 @@ public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutp
         publishNewToolExecution(this.jobDefinition);
         
         //execute processing tool
-        ProcessOutputDescription toolOutputDescription = this.toolProcess.execute(this.toolContext);
-        LOGGER.debug("Process: " + toolContext.getProcessID() + ",executed toolProcess " + toolProcess);
+        ProcessOutputDescription toolOutputDescription;
+        try {
+            toolOutputDescription = this.toolProcess.execute(this.toolContext);
+            LOGGER.debug("Process: " + toolContext.getProcessID() + ",executed toolProcess " + toolProcess);
+        } catch (ExecutionException e) {
+            LOGGER.warn("Process execution failed", e.getMessage());
+            LOGGER.debug(e.getMessage(), e);
+            
+            // publish message with the failure
+            publishToolFailure(this.jobDefinition, e.getMessage());
+        
+            throw e;
+        }
+        
 
         //publish newProduct message
         if (this.newProductPublisher != null) {
@@ -116,6 +130,16 @@ public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutp
         msg.setProductCollection(jobDefinition.getProductCollection());
         newProductPublisher.toolExecution().send(MessageBuilder.withPayload(msg).build());
         LOGGER.info("publish toolExecution message " + System.lineSeparator() + msg.toString());
+    }
+    
+    private void publishToolFailure(WacodisJobDefinition jobDefinition, String failureMessage) {
+        //publish newProduct message via broker
+        WacodisJobFailed msg = new WacodisJobFailed();
+        msg.setJobIdentifier(jobDefinition.getId().toString());
+        msg.setCreated(new DateTime());
+        msg.setReason(failureMessage);
+        newProductPublisher.toolFailure().send(MessageBuilder.withPayload(msg).build());
+        LOGGER.info("publish toolFailure message " + System.lineSeparator() + msg.toString());
     }
 
     private ProductDescription createMessagePayload(ProcessOutputDescription outputDescription, WacodisJobDefinition jobDefinition) {
