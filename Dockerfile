@@ -10,6 +10,17 @@ FROM maven:3.5-jdk-8-alpine as build
 WORKDIR /app
 
 COPY --from=clone /app/wps-client-lib /app/wps-client-lib
+
+# only retrieve deps
+COPY ./pom.xml /app/core-engine/pom.xml
+COPY ./job-scheduling/pom.xml /app/core-engine/job-scheduling/
+COPY ./job-definition-evaluator/pom.xml /app/core-engine/job-definition-evaluator/
+COPY ./job-definition-executor/pom.xml /app/core-engine/job-definition-executor/
+COPY ./core-models/pom.xml /app/core-engine/core-models/
+COPY ./core-engine-app/pom.xml /app/core-engine/core-engine-app/
+COPY ./core-engine-utils/pom.xml /app/core-engine/core-engine-utils/
+RUN mvn -f /app/core-engine/pom.xml dependency:go-offline --non-recursive && mvn -f /app/wps-client-lib/pom.xml dependency:go-offline
+
 COPY . /app/core-engine/
 
 RUN mvn -f ./wps-client-lib/pom.xml clean install -DskipTests \

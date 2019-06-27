@@ -131,23 +131,32 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
             if (!isInputOptional(processInput) && availableResources == null) {
                 throw new IllegalArgumentException("cannot set inputs: no resource available for input " + processInput.getId() + " of process " + this.wpsProcessDescription.getId());
             }
+            
+            int addedOccurs = 0;
 
             //set wpsClient input
             //ToDo properley handle body of PostResource
             if (availableResources != null) {
 
                 for (ResourceDescription resource : availableResources) {
+                    
+                    if (addedOccurs >= processInput.getMaxOccurs()) {
+                        LOGGER.info("Max occurs ({}) for input {} reached. Skipping other candidates");
+                        break;
+                    }
 
                     mimeType = resource.getMimeType();
 
                     if (processInput instanceof LiteralInputDescription) { //Literal Input
                         //set input, use url as value
                         executeRequestBuilder.addLiteralData(inputID, resource.getResource().getUrl(), "", "", mimeType); //input id, value, schema, encoding, mime type
+                        addedOccurs++;
                     } else if (processInput instanceof ComplexInputDescription) { // Complex Input
                         //Complex Input (always as reference?)
                         try {
                             //set input, use url as value
                             executeRequestBuilder.addComplexDataReference(inputID, resource.getResource().getUrl(), GML3SCHEMA, null, mimeType); //ToDo make schema variable
+                            addedOccurs++;
                         } catch (MalformedURLException ex) {
                             throw new IllegalArgumentException("cannot add complex input " + inputID + " as reference, invalid reference, malformed url " + resource.getResource().getUrl(), ex);
                         }
