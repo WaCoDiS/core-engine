@@ -141,7 +141,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
                 for (ResourceDescription resource : availableResources) {
                     
                     if (addedOccurs >= processInput.getMaxOccurs()) {
-                        LOGGER.info("Max occurs ({}) for input {} reached. Skipping other candidates");
+                        LOGGER.info("Max occurs ({}) for input {} reached. Skipping other candidates", processInput.getMaxOccurs(), processInput.getId());
                         break;
                     }
 
@@ -180,6 +180,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         for (String expectedOutput : expectedOutputs) {
             // TODO parse the mime type from the process description
             executeRequestBuilder.setResponseDocument(expectedOutput, "", "", "image/geotiff" /*mime type*/); //output type? mime type?
+            executeRequestBuilder.setAsReference(expectedOutput, true);
         }
     }
 
