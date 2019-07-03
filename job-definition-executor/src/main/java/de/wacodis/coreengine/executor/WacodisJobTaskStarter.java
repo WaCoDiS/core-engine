@@ -24,9 +24,6 @@ import de.wacodis.coreengine.executor.process.ProcessContext;
 import de.wacodis.coreengine.executor.process.ProcessContextBuilder;
 import de.wacodis.coreengine.executor.process.dummy.EmptyDummyProcess;
 import de.wacodis.coreengine.executor.process.wps.WPSProcessContextBuilder;
-import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
 
 /**
@@ -38,7 +35,7 @@ public class WacodisJobTaskStarter {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WacodisJobTaskStarter.class);
     
-    private static final String[] DEFAULT_OUTPUTS = new String[] {"PRODUCT"};
+    private static final String[] DEFAULT_OUTPUTS = new String[] {"PRODUCT", "METADATA"};
     
     private final WPSClientSession wpsClient;
     private final ExecutorService wacodisJobExecutionService;

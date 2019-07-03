@@ -178,9 +178,15 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
      */
     private void setWPSOutputs(List<String> expectedOutputs, ExecuteRequestBuilder executeRequestBuilder) {
         for (String expectedOutput : expectedOutputs) {
-            // TODO parse the mime type from the process description
-            executeRequestBuilder.setResponseDocument(expectedOutput, "", "", "image/geotiff" /*mime type*/); //output type? mime type?
-            executeRequestBuilder.setAsReference(expectedOutput, true);
+            // METADATA is special. TODO: treat it in a generic way
+            if ("METADATA".equalsIgnoreCase(expectedOutput)) {
+                executeRequestBuilder.setResponseDocument(expectedOutput, "", "", "text/json" /*mime type*/); //output type? mime type?
+            } else {
+                // TODO parse the mime type from the process description
+                executeRequestBuilder.setResponseDocument(expectedOutput, "", "", "image/geotiff" /*mime type*/); //output type? mime type?
+                executeRequestBuilder.setAsReference(expectedOutput, true);
+            }
+            
         }
     }
 
