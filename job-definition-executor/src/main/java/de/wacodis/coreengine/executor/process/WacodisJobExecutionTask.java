@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
+import java.util.stream.Collectors;
 
 /**
  * execute wacodis job, 1) execute processing tool, 2) execute cleanUp tool
@@ -119,7 +120,10 @@ public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutp
         ProductDescription msg = new ProductDescription();
         msg.setJobIdentifier(outputDescription.getProcessIdentifier());
         msg.setProductCollection(jobDefinition.getProductCollection());
-        msg.setOutputIdentifiers(new ArrayList<>(outputDescription.getOutputIdentifiers()));
+        // do not publish the "METADATA" output
+        msg.setOutputIdentifiers(outputDescription.getOutputIdentifiers().stream()
+                .filter(i -> !"METADATA".equalsIgnoreCase(i))
+                .collect(Collectors.toList()));
         Message newProductMessage = MessageBuilder.withPayload(msg).build();
         toolMessagePublisher.toolFinished().send(newProductMessage);
         LOGGER.info("publish toolFinished message " + System.lineSeparator() + newProductMessage.getPayload().toString());
