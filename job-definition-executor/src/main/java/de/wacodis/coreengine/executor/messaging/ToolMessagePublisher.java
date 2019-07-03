@@ -11,5 +11,5 @@ import org.springframework.cloud.stream.annotation.EnableBinding;
  *
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
-@EnableBinding(NewProductPublisherChannel.class)
-public class NewProductPublisher {}
+@EnableBinding(ToolMessagePublisherChannel.class)
+public class ToolMessagePublisher {}

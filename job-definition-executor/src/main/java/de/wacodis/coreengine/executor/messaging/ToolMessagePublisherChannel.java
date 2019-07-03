@@ -12,14 +12,14 @@ import org.springframework.messaging.MessageChannel;
  *
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
-public interface NewProductPublisherChannel {
+public interface ToolMessagePublisherChannel {
 
-    String NEW_PRODUCT = "newProduct";
+    String TOOL_FINISHED = "toolFinished";
     String TOOL_EXECUTION = "toolExecution";
     String TOOL_FAILURE = "toolFailure";
 
-    @Output(NEW_PRODUCT)
-    MessageChannel newProduct();
+    @Output(TOOL_FINISHED)
+    MessageChannel toolFinished();
     
     @Output(TOOL_EXECUTION)
     MessageChannel toolExecution();

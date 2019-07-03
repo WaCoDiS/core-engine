@@ -8,7 +8,6 @@ package de.wacodis.coreengine.executor;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.configuration.WacodisJobExecutorConfiguration;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
-import de.wacodis.coreengine.executor.messaging.NewProductPublisherChannel;
 import de.wacodis.coreengine.executor.process.wps.WPSProcess;
 import de.wacodis.coreengine.executor.process.WacodisJobExecutionOutput;
 import de.wacodis.coreengine.executor.process.WacodisJobExecutionTask;
@@ -28,6 +27,7 @@ import de.wacodis.coreengine.executor.process.wps.WPSProcessContextBuilder;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
 
 /**
  *
@@ -45,7 +45,7 @@ public class WacodisJobTaskStarter {
     private final ProcessContextBuilder contextBuilder;
 
     @Autowired
-    NewProductPublisherChannel newProductPublisher;
+    ToolMessagePublisherChannel newProductPublisher;
     
     @Autowired
     private WacodisJobExecutorConfiguration executorConfig;
