@@ -5,7 +5,7 @@
  */
 package de.wacodis.coreengine.executor.process.wps;
 
-import de.wacodis.core.models.AbstractSubsetDefinition;
+import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.extension.staticresource.StaticDummyResource;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
 import de.wacodis.coreengine.executor.exception.ExecutionException;
@@ -150,13 +150,17 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
                     mimeType = resource.getMimeType();
 
                     if (processInput instanceof LiteralInputDescription) { //Literal Input
-                       String literalValue = (!StaticDummyResource.class.isAssignableFrom(resource.getResource().getClass())) ? resource.getResource().getUrl() : ((StaticDummyResource)resource.getResource()).getValue(); 
+                       String literalValue = getLiteralInputValue(resource);
                        executeRequestBuilder.addLiteralData(inputID, literalValue, "", "", mimeType); //input id, value, schema, encoding, mime type 
                         
                         addedOccurs++;
                     } else if (processInput instanceof ComplexInputDescription) { // Complex Input
                         //Complex Input (always as reference?)
                         try {
+                            if(StaticDummyResource.class.isAssignableFrom(resource.getResource().getClass())){
+                                throw new IllegalArgumentException("illegal ressource type for complex wps input, resource for input " + processInput.getId() + " is a static resource, only non-static resources are allowed for complex inputs");
+                            }
+                            
                             //set input, use url as value
                             executeRequestBuilder.addComplexDataReference(inputID, resource.getResource().getUrl(), GML3SCHEMA, null, mimeType); //ToDo make schema variable
                             addedOccurs++;
@@ -304,8 +308,22 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         return availableOutputIdentifiers;
     }
     
-    private void handleStaticInput(AbstractSubsetDefinition input){
+
+    /**
+     * @return  url for non-static resources,  value for static resources
+     */
+    private String getLiteralInputValue(ResourceDescription input){
+        String literalValue; 
+        AbstractResource resource = input.getResource();
         
+        if(StaticDummyResource.class.isAssignableFrom(resource.getClass())){
+            StaticDummyResource staticResource = (StaticDummyResource) resource;
+            literalValue = staticResource.getValue();
+        }else{
+            literalValue = resource.getUrl();
+        }
+        
+        return literalValue;
     }
 
     /**
