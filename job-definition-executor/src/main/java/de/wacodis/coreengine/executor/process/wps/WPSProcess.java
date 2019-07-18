@@ -5,6 +5,8 @@
  */
 package de.wacodis.coreengine.executor.process.wps;
 
+import de.wacodis.core.models.AbstractSubsetDefinition;
+import de.wacodis.core.models.extension.staticresource.StaticDummyResource;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
 import de.wacodis.coreengine.executor.exception.ExecutionException;
 import de.wacodis.coreengine.executor.process.ProcessContext;
@@ -148,8 +150,9 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
                     mimeType = resource.getMimeType();
 
                     if (processInput instanceof LiteralInputDescription) { //Literal Input
-                        //set input, use url as value
-                        executeRequestBuilder.addLiteralData(inputID, resource.getResource().getUrl(), "", "", mimeType); //input id, value, schema, encoding, mime type
+                       String literalValue = (!StaticDummyResource.class.isAssignableFrom(resource.getResource().getClass())) ? resource.getResource().getUrl() : ((StaticDummyResource)resource.getResource()).getValue(); 
+                       executeRequestBuilder.addLiteralData(inputID, literalValue, "", "", mimeType); //input id, value, schema, encoding, mime type 
+                        
                         addedOccurs++;
                     } else if (processInput instanceof ComplexInputDescription) { // Complex Input
                         //Complex Input (always as reference?)
@@ -299,6 +302,10 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         Set<String> availableOutputIdentifiers = availableOutputs.stream().map(output -> output.getId()).collect(Collectors.toSet());
 
         return availableOutputIdentifiers;
+    }
+    
+    private void handleStaticInput(AbstractSubsetDefinition input){
+        
     }
 
     /**

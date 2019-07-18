@@ -76,7 +76,7 @@ public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutp
         if (this.toolMessagePublisher != null) {
             publishToolFinished(this.jobDefinition, toolOutputDescription);
         } else {
-            LOGGER.error("newProductPubliser is null, could not publish ProductDescription message for process " + toolContext.getProcessID());
+            LOGGER.error("newProductPublisher is null, could not publish ProductDescription message for process " + toolContext.getProcessID());
         }
 
         //execute cleanup tool, TODO

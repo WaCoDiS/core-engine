@@ -5,13 +5,17 @@
  */
 package de.wacodis.coreengine.evaluator.wacodisjobevaluation;
 
+import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
+import de.wacodis.core.models.StaticSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionTemporalCoverage;
+import de.wacodis.core.models.extension.staticresource.StaticDummyResource;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.cron.CronExecutionTimeCalculator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -100,9 +104,27 @@ public class WacodisJobWrapper {
     }
 
     private void initInputs() {
-        for (AbstractSubsetDefinition subset : this.jobDefinition.getInputs()) {
+        for (AbstractSubsetDefinition subset : this.jobDefinition.getInputs()) {    
             InputHelper input = new InputHelper(subset);
-            this.inputs.add(input);
+ 
+            if(StaticSubsetDefinition.class.isAssignableFrom(subset.getClass())){ //handle static inputs
+                input.setResourceAvailable(true); //static input always available 
+                input.setResource(createStaticDummyResource(((StaticSubsetDefinition)subset)));  
+            }
+            
+            this.inputs.add(input); 
         }
+    }
+    
+    
+    private List<AbstractResource> createStaticDummyResource(StaticSubsetDefinition subset){
+        List<AbstractResource> resourceList = new ArrayList<>();
+        
+        StaticDummyResource resource = new StaticDummyResource();
+        resource.setDataType(subset.getDataType());
+        resource.setValue(subset.getValue());
+        
+        resourceList.add(resource);
+        return resourceList;
     }
 }
