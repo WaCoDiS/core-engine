@@ -11,6 +11,8 @@ import de.wacodis.core.models.AbstractSubsetDefinition;
 import de.wacodis.core.models.CatalogueSubsetDefinition;
 import de.wacodis.core.models.CopernicusDataEnvelope;
 import de.wacodis.core.models.CopernicusSubsetDefinition;
+import de.wacodis.core.models.DwdDataEnvelope;
+import de.wacodis.core.models.DwdSubsetDefinition;
 import de.wacodis.core.models.GdiDeDataEnvelope;
 import de.wacodis.core.models.SensorWebDataEnvelope;
 import de.wacodis.core.models.SensorWebSubsetDefinition;
@@ -47,10 +49,10 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
         this.config = config;
     }
 
-    public float getMinimumOverlapPercentage(){
+    public float getMinimumOverlapPercentage() {
         return this.config.getMinimumOverlapPercentage();
     }
-    
+
     public void setMinimumOverlapPercentage(float minimumOverlapPercentage) {
         this.config.setMinimumOverlapPercentage(minimumOverlapPercentage);
     }
@@ -108,6 +110,13 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
                 CatalogueSubsetDefinition catalogueSubsetDefinition = (CatalogueSubsetDefinition) subsetDefinition;
 
                 isMatch = matchGdiDeDataEnevelope(gdiDataEnvelope, catalogueSubsetDefinition);
+
+                break;
+            case DWDDATAENVELOPE:
+                DwdDataEnvelope dwdDataEnvelope = (DwdDataEnvelope) dataEnvelope;
+                DwdSubsetDefinition dwdSubsetDefinition = (DwdSubsetDefinition) subsetDefinition;
+
+                isMatch = matchDWDDataEnvelope(dwdDataEnvelope, dwdSubsetDefinition);
 
                 break;
             default:
@@ -169,6 +178,11 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
                 && dataEnvelope.getProcedure().equals(subsetDefinition.getProcedure());
     }
 
+    private boolean matchDWDDataEnvelope(DwdDataEnvelope dataEnvelope, DwdSubsetDefinition subsetDefinition) {
+        return dataEnvelope.getServiceUrl().equals(subsetDefinition.getServiceUrl())
+                && dataEnvelope.getLayerName().equals(subsetDefinition.getLayerName());
+    }
+
     /**
      * check for compatible source types
      *
@@ -182,6 +196,8 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
         } else if (dataEnvelope.getSourceType() == AbstractDataEnvelope.SourceTypeEnum.SENSORWEBDATAENVELOPE && subsetDefinition.getSourceType() == AbstractSubsetDefinition.SourceTypeEnum.SENSORWEBSUBSETDEFINITION) {
             return true;
         } else if (dataEnvelope.getSourceType() == AbstractDataEnvelope.SourceTypeEnum.GDIDEDATAENVELOPE && subsetDefinition.getSourceType() == AbstractSubsetDefinition.SourceTypeEnum.CATALOGUESUBSETDEFINITION) {
+            return true;
+        } else if (dataEnvelope.getSourceType() == AbstractDataEnvelope.SourceTypeEnum.DWDDATAENVELOPE && subsetDefinition.getSourceType() == AbstractSubsetDefinition.SourceTypeEnum.DWDSUBSETDEFINITION) {
             return true;
         } else {
             return false;
@@ -232,7 +248,7 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
     }
 
     /**
-     * 
+     *
      * @param extent1
      * @param extent2
      * @return intersection of extent1 and extent2

@@ -12,6 +12,8 @@ import de.wacodis.core.models.AbstractSubsetDefinition;
 import de.wacodis.core.models.CatalogueSubsetDefinition;
 import de.wacodis.core.models.CopernicusDataEnvelope;
 import de.wacodis.core.models.CopernicusSubsetDefinition;
+import de.wacodis.core.models.DwdDataEnvelope;
+import de.wacodis.core.models.DwdSubsetDefinition;
 import de.wacodis.core.models.GdiDeDataEnvelope;
 import de.wacodis.core.models.SensorWebDataEnvelope;
 import de.wacodis.core.models.SensorWebSubsetDefinition;
@@ -243,6 +245,25 @@ public class BasicDataEnvelopeMatcherTest {
         //default minimum overlap percentage = 100%
         assertTrue(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
     }
+    
+    @Test
+    public void testMatchDwdDataEnvelope(){
+        DwdDataEnvelope dwdEnvelope = getDwdDataEnvelope();
+        DwdSubsetDefinition dwdSubset = getDwdSubsetDefinition();
+        WacodisJobWrapper wrapper = getJobWrapper();
+        
+        assertTrue(this.matcher.match(dwdEnvelope, wrapper, dwdSubset));
+    }
+    
+    @Test
+    public void testMatchDwdDataEnvelope_False(){
+        DwdDataEnvelope dwdEnvelope = getDwdDataEnvelope();
+        DwdSubsetDefinition dwdSubset = getDwdSubsetDefinition();
+        WacodisJobWrapper wrapper = getJobWrapper();
+        
+        dwdEnvelope.setLayerName("layer2");
+        assertFalse(this.matcher.match(dwdEnvelope, wrapper, dwdSubset));
+    }
 
     @Test
     public void testMatchAreaOfInterest_Disjoint() {
@@ -405,6 +426,40 @@ public class BasicDataEnvelopeMatcherTest {
         return copernicusSubset;
     }
 
+    private DwdSubsetDefinition getDwdSubsetDefinition(){
+        DwdSubsetDefinition dwdSubset = new DwdSubsetDefinition();
+        dwdSubset.setSourceType(AbstractSubsetDefinition.SourceTypeEnum.DWDSUBSETDEFINITION);
+        dwdSubset.setLayerName("layer1");
+        dwdSubset.setServiceUrl("http://www.example.com");
+        dwdSubset.setIdentifier("dwdsubset");
+        
+        return dwdSubset;
+    }
+    
+    private DwdDataEnvelope getDwdDataEnvelope(){
+        DwdDataEnvelope dwdEnvelope = new DwdDataEnvelope();
+        dwdEnvelope.setSourceType(AbstractDataEnvelope.SourceTypeEnum.DWDDATAENVELOPE);
+        dwdEnvelope.setLayerName("layer1");
+        dwdEnvelope.setServiceUrl("http://www.example.com");
+        dwdEnvelope.setParameter("param1");
+        dwdEnvelope.setModified(new DateTime(DateTime.parse("2012-01-01T07:30:15Z")));
+        dwdEnvelope.setCreated(new DateTime(DateTime.parse("2012-01-01T07:00:35Z")));
+        
+        AbstractDataEnvelopeAreaOfInterest aoi = new AbstractDataEnvelopeAreaOfInterest();
+        aoi.addExtentItem(0.0f);
+        aoi.addExtentItem(0.0f);
+        aoi.addExtentItem(10.0f);
+        aoi.addExtentItem(10.0f);
+        dwdEnvelope.setAreaOfInterest(aoi); //create 50% overlap 
+        
+        AbstractDataEnvelopeTimeFrame tf = new AbstractDataEnvelopeTimeFrame();
+        tf.setStartTime(new DateTime(DateTime.parse("2018-01-01T07:30:15Z")));
+        tf.setEndTime(new DateTime(DateTime.parse("2018-01-02T07:30:15Z")));    
+        dwdEnvelope.setTimeFrame(tf);
+        
+        return dwdEnvelope;
+    }
+    
     private WacodisJobWrapper getJobWrapper() {
         WacodisJobDefinitionTemporalCoverage tempCov = new WacodisJobDefinitionTemporalCoverage();
         tempCov.setDuration("P1M"); //covers the month before execution
@@ -413,6 +468,7 @@ public class BasicDataEnvelopeMatcherTest {
         inputs.add(getCatalogueSubsetDefinition());
         inputs.add(getCopernicusSubsetDefinition());
         inputs.add(getSensorWebSubsetDefinition());
+        inputs.add(getDwdSubsetDefinition());
 
         AbstractDataEnvelopeAreaOfInterest aoi = new AbstractDataEnvelopeAreaOfInterest();
         aoi.addExtentItem(0.0f);
