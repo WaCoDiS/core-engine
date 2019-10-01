@@ -16,6 +16,8 @@ import de.wacodis.core.models.DwdSubsetDefinition;
 import de.wacodis.core.models.GdiDeDataEnvelope;
 import de.wacodis.core.models.SensorWebDataEnvelope;
 import de.wacodis.core.models.SensorWebSubsetDefinition;
+import de.wacodis.core.models.WacodisProductDataEnvelope;
+import de.wacodis.core.models.WacodisProductSubsetDefinition;
 import de.wacodis.coreengine.evaluator.configuration.DataEnvelopeMatchingConfiguration;
 import java.util.Arrays;
 import org.joda.time.Interval;
@@ -119,6 +121,13 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
                 isMatch = matchDWDDataEnvelope(dwdDataEnvelope, dwdSubsetDefinition);
 
                 break;
+            case WACODISPRODUCTDATAENVELOPE:
+                WacodisProductDataEnvelope productDataEnvelope = (WacodisProductDataEnvelope) dataEnvelope;
+                WacodisProductSubsetDefinition productSubset = (WacodisProductSubsetDefinition) subsetDefinition;
+                
+                isMatch = matchProductdataEnvelope(productDataEnvelope, productSubset);
+                
+                break;
             default:
                 //unknown source type or not set
                 LOGGER.warn("SourceType for DataEnvelope unknown or not set, matching not possible: " + dataEnvelope.getSourceType().toString());
@@ -182,6 +191,19 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
         return dataEnvelope.getServiceUrl().equals(subsetDefinition.getServiceUrl())
                 && dataEnvelope.getLayerName().equals(subsetDefinition.getLayerName());
     }
+    
+    private boolean matchProductdataEnvelope(WacodisProductDataEnvelope dataEnvelope, WacodisProductSubsetDefinition subsetDefinition){
+        boolean isMatch = dataEnvelope.getServiceName().equalsIgnoreCase(subsetDefinition.getServiceUrl()) 
+                        && dataEnvelope.getProductCollection().equals(subsetDefinition.getProductCollection());
+        
+        
+               //match productType if set
+               if(subsetDefinition.getProductType() != null && !subsetDefinition.getProductType().isEmpty()){
+                   isMatch &= dataEnvelope.getProductType().equals(subsetDefinition.getProductType());
+               }
+             
+        return isMatch;
+    }
 
     /**
      * check for compatible source types
@@ -198,6 +220,8 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
         } else if (dataEnvelope.getSourceType() == AbstractDataEnvelope.SourceTypeEnum.GDIDEDATAENVELOPE && subsetDefinition.getSourceType() == AbstractSubsetDefinition.SourceTypeEnum.CATALOGUESUBSETDEFINITION) {
             return true;
         } else if (dataEnvelope.getSourceType() == AbstractDataEnvelope.SourceTypeEnum.DWDDATAENVELOPE && subsetDefinition.getSourceType() == AbstractSubsetDefinition.SourceTypeEnum.DWDSUBSETDEFINITION) {
+            return true;
+        } else if(dataEnvelope.getSourceType() == AbstractDataEnvelope.SourceTypeEnum.WACODISPRODUCTDATAENVELOPE && subsetDefinition.getSourceType() == AbstractSubsetDefinition.SourceTypeEnum.WACODISPRODUCTSUBSETDEFINITION){
             return true;
         } else {
             return false;

@@ -20,6 +20,8 @@ import de.wacodis.core.models.SensorWebSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionExecution;
 import de.wacodis.core.models.WacodisJobDefinitionTemporalCoverage;
+import de.wacodis.core.models.WacodisProductDataEnvelope;
+import de.wacodis.core.models.WacodisProductSubsetDefinition;
 import java.util.ArrayList;
 import java.util.List;
 import org.joda.time.DateTime;
@@ -245,24 +247,63 @@ public class BasicDataEnvelopeMatcherTest {
         //default minimum overlap percentage = 100%
         assertTrue(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
     }
-    
+
     @Test
-    public void testMatchDwdDataEnvelope(){
+    public void testMatchDwdDataEnvelope() {
         DwdDataEnvelope dwdEnvelope = getDwdDataEnvelope();
         DwdSubsetDefinition dwdSubset = getDwdSubsetDefinition();
         WacodisJobWrapper wrapper = getJobWrapper();
-        
+
         assertTrue(this.matcher.match(dwdEnvelope, wrapper, dwdSubset));
     }
-    
+
     @Test
-    public void testMatchDwdDataEnvelope_False(){
+    public void testMatchDwdDataEnvelope_False() {
         DwdDataEnvelope dwdEnvelope = getDwdDataEnvelope();
         DwdSubsetDefinition dwdSubset = getDwdSubsetDefinition();
         WacodisJobWrapper wrapper = getJobWrapper();
-        
+
         dwdEnvelope.setLayerName("layer2");
         assertFalse(this.matcher.match(dwdEnvelope, wrapper, dwdSubset));
+    }
+
+    @Test
+    public void testMatchWacodisProductDataEnvelope() {
+        WacodisProductDataEnvelope productEnvelope = getProductDataEnvelope();
+        WacodisProductSubsetDefinition productSubset = getProductSubsetDefinition();
+        WacodisJobWrapper wrapper = getJobWrapper();
+
+        assertTrue(this.matcher.match(productEnvelope, wrapper, productSubset));
+    }
+
+    @Test
+    public void testMatchWacodisProductDataEnvelope_False() {
+        WacodisProductDataEnvelope productEnvelope = getProductDataEnvelope();
+        WacodisProductSubsetDefinition productSubset = getProductSubsetDefinition();
+        WacodisJobWrapper wrapper = getJobWrapper();
+
+        productSubset.setProductCollection("someCollection");
+        assertFalse(this.matcher.match(productEnvelope, wrapper, productSubset));
+    }
+
+    @Test
+    public void testMatchWacodisProductDataEnvelope_WithProductType() {
+        WacodisProductDataEnvelope productEnvelope = getProductDataEnvelope();
+        WacodisProductSubsetDefinition productSubset = getProductSubsetDefinition();
+        WacodisJobWrapper wrapper = getJobWrapper();
+
+        productSubset.setProductType("testType");
+        assertTrue(this.matcher.match(productEnvelope, wrapper, productSubset));
+    }
+
+    @Test
+    public void testMatchWacodisProductDataEnvelope_WithProductType_False() {
+        WacodisProductDataEnvelope productEnvelope = getProductDataEnvelope();
+        WacodisProductSubsetDefinition productSubset = getProductSubsetDefinition();
+        WacodisJobWrapper wrapper = getJobWrapper();
+
+        productSubset.setProductType("someType");
+        assertFalse(this.matcher.match(productEnvelope, wrapper, productSubset));
     }
 
     @Test
@@ -426,17 +467,17 @@ public class BasicDataEnvelopeMatcherTest {
         return copernicusSubset;
     }
 
-    private DwdSubsetDefinition getDwdSubsetDefinition(){
+    private DwdSubsetDefinition getDwdSubsetDefinition() {
         DwdSubsetDefinition dwdSubset = new DwdSubsetDefinition();
         dwdSubset.setSourceType(AbstractSubsetDefinition.SourceTypeEnum.DWDSUBSETDEFINITION);
         dwdSubset.setLayerName("layer1");
         dwdSubset.setServiceUrl("http://www.example.com");
         dwdSubset.setIdentifier("dwdsubset");
-        
+
         return dwdSubset;
     }
-    
-    private DwdDataEnvelope getDwdDataEnvelope(){
+
+    private DwdDataEnvelope getDwdDataEnvelope() {
         DwdDataEnvelope dwdEnvelope = new DwdDataEnvelope();
         dwdEnvelope.setSourceType(AbstractDataEnvelope.SourceTypeEnum.DWDDATAENVELOPE);
         dwdEnvelope.setLayerName("layer1");
@@ -444,22 +485,53 @@ public class BasicDataEnvelopeMatcherTest {
         dwdEnvelope.setParameter("param1");
         dwdEnvelope.setModified(new DateTime(DateTime.parse("2012-01-01T07:30:15Z")));
         dwdEnvelope.setCreated(new DateTime(DateTime.parse("2012-01-01T07:00:35Z")));
-        
+
         AbstractDataEnvelopeAreaOfInterest aoi = new AbstractDataEnvelopeAreaOfInterest();
         aoi.addExtentItem(0.0f);
         aoi.addExtentItem(0.0f);
         aoi.addExtentItem(10.0f);
         aoi.addExtentItem(10.0f);
         dwdEnvelope.setAreaOfInterest(aoi); //create 50% overlap 
-        
+
         AbstractDataEnvelopeTimeFrame tf = new AbstractDataEnvelopeTimeFrame();
         tf.setStartTime(new DateTime(DateTime.parse("2018-01-01T07:30:15Z")));
-        tf.setEndTime(new DateTime(DateTime.parse("2018-01-02T07:30:15Z")));    
+        tf.setEndTime(new DateTime(DateTime.parse("2018-01-02T07:30:15Z")));
         dwdEnvelope.setTimeFrame(tf);
-        
+
         return dwdEnvelope;
     }
-    
+
+    private WacodisProductSubsetDefinition getProductSubsetDefinition() {
+        WacodisProductSubsetDefinition productSubset = new WacodisProductSubsetDefinition();
+        productSubset.setSourceType(AbstractSubsetDefinition.SourceTypeEnum.WACODISPRODUCTSUBSETDEFINITION);
+        productSubset.setProductCollection("testCollection");
+        productSubset.setServiceUrl("http://example.com");
+
+        return productSubset;
+    }
+
+    private WacodisProductDataEnvelope getProductDataEnvelope() {
+        WacodisProductDataEnvelope productEnvelope = new WacodisProductDataEnvelope();
+        productEnvelope.setSourceType(AbstractDataEnvelope.SourceTypeEnum.WACODISPRODUCTDATAENVELOPE);
+        productEnvelope.serviceName("http://example.com");
+        productEnvelope.setProductCollection("testCollection");
+        productEnvelope.setProductType("testType");
+
+        AbstractDataEnvelopeAreaOfInterest aoi = new AbstractDataEnvelopeAreaOfInterest();
+        aoi.addExtentItem(0.0f);
+        aoi.addExtentItem(0.0f);
+        aoi.addExtentItem(10.0f);
+        aoi.addExtentItem(10.0f);
+        productEnvelope.setAreaOfInterest(aoi); //create 50% overlap 
+
+        AbstractDataEnvelopeTimeFrame tf = new AbstractDataEnvelopeTimeFrame();
+        tf.setStartTime(new DateTime(DateTime.parse("2018-01-01T07:30:15Z")));
+        tf.setEndTime(new DateTime(DateTime.parse("2018-01-02T07:30:15Z")));
+        productEnvelope.setTimeFrame(tf);
+
+        return productEnvelope;
+    }
+
     private WacodisJobWrapper getJobWrapper() {
         WacodisJobDefinitionTemporalCoverage tempCov = new WacodisJobDefinitionTemporalCoverage();
         tempCov.setDuration("P1M"); //covers the month before execution
