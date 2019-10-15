@@ -10,6 +10,7 @@ import org.n52.geoprocessing.wps.client.WPSClientSession;
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.GetResource;
 import de.wacodis.coreengine.executor.exception.ExecutionException;
+import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ProcessOutputDescription;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
 
@@ -23,7 +24,7 @@ public class RunWPSProcessIT {
     }
 
     public void runWPSProcess() throws ExecutionException {
-        String wpsURL = "http://localhost:8080/wps/service";
+        String wpsURL = "http://localhost:8080/wacodis-wps/service";
         String wpsProcessID = "de.hsbo.wacodis.land_cover_classification";
 
         WPSClientSession wpsClient = WPSClientSession.getInstance();
@@ -67,7 +68,7 @@ public class RunWPSProcessIT {
         inputContext.addInputResource("REFERENCE_DATA_TYPE", new ResourceDescription(refDataType, "text/xml"));
         inputContext.addInputResource("REFERENCE_DATA", new ResourceDescription(refData, "text/xml"));
 
-        inputContext.addExpectedOutput("PRODUCT");
+        inputContext.addExpectedOutput(new ExpectedProcessOutput("PRODUCT", "image/geotiff"));
 
         inputContext.setProcessID("dummyLandCoverClassificationProcess");
 

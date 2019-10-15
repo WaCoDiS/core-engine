@@ -19,7 +19,7 @@ import java.util.Map;
 public class ProcessContext {
 
     private Map<String, List<ResourceDescription>> inputResources;
-    private List<String> expectedOutputs;
+    private List<ExpectedProcessOutput> expectedOutputs;
     private String processID;
 
     public ProcessContext() {
@@ -62,19 +62,19 @@ public class ProcessContext {
     }
 
 
-    public List<String> getExpectedOutputs() {
+    public List<ExpectedProcessOutput> getExpectedOutputs() {
         return expectedOutputs;
     }
 
-    public void setExpectedOutputs(List<String> expectedOutputs) {
+    public void setExpectedOutputs(List<ExpectedProcessOutput> expectedOutputs) {
         this.expectedOutputs = expectedOutputs;
     }
 
-    public void addExpectedOutput(String expectedOutput) {
+    public void addExpectedOutput(ExpectedProcessOutput expectedOutput) {
         this.expectedOutputs.add(expectedOutput);
     }
 
-    public void removeExpectedOutput(String expectedOutput) {
+    public void removeExpectedOutput(ExpectedProcessOutput expectedOutput) {
         this.expectedOutputs.remove(expectedOutput);
     }
 

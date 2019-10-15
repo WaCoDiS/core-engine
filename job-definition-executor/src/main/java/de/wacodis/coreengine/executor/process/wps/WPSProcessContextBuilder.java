@@ -28,9 +28,10 @@ public class WPSProcessContextBuilder implements ProcessContextBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(WPSProcessContextBuilder.class);
     
     private static final String DEFAULT_MIME_TYPE = "text/xml";
+    
 
     @Override
-    public ProcessContext buildProcessContext(WacodisJobWrapper job, String... expectedProcessOutputIdentifiers) {
+    public ProcessContext buildProcessContext(WacodisJobWrapper job, ExpectedProcessOutput... expectedProcessOutputs) {
         ProcessContext context = new ProcessContext();
 
         context.setProcessID(job.getJobDefinition().getId().toString());
@@ -49,8 +50,17 @@ public class WPSProcessContextBuilder implements ProcessContextBuilder {
             }        
         }
    
-        context.setExpectedOutputs(Arrays.asList(expectedProcessOutputIdentifiers)); //set expected outputs
+        context.setExpectedOutputs(Arrays.asList(expectedProcessOutputs)); //set expected outputs
 
         return context;
     }
+    
+    public ProcessContext buildProcessContext(WacodisJobWrapper job){
+        ExpectedProcessOutput productOutput = new ExpectedProcessOutput("PRODUCT", "image/geotiff");
+        ExpectedProcessOutput metadataOutput = new ExpectedProcessOutput("METADATA" , "text/json");
+        
+        
+        return buildProcessContext(job, new ExpectedProcessOutput[]{productOutput, metadataOutput});
+    }
+    
 }

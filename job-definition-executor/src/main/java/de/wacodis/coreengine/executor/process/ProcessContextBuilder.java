@@ -13,6 +13,6 @@ import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
  */
 public interface ProcessContextBuilder {
     
-    ProcessContext buildProcessContext(WacodisJobWrapper job, String... expectedProcessOutputIdentifiers);
+    ProcessContext buildProcessContext(WacodisJobWrapper job, ExpectedProcessOutput... expectedProcessOutputIdentifiers);
     
 }

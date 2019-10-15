@@ -10,7 +10,6 @@ import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobExecution;
 import de.wacodis.core.models.WacodisJobFailed;
 import de.wacodis.coreengine.executor.exception.ExecutionException;
-import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import org.joda.time.DateTime;
 import org.slf4j.LoggerFactory;
@@ -84,12 +83,9 @@ public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutp
         ProcessOutputDescription cleanUpOutput = this.cleanUpProcess.execute(cleanUpContext);
         LOGGER.debug("Process: " + toolContext.getProcessID() + ",executed cleanUpProcess " + cleanUpProcess);
 
-        //build internal output, ToDo
-        WacodisJobExecutionOutput jobOutput = buildJobExecutionOutput(toolOutputDescription, null);
-
         LOGGER.info("Process: " + toolContext.getProcessID() + ",finished execution");
-
-        return jobOutput;
+        
+        return buildJobExecutionOutput(toolOutputDescription, cleanUpOutput);
     }
 
     /**

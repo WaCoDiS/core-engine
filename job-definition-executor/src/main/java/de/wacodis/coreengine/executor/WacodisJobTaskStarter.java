@@ -25,6 +25,7 @@ import de.wacodis.coreengine.executor.process.ProcessContextBuilder;
 import de.wacodis.coreengine.executor.process.dummy.EmptyDummyProcess;
 import de.wacodis.coreengine.executor.process.wps.WPSProcessContextBuilder;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
+import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 
 /**
  *
@@ -35,7 +36,8 @@ public class WacodisJobTaskStarter {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WacodisJobTaskStarter.class);
     
-    private static final String[] DEFAULT_OUTPUTS = new String[] {"PRODUCT", "METADATA"};
+    private static final ExpectedProcessOutput PRODUCTOUTPUT = new ExpectedProcessOutput("PRODUCT", "image/geotiff");
+    private static final ExpectedProcessOutput METADATAOUTPUT =  new ExpectedProcessOutput("METADATA" , "text/json");
     
     private final WPSClientSession wpsClient;
     private final ExecutorService wacodisJobExecutionService;
@@ -75,7 +77,7 @@ public class WacodisJobTaskStarter {
     public void executeWacodisJob(WacodisJobWrapper job) {
         String toolProcessID = job.getJobDefinition().getProcessingTool();
         String cleanUpProcessID = this.executorConfig.getCleanUpTool();
-        ProcessContext toolContext = this.contextBuilder.buildProcessContext(job, DEFAULT_OUTPUTS); //expect default outputs (as long as jobdefinition provides no output information)
+        ProcessContext toolContext = this.contextBuilder.buildProcessContext(job, PRODUCTOUTPUT, METADATAOUTPUT); //expect default outputs (as long as jobdefinition provides no output information)
 
         Process toolProcess = new WPSProcess(this.wpsClient, this.wpsConfig.getUri(), this.wpsConfig.getVersion(), toolProcessID);
         Process cleanUpProcess = new EmptyDummyProcess(); //ToDo implement correct clean up process

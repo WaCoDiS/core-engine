@@ -9,6 +9,7 @@ import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.extension.staticresource.StaticDummyResource;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
 import de.wacodis.coreengine.executor.exception.ExecutionException;
+import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ProcessContext;
 import de.wacodis.coreengine.executor.process.ProcessOutputDescription;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
@@ -146,7 +147,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
                         LOGGER.info("Max occurs ({}) for input {} reached. Skipping other candidates", processInput.getMaxOccurs(), processInput.getId());
                         break;
                     }
-
+                    
                     mimeType = resource.getMimeType();
 
                     if (processInput instanceof LiteralInputDescription) { //Literal Input
@@ -183,17 +184,16 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
      * @param executeRequestBuilder
      * @param expectedOutputs
      */
-    private void setWPSOutputs(List<String> expectedOutputs, ExecuteRequestBuilder executeRequestBuilder) {
-        for (String expectedOutput : expectedOutputs) {
+    private void setWPSOutputs(List<ExpectedProcessOutput> expectedOutputs, ExecuteRequestBuilder executeRequestBuilder) {
+        for (ExpectedProcessOutput expectedOutput : expectedOutputs) {
             // METADATA is special. TODO: treat it in a generic way
-            if ("METADATA".equalsIgnoreCase(expectedOutput)) {
-                executeRequestBuilder.setResponseDocument(expectedOutput, "", "", "text/json" /*mime type*/); //output type? mime type?
+            if ("METADATA".equalsIgnoreCase(expectedOutput.getIdentifier())) {
+                executeRequestBuilder.setResponseDocument(expectedOutput.getIdentifier(), "", "", expectedOutput.getMimeType() /*mime type*/); //output type? mime type?
             } else {
                 // TODO parse the mime type from the process description
-                executeRequestBuilder.setResponseDocument(expectedOutput, "", "", "image/geotiff" /*mime type*/); //output type? mime type?
-                executeRequestBuilder.setAsReference(expectedOutput, true);
+                executeRequestBuilder.setResponseDocument(expectedOutput.getIdentifier(), "", "", expectedOutput.getMimeType() /*mime type*/); //output type? mime type?
+                executeRequestBuilder.setAsReference(expectedOutput.getIdentifier(), true);
             }
-            
         }
     }
 
@@ -259,8 +259,8 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         Set<String> availableProcessOutputs = getAvailableOutputIdentifiers(wpsProcessResult);
 
         //throw exception if expected output is not available
-        for (String expectedOutput : context.getExpectedOutputs()) {
-            if (!availableProcessOutputs.contains(expectedOutput)) {
+        for (ExpectedProcessOutput expectedOutput : context.getExpectedOutputs()) {
+            if (!availableProcessOutputs.contains(expectedOutput.getIdentifier())) {
                 throw new ExecutionException("expected process output " + expectedOutput + " not available (Wacodis Job-ID: " + this.processID + ", WPS Job-ID: " + wpsProcessResult.getJobId() + ")");
             }
         }
@@ -340,7 +340,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         if (!this.isInitialized || !this.isConnected) {
             init();
         }
-
+   
         List<String> mandatoryInputs = this.wpsProcessDescription.getInputs().stream().filter(id -> !isInputOptional(id)).map(id -> id.getId()).collect(Collectors.toList());
         List<String> offeredOutputs = this.wpsProcessDescription.getOutputs().stream().map(od -> od.getId()).collect(Collectors.toList());
         Set<String> availableInputs = context.getInputResources().keySet();
