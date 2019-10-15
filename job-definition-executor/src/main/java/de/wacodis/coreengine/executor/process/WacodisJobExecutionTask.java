@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  *
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
-public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutput> {
+public class WacodisJobExecutionTask implements Callable<Void> {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WacodisJobExecutionTask.class);
 
@@ -49,7 +49,7 @@ public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutp
     }
 
     @Override
-    public WacodisJobExecutionOutput call() throws Exception {
+    public Void call() throws Exception {
         LOGGER.debug("new thread started for process " + toolContext.getProcessID() + ", toolProcess: " + toolProcess + " cleaUpProcess: " + cleanUpProcess);
 
         // publish message for execution start
@@ -85,7 +85,7 @@ public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutp
 
         LOGGER.info("Process: " + toolContext.getProcessID() + ",finished execution");
         
-        return buildJobExecutionOutput(toolOutputDescription, cleanUpOutput);
+        return null; //statisfy return type Void
     }
 
     /**
@@ -100,16 +100,6 @@ public class WacodisJobExecutionTask implements Callable<WacodisJobExecutionOutp
         return cleanUpContext;
     }
 
-    /**
-     * TODO
-     *
-     * @param toolOutputDescription
-     * @param cleanUpOutputDescription
-     * @return
-     */
-    private WacodisJobExecutionOutput buildJobExecutionOutput(ProcessOutputDescription toolOutputDescription, ProcessOutputDescription cleanUpOutputDescription) {
-        return new WacodisJobExecutionOutput();
-    }
 
     private void publishToolFinished(WacodisJobDefinition jobDefinition, ProcessOutputDescription outputDescription) {
         //publish newProduct message via broker

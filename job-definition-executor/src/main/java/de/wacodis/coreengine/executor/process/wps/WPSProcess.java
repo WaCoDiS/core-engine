@@ -93,7 +93,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         //submit execute request
         try {
             LOGGER.info("Executing request: {}", executeRequest);
-            Object wpsOutput = this.wpsClient.execute(this.wpsURL, executeRequest, this.wpsVersion); //submit 
+            Object wpsOutput = this.wpsClient.execute(this.wpsURL, executeRequest, this.wpsVersion); //submit process to wps
             LOGGER.info("Processing result: {}", wpsOutput);
             Result wpsProcessResult = parseWPSOutput(wpsOutput);
             ProcessOutputDescription outputDescription = buildProcessOutput(context, wpsProcessResult);

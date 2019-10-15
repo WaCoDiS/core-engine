@@ -9,11 +9,9 @@ import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.configuration.WacodisJobExecutorConfiguration;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
 import de.wacodis.coreengine.executor.process.wps.WPSProcess;
-import de.wacodis.coreengine.executor.process.WacodisJobExecutionOutput;
 import de.wacodis.coreengine.executor.process.WacodisJobExecutionTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import javax.annotation.PreDestroy;
 import org.n52.geoprocessing.wps.client.WPSClientSession;
 import org.slf4j.LoggerFactory;
@@ -84,13 +82,13 @@ public class WacodisJobTaskStarter {
 
         LOGGER.info("execute Wacodis Job " + job.getJobDefinition().getId().toString() + " using processing tool " + toolProcessID + " and cleanUp tool " + cleanUpProcessID);
         LOGGER.debug("start thread for process " + job.getJobDefinition().getId().toString());
-        Future<WacodisJobExecutionOutput> jobExecutionResult = this.wacodisJobExecutionService.submit(new WacodisJobExecutionTask(toolProcess, toolContext, cleanUpProcess, job.getJobDefinition(), this.newProductPublisher));
+        this.wacodisJobExecutionService.submit(new WacodisJobExecutionTask(toolProcess, toolContext, cleanUpProcess, job.getJobDefinition(), this.newProductPublisher));
     }
 
     @PreDestroy
     private void shutdownJobExecutionService() {
         this.wacodisJobExecutionService.shutdown();
-        LOGGER.debug("shutdown executor service");
+        LOGGER.info("shutdown wacodis job executor service");
     }
 
 }
