@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 /**
  *  build ProcessContext for a Wacodis Job applicable for a WPSProcess
  * 
- * TODO: Handle MimeType, handle outputs
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 public class WPSProcessContextBuilder implements ProcessContextBuilder {
@@ -53,14 +52,6 @@ public class WPSProcessContextBuilder implements ProcessContextBuilder {
         context.setExpectedOutputs(Arrays.asList(expectedProcessOutputs)); //set expected outputs
 
         return context;
-    }
-    
-    public ProcessContext buildProcessContext(WacodisJobWrapper job){
-        ExpectedProcessOutput productOutput = new ExpectedProcessOutput("PRODUCT", "image/geotiff");
-        ExpectedProcessOutput metadataOutput = new ExpectedProcessOutput("METADATA" , "text/json");
-        
-        
-        return buildProcessContext(job, new ExpectedProcessOutput[]{productOutput, metadataOutput});
     }
     
 }

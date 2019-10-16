@@ -12,7 +12,6 @@ import de.wacodis.coreengine.evaluator.EvaluationStatus;
 import de.wacodis.coreengine.evaluator.WacodisJobExecutableEvent;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
-import de.wacodis.coreengine.executor.configuration.WacodisJobExecutorConfiguration;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
 import de.wacodis.coreengine.executor.events.WacodisJobExecutableStateChangedHandler;
 import java.util.UUID;
@@ -52,10 +51,8 @@ public class WacodisJobExecutorIT {
         WebProcessingServiceConfiguration wpsConfig = new WebProcessingServiceConfiguration();
         wpsConfig.setVersion("2.0.0");
         wpsConfig.setUri(WPSURL);
-        WacodisJobExecutorConfiguration executorConfig = new WacodisJobExecutorConfiguration();
-        executorConfig.setCleanUpTool("dummyTool");
+
         this.eventHandler.getJobExecutor().setWpsConfig(wpsConfig);
-        this.eventHandler.getJobExecutor().setExecutorConfig(executorConfig);
 
        //produce executable job
        WacodisJobWrapper testJob = createJobWrapper();

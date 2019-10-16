@@ -19,7 +19,7 @@ import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
 import java.util.stream.Collectors;
 
 /**
- * execute wacodis job, 1) execute processing tool, 2) execute cleanUp tool
+ * execute wacodis job -> execute processing tool and publish messages (started, failed, finished) 
  *
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
@@ -28,21 +28,18 @@ public class WacodisJobExecutionTask implements Callable<Void> {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WacodisJobExecutionTask.class);
 
     private final de.wacodis.coreengine.executor.process.Process toolProcess;
-    private final de.wacodis.coreengine.executor.process.Process cleanUpProcess;
     private final ProcessContext toolContext;
     private final WacodisJobDefinition jobDefinition;
     private ToolMessagePublisherChannel toolMessagePublisher;
 
-    public WacodisJobExecutionTask(Process toolProcess, ProcessContext toolContext, Process cleanUpProcess, WacodisJobDefinition jobDefinition) {
+    public WacodisJobExecutionTask(Process toolProcess, ProcessContext toolContext, WacodisJobDefinition jobDefinition) {
         this.toolProcess = toolProcess;
-        this.cleanUpProcess = cleanUpProcess;
         this.toolContext = toolContext;
         this.jobDefinition = jobDefinition;
     }
 
-    public WacodisJobExecutionTask(Process toolProcess, ProcessContext toolContext, Process cleanUpProcess, WacodisJobDefinition jobDefinition, ToolMessagePublisherChannel newProductPublisher) {
+    public WacodisJobExecutionTask(Process toolProcess, ProcessContext toolContext, WacodisJobDefinition jobDefinition, ToolMessagePublisherChannel newProductPublisher) {
         this.toolProcess = toolProcess;
-        this.cleanUpProcess = cleanUpProcess;
         this.toolContext = toolContext;
         this.jobDefinition = jobDefinition;
         this.toolMessagePublisher = newProductPublisher;
@@ -50,10 +47,10 @@ public class WacodisJobExecutionTask implements Callable<Void> {
 
     @Override
     public Void call() throws Exception {
-        LOGGER.debug("new thread started for process " + toolContext.getProcessID() + ", toolProcess: " + toolProcess + " cleaUpProcess: " + cleanUpProcess);
+        LOGGER.debug("new thread started for process " + toolContext.getProcessID() + ", toolProcess: " + toolProcess);
 
         // publish message for execution start
-        publishNewToolExecution(this.jobDefinition);
+        publishToolExecutionStarted(this.jobDefinition);
         
         //execute processing tool
         ProcessOutputDescription toolOutputDescription;
@@ -70,7 +67,6 @@ public class WacodisJobExecutionTask implements Callable<Void> {
             throw e;
         }
         
-
         //publish toolFinished message
         if (this.toolMessagePublisher != null) {
             publishToolFinished(this.jobDefinition, toolOutputDescription);
@@ -78,28 +74,10 @@ public class WacodisJobExecutionTask implements Callable<Void> {
             LOGGER.error("newProductPublisher is null, could not publish ProductDescription message for process " + toolContext.getProcessID());
         }
 
-        //execute cleanup tool, TODO
-        ProcessContext cleanUpContext = buildCleanUpToolContext(toolOutputDescription);
-        ProcessOutputDescription cleanUpOutput = this.cleanUpProcess.execute(cleanUpContext);
-        LOGGER.debug("Process: " + toolContext.getProcessID() + ",executed cleanUpProcess " + cleanUpProcess);
-
         LOGGER.info("Process: " + toolContext.getProcessID() + ",finished execution");
         
-        return null; //statisfy return type Void
+        return null; //satisfy return type Void
     }
-
-    /**
-     * TODO
-     *
-     * @param toolOutputDescription
-     * @return
-     */
-    private ProcessContext buildCleanUpToolContext(ProcessOutputDescription toolOutputDescription) {
-        ProcessContext cleanUpContext = new ProcessContext();
-
-        return cleanUpContext;
-    }
-
 
     private void publishToolFinished(WacodisJobDefinition jobDefinition, ProcessOutputDescription outputDescription) {
         //publish newProduct message via broker
@@ -115,7 +93,7 @@ public class WacodisJobExecutionTask implements Callable<Void> {
         LOGGER.info("publish toolFinished message " + System.lineSeparator() + newProductMessage.getPayload().toString());
     }
     
-    private void publishNewToolExecution(WacodisJobDefinition jobDefinition) {
+    private void publishToolExecutionStarted(WacodisJobDefinition jobDefinition) {
         //publish toolExecution message via broker
         WacodisJobExecution msg = new WacodisJobExecution();
         msg.setJobIdentifier(jobDefinition.getId().toString());
