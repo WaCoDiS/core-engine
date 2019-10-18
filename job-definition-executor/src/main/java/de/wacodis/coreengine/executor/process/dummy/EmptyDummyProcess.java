@@ -8,12 +8,16 @@ package de.wacodis.coreengine.executor.process.dummy;
 import de.wacodis.coreengine.executor.exception.ExecutionException;
 import de.wacodis.coreengine.executor.process.ProcessContext;
 import de.wacodis.coreengine.executor.process.ProcessOutputDescription;
+import org.slf4j.LoggerFactory;
 
 /**
  * dummy process without functionality
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 public class EmptyDummyProcess implements de.wacodis.coreengine.executor.process.Process {
+    
+    
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(EmptyDummyProcess.class);
 
     /**
      * @param context ignored, can be null
@@ -22,19 +26,12 @@ public class EmptyDummyProcess implements de.wacodis.coreengine.executor.process
      */
     @Override
     public ProcessOutputDescription execute(ProcessContext context) throws ExecutionException {
+        LOGGER.info("executing dummy process");
+        
         ProcessOutputDescription outputDescription = new ProcessOutputDescription();
         outputDescription.setProcessIdentifier("dummyProcess_" + System.currentTimeMillis());
         
         return outputDescription;
     }
-
-    /**
-     * @param context ignored, can be null
-     * @return always returns true 
-     */
-    @Override
-    public boolean validateContext(ProcessContext context) {
-        return true;
-    }
-    
+   
 }

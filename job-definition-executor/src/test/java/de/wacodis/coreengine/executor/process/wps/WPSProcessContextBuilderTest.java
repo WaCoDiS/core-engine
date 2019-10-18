@@ -69,7 +69,7 @@ public class WPSProcessContextBuilderTest {
         WPSProcessContextBuilder contextBuilder = new WPSProcessContextBuilder();
         ProcessContext context = contextBuilder.buildProcessContext(jobWrapper);
 
-        assertEquals(processID.toString(), context.getProcessID());
+        assertEquals(processID.toString(), context.getWacodisProcessID());
     }
 
 }

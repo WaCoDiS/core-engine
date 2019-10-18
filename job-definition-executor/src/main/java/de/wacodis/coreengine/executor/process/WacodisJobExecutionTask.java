@@ -47,22 +47,22 @@ public class WacodisJobExecutionTask implements Callable<Void> {
 
     @Override
     public Void call() throws Exception {
-        LOGGER.debug("new thread started for process " + toolContext.getProcessID() + ", toolProcess: " + toolProcess);
+        LOGGER.debug("new thread started for process " + toolContext.getWacodisProcessID() + ", toolProcess: " + toolProcess);
 
         // publish message for execution start
-        publishToolExecutionStarted(this.jobDefinition);
+        //publishToolExecutionStarted(this.jobDefinition);
         
         //execute processing tool
         ProcessOutputDescription toolOutputDescription;
         try {
             toolOutputDescription = this.toolProcess.execute(this.toolContext);
-            LOGGER.debug("Process: " + toolContext.getProcessID() + ",executed toolProcess " + toolProcess);
+            LOGGER.debug("Process: " + toolContext.getWacodisProcessID() + ",executed toolProcess " + toolProcess);
         } catch (ExecutionException e) {
             LOGGER.warn("Process execution failed", e.getMessage());
             LOGGER.debug(e.getMessage(), e);
             
             // publish message with the failure
-            publishToolFailure(this.jobDefinition, e.getMessage());
+            //publishToolFailure(this.jobDefinition, e.getMessage());
         
             throw e;
         }
@@ -71,10 +71,10 @@ public class WacodisJobExecutionTask implements Callable<Void> {
         if (this.toolMessagePublisher != null) {
             publishToolFinished(this.jobDefinition, toolOutputDescription);
         } else {
-            LOGGER.error("newProductPublisher is null, could not publish ProductDescription message for process " + toolContext.getProcessID());
+            LOGGER.error("newProductPublisher is null, could not publish ProductDescription message for process " + toolContext.getWacodisProcessID());
         }
 
-        LOGGER.info("Process: " + toolContext.getProcessID() + ",finished execution");
+        LOGGER.info("Process: " + toolContext.getWacodisProcessID() + ",finished execution");
         
         return null; //satisfy return type Void
     }

@@ -20,19 +20,19 @@ public class ProcessContext {
 
     private Map<String, List<ResourceDescription>> inputResources;
     private List<ExpectedProcessOutput> expectedOutputs;
-    private String processID;
+    private String wacodisProcessID;
 
     public ProcessContext() {
         this.inputResources = new HashMap<>();
         this.expectedOutputs = new ArrayList<>();
     }
 
-    public String getProcessID() {
-        return processID;
+    public String getWacodisProcessID() {
+        return wacodisProcessID;
     }
 
-    public void setProcessID(String processID) {
-        this.processID = processID;
+    public void setWacodisProcessID(String wacodisProcessID) {
+        this.wacodisProcessID = wacodisProcessID;
     }
 
     public Map<String, List<ResourceDescription>> getInputResources() {

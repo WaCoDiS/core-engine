@@ -35,6 +35,8 @@ public class WacodisJobTaskStarter {
     private static final ExpectedProcessOutput PRODUCTOUTPUT = new ExpectedProcessOutput("PRODUCT", "image/geotiff");
     private static final ExpectedProcessOutput METADATAOUTPUT =  new ExpectedProcessOutput("METADATA" , "text/json");
     
+   // private static final ExpectedProcessOutput LITERALOUTPUT = new ExpectedProcessOutput("LiteralOutputData", "text/xml");
+    
     private final WPSClientSession wpsClient;
     private final ExecutorService wacodisJobExecutionService;
     private final ProcessContextBuilder contextBuilder;

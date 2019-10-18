@@ -32,8 +32,6 @@ public class RunWPSProcessIT {
         System.out.println("validate process context");
         de.wacodis.coreengine.executor.process.Process wpsProcess = new WPSProcess(wpsClient, wpsURL, "2.0.0", wpsProcessID);
         ProcessContext inputContext = buildInputContext();
-        boolean validContext = wpsProcess.validateContext(inputContext);
-        System.out.println("context is valid: " +  validContext);
         
         System.out.println("execute wps process " +  wpsProcessID);
         ProcessOutputDescription outputDescription = wpsProcess.execute(inputContext);
@@ -70,7 +68,7 @@ public class RunWPSProcessIT {
 
         inputContext.addExpectedOutput(new ExpectedProcessOutput("PRODUCT", "image/geotiff"));
 
-        inputContext.setProcessID("dummyLandCoverClassificationProcess");
+        inputContext.setWacodisProcessID("dummyLandCoverClassificationProcess");
 
         return inputContext;
     }

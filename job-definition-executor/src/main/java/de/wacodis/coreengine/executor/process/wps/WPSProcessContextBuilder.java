@@ -33,7 +33,7 @@ public class WPSProcessContextBuilder implements ProcessContextBuilder {
     public ProcessContext buildProcessContext(WacodisJobWrapper job, ExpectedProcessOutput... expectedProcessOutputs) {
         ProcessContext context = new ProcessContext();
 
-        context.setProcessID(job.getJobDefinition().getId().toString());
+        context.setWacodisProcessID(job.getJobDefinition().getId().toString());
         
         List<InputHelper> jobInputs = job.getInputs();
         
