@@ -19,7 +19,8 @@ import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
 import java.util.stream.Collectors;
 
 /**
- * execute wacodis job -> execute processing tool and publish messages (started, failed, finished) 
+ * execute wacodis job -> execute processing tool and publish messages (started,
+ * failed, finished)
  *
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
@@ -50,8 +51,8 @@ public class WacodisJobExecutionTask implements Callable<Void> {
         LOGGER.debug("new thread started for process " + toolContext.getWacodisProcessID() + ", toolProcess: " + toolProcess);
 
         // publish message for execution start
-        //publishToolExecutionStarted(this.jobDefinition);
-        
+        publishToolExecutionStarted(this.jobDefinition);
+
         //execute processing tool
         ProcessOutputDescription toolOutputDescription;
         try {
@@ -60,13 +61,13 @@ public class WacodisJobExecutionTask implements Callable<Void> {
         } catch (ExecutionException e) {
             LOGGER.warn("Process execution failed", e.getMessage());
             LOGGER.debug(e.getMessage(), e);
-            
+
             // publish message with the failure
-            //publishToolFailure(this.jobDefinition, e.getMessage());
-        
+            publishToolFailure(this.jobDefinition, e.getMessage());
+
             throw e;
         }
-        
+
         //publish toolFinished message
         if (this.toolMessagePublisher != null) {
             publishToolFinished(this.jobDefinition, toolOutputDescription);
@@ -75,7 +76,7 @@ public class WacodisJobExecutionTask implements Callable<Void> {
         }
 
         LOGGER.info("Process: " + toolContext.getWacodisProcessID() + ",finished execution");
-        
+
         return null; //satisfy return type Void
     }
 
@@ -92,7 +93,7 @@ public class WacodisJobExecutionTask implements Callable<Void> {
         toolMessagePublisher.toolFinished().send(newProductMessage);
         LOGGER.info("publish toolFinished message " + System.lineSeparator() + newProductMessage.getPayload().toString());
     }
-    
+
     private void publishToolExecutionStarted(WacodisJobDefinition jobDefinition) {
         //publish toolExecution message via broker
         WacodisJobExecution msg = new WacodisJobExecution();
@@ -103,7 +104,7 @@ public class WacodisJobExecutionTask implements Callable<Void> {
         toolMessagePublisher.toolExecution().send(MessageBuilder.withPayload(msg).build());
         LOGGER.info("publish toolExecution message " + System.lineSeparator() + msg.toString());
     }
-    
+
     private void publishToolFailure(WacodisJobDefinition jobDefinition, String failureMessage) {
         //publish toolFailure message via broker
         WacodisJobFailed msg = new WacodisJobFailed();
