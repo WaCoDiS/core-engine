@@ -461,7 +461,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
     }
 
     private boolean validateMinumumInputQuantity(InputDescription supportedInput, List<ResourceDescription> providedInput) {
-        return (providedInput.size() < supportedInput.getMinOccurs());
+        return (providedInput.size() >= supportedInput.getMinOccurs());
     }
 
     private Set<String> getMissingMandatoryInputs(Map<String, List<ResourceDescription>> providedInputResources) {
