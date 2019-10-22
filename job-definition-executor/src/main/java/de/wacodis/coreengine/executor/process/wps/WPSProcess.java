@@ -174,6 +174,11 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
 
         for (InputDescription processInput : processInputs) {
             inputID = processInput.getId();
+            
+            if(!providedInputResources.containsKey(inputID)){ //skip if no resource provided for specific wps input
+                continue;
+            }
+            
             providedResourcesForProcessInput = providedInputResources.get(inputID);
 
             if (processInput instanceof LiteralInputDescription) {
