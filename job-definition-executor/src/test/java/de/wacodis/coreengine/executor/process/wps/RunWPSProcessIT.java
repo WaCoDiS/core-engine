@@ -35,7 +35,11 @@ public class RunWPSProcessIT {
         
         System.out.println("execute wps process " +  wpsProcessID);
         ProcessOutputDescription outputDescription = wpsProcess.execute(inputContext);
-        System.out.println("Outputs:" + System.lineSeparator() + outputDescription.getOutputIdentifiers().toString());
+        
+        System.out.println("Outputs:");
+        for(String key: outputDescription.getAllOutputParameterKeys()){
+            System.out.println("key: " + key + ",, value: " +outputDescription.getOutputParameter(key));
+        }
     }
 
     private ProcessContext buildInputContext() {

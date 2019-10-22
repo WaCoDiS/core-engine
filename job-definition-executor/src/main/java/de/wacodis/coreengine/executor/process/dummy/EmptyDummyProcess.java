@@ -21,17 +21,13 @@ public class EmptyDummyProcess implements de.wacodis.coreengine.executor.process
 
     /**
      * @param context ignored, can be null
-     * @return ProcessOutputDescription with ProcessIdentifier "dummyProcess_timestamp" and empty set OutputIdentifiers
      * @throws ExecutionException  never thrown
      */
     @Override
     public ProcessOutputDescription execute(ProcessContext context) throws ExecutionException {
         LOGGER.info("executing dummy process");
         
-        ProcessOutputDescription outputDescription = new ProcessOutputDescription();
-        outputDescription.setProcessIdentifier("dummyProcess_" + System.currentTimeMillis());
-        
-        return outputDescription;
+        return new ProcessOutputDescription("emptyDummyProcess_" + System.currentTimeMillis());
     }
    
 }

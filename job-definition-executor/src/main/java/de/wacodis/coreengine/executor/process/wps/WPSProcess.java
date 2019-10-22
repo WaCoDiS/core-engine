@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.NotImplementedException;
 import org.n52.geoprocessing.wps.client.ExecuteRequestBuilder;
@@ -86,32 +84,49 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         this.isInitialized = true;
     }
 
+    /**
+     * execute wps process asynchronously
+     * @param context
+     * @return ProcessOutputDescription containing wps job id, parameters 'startTimeMillis' and 'endTimeMillis'
+     * @throws ExecutionException 
+     */
     @Override
     public ProcessOutputDescription execute(ProcessContext context) throws ExecutionException {
-        LOGGER.info("start execution of process " + context.getWacodisProcessID() + System.lineSeparator() + "wps url: " + this.wpsURL + ", wps version: " + this.wpsVersion + " wps process: " + this.wpsProcessID);
+        long startTimeMillis, endTimeMillis;
+
+        startTimeMillis = System.currentTimeMillis();
+        
+        LOGGER.info(
+                "start execution of process " + context.getWacodisProcessID() + System.lineSeparator() + "wps url: " + this.wpsURL + ", wps version: " + this.wpsVersion + " wps process: " + this.wpsProcessID);
 
         if (!this.isInitialized || !this.isConnected) {
             init();
         }
 
         //check if mandatory inputs are provided and provided inputs and its mime types are supported by wps process
-        LOGGER.debug("validate provided inputs of process " + context.getWacodisProcessID() + System.lineSeparator() + "wps url: " + this.wpsURL + ", wps version: " + this.wpsVersion + " wps process: " + this.wpsProcessID);
+        LOGGER.debug(
+                "validate provided inputs of process " + context.getWacodisProcessID() + System.lineSeparator() + "wps url: " + this.wpsURL + ", wps version: " + this.wpsVersion + " wps process: " + this.wpsProcessID);
         Optional<Throwable> inputValidationResult = validateProvidedInputResources(context.getInputResources());
+
         if (inputValidationResult.isPresent()) { //optional contains throwable if not valid
             throw new ExecutionException("unable to execute process " + context.getWacodisProcessID() + " because of unsupported provided inputs" + System.lineSeparator() + "wps url: " + this.wpsURL + ", wps version: " + this.wpsVersion + " wps process: " + this.wpsProcessID, inputValidationResult.get());
         }
 
         //check if expected outputs and its mime types are supported by wps process
-        LOGGER.debug("validate expected outputs of process " + context.getWacodisProcessID() + System.lineSeparator() + "wps url: " + this.wpsURL + ", wps version: " + this.wpsVersion + " wps process: " + this.wpsProcessID);
+        LOGGER.debug(
+                "validate expected outputs of process " + context.getWacodisProcessID() + System.lineSeparator() + "wps url: " + this.wpsURL + ", wps version: " + this.wpsVersion + " wps process: " + this.wpsProcessID);
         Optional<Throwable> expectedOutputValidationResult = validateExpectedOutputs(context.getExpectedOutputs());
+
         if (expectedOutputValidationResult.isPresent()) { //optional contains throwable if not valid
             throw new ExecutionException("unable to execute process " + context.getWacodisProcessID() + " because of unsupported expected outputs" + System.lineSeparator() + "wps url: " + this.wpsURL + ", wps version: " + this.wpsVersion + " wps process: " + this.wpsProcessID, expectedOutputValidationResult.get());
         }
 
-        LOGGER.debug("building wps execute request for process " + context.getWacodisProcessID() + System.lineSeparator() + "wps url: " + this.wpsURL + ", wps version: " + this.wpsVersion + " wps process: " + this.wpsProcessID);
+        LOGGER.debug(
+                "building wps execute request for process " + context.getWacodisProcessID() + System.lineSeparator() + "wps url: " + this.wpsURL + ", wps version: " + this.wpsVersion + " wps process: " + this.wpsProcessID);
         //get execute request
         Execute executeRequest = buildExecuteRequest(context);
         //submit execute request
+
         try {
             //exeute wps process
             LOGGER.debug("execute request for process {}: {}", context.getWacodisProcessID(), executeRequest);
@@ -120,17 +135,20 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
             LOGGER.debug("start parsing result for process {}", context.getWacodisProcessID());
             //parse wps output
             Result wpsProcessResult = parseWPSOutput(wpsOutput); //throws exception if wps output contains errors
-            Optional<Throwable> outputValidationResult = validateProcessOutput(wpsOutput, context);
-            if(outputValidationResult.isPresent()){
-                throw new ExecutionException("wps process" + this.wpsProcessDescription.getId() + " (wps job id: " + wpsProcessResult.getJobId() +") returned invalid output", outputValidationResult.get());
+            Optional<Throwable> outputValidationResult = validateProcessOutput(wpsProcessResult, context); //contains exception if invalid
+            if (outputValidationResult.isPresent()) {
+                throw new ExecutionException("wps process" + this.wpsProcessDescription.getId() + " (wps job id: " + wpsProcessResult.getJobId() + ") returned invalid output", outputValidationResult.get());
             }
-            
-            ProcessOutputDescription outputDescription = buildProcessOutput(wpsProcessResult);
             LOGGER.debug("successfully parsed result for process {}", context.getWacodisProcessID());
-            LOGGER.info("successfully executed process " + context.getWacodisProcessID());
-            return outputDescription;
+            
+            endTimeMillis = System.currentTimeMillis();
+            
+            LOGGER.info("successfully executed process " + context.getWacodisProcessID() + " after " + ((endTimeMillis - startTimeMillis)/1000) + " seconds" );
+            
+            return buildProcessOutput(wpsProcessResult, startTimeMillis, endTimeMillis);
         } catch (WPSClientException | IOException ex) {
-            throw new ExecutionException("execution of wps process for wacodis job " + this.wpsProcessID + " failed", ex);
+            endTimeMillis = System.currentTimeMillis();
+            throw new ExecutionException("execution of wps process for wacodis job " + this.wpsProcessID + " failed after " + ((endTimeMillis - startTimeMillis)/1000) + " seconds", ex);
         }
     }
 
@@ -199,14 +217,16 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
 
             providedResource = providedResources.get(i);
 
-            if (StaticDummyResource.class.isAssignableFrom(providedResource.getResource().getClass())) {
-                throw new IllegalArgumentException("illegal ressource type for complex wps input, resource for input " + complexProcessInput.getId() + " is a static resource, only non-static resources are allowed for complex inputs");
+            if (StaticDummyResource.class
+                    .isAssignableFrom(providedResource.getResource().getClass())) {
+                throw new IllegalArgumentException(
+                        "illegal ressource type for complex wps input, resource for input " + complexProcessInput.getId() + " is a static resource, only non-static resources are allowed for complex inputs");
             }
 
             try {
                 executeRequestBuilder.addComplexDataReference(complexProcessInput.getId(), providedResource.getResource().getUrl(), GML3SCHEMA, null, providedResource.getMimeType()); //ToDo make schema variable
             } catch (MalformedURLException ex) {
-                throw new IllegalArgumentException("cannot add complex input " + complexProcessInput.getId() + " as reference, invalid reference, malformed url " + providedResource.getResource().getUrl(), ex);
+                throw new IllegalArgumentException("cannot add complex input " + complexProcessInput.getId() + " as reference, invalid reference, malformed url" + providedResource.getResource().getUrl(), ex);
             }
         }
     }
@@ -228,8 +248,8 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         return (input.getMinOccurs() == 0);
     }
 
-    private boolean isResourceAvailable(InputHelper inputHelper) {
-        return (inputHelper != null && inputHelper.isResourceAvailable() && inputHelper.getResource().isPresent() && inputHelper.getResource().get().size() > 0);
+    private boolean isResourceAvailable(Map<String, List<ResourceDescription>> providedInputResources, String key) { 
+        return (providedInputResources.get(key) != null && providedInputResources.get(key).size() > 0);
     }
 
     private void connectWPS() {
@@ -276,37 +296,33 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         return wpsProcessResult;
     }
 
-    /**
-     * @param wpsProcessResult
-     * @return
-     */
-    private ProcessOutputDescription buildProcessOutput(Result wpsProcessResult) throws ExecutionException {
-        ProcessOutputDescription outputDescription = new ProcessOutputDescription();
 
-        Set<String> availableProcessOutputs = wpsProcessResult.getOutputs().stream().map(availableOutput -> availableOutput.getId()).collect(Collectors.toSet());
-        outputDescription.setOutputIdentifiers(availableProcessOutputs);
-        outputDescription.setProcessIdentifier(wpsProcessResult.getJobId()); //wps job-id
+    private ProcessOutputDescription buildProcessOutput(Result wpsProcessResult, long startTimeMillis, long endTimeMillis) { 
+        ProcessOutputDescription processOutput = new ProcessOutputDescription();
+        
+        processOutput.setProcessIdentifier(wpsProcessResult.getJobId()); //wps job-id
+        processOutput.addOutputParameter("startTimeMillis", Long.toString(startTimeMillis));
+        processOutput.addOutputParameter("endTimeMillis", Long.toString(endTimeMillis));
 
         LOGGER.debug("built process output description for wps process " + this.wpsProcessID + " (wps Job-ID: " + wpsProcessResult.getJobId() + ")");
 
-        return outputDescription;
+        return processOutput;
     }
-    
-    
-    private Optional<Throwable> validateProcessOutput(Object wpsProcessResult, ProcessContext context){      
-        try {
-            Result parsedResult = parseWPSOutput(wpsProcessResult);
-            
-            Set<String> missingProcessOutputs = getMissingProcessOutputs(parsedResult, context.getExpectedOutputs());
 
+    /**
+     * check if wps output actually contains all expected output parameters
+     *
+     * @param wpsProcessResult
+     * @param context
+     * @return Optional.empty() if valid, Optiona.of(Throwable) if invalid
+     */
+    private Optional<Throwable> validateProcessOutput(Result wpsProcessResult, ProcessContext context) {
+        Set<String> missingProcessOutputs = getMissingProcessOutputs(wpsProcessResult, context.getExpectedOutputs());
 
-            if(missingProcessOutputs.isEmpty()){
-                return Optional.empty();
-            }else{
-                return Optional.of(new ExecutionException("wps process " + this.wpsProcessDescription.getId() + " (wps job id: " + parsedResult.getJobId() +") returned but expected outputs are missing: " + missingProcessOutputs.toString()));
-            }     
-        } catch (ExecutionException ex) {
-            return Optional.of(ex); //parsing exception
+        if (missingProcessOutputs.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(new ExecutionException("wps process " + this.wpsProcessDescription.getId() + " (wps job id: " + wpsProcessResult.getJobId() + ") returned but expected outputs are missing: " + missingProcessOutputs.toString()));
         }
     }
 
@@ -344,7 +360,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         Set<String> expectedOutputIdentifiers = expectedOutputs.stream().map(expectedOutput -> expectedOutput.getIdentifier()).collect(Collectors.toSet());
 
         expectedOutputIdentifiers.removeAll(availableOutputIdentifiers); //missing entries remain in the set
-        
+
         return expectedOutputIdentifiers;
     }
 
@@ -355,7 +371,8 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         String literalValue;
         AbstractResource resource = input.getResource();
 
-        if (StaticDummyResource.class.isAssignableFrom(resource.getClass())) { //StaticResource or subtype
+        if (StaticDummyResource.class
+                .isAssignableFrom(resource.getClass())) { //StaticResource or subtype
             StaticDummyResource staticResource = (StaticDummyResource) resource;
             literalValue = staticResource.getValue();
         } else {
@@ -424,7 +441,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
                 }
 
                 if (!validateMinumumInputQuantity(supportedInput.get(), providedInputResources.get(providedInputID))) { //input quantity
-                    return Optional.of(new IllegalArgumentException("unsupported quantity " + providedInputResources.get(providedInputID).size() + " of input " + supportedInput.get().getId() + " provided, provided " + providedInputResources.size() +" resources ,minimum occurrence is " + supportedInput.get().getMinOccurs() + " for wps process " + this.wpsProcessDescription.getTitle() + " (" + this.wpsProcessDescription.getId() + ")"));
+                    return Optional.of(new IllegalArgumentException("unsupported quantity " + providedInputResources.get(providedInputID).size() + " of input " + supportedInput.get().getId() + " provided, provided " + providedInputResources.size() + " resources ,minimum occurrence is " + supportedInput.get().getMinOccurs() + " for wps process " + this.wpsProcessDescription.getTitle() + " (" + this.wpsProcessDescription.getId() + ")"));
                 }
 
             } else { //input not supported
@@ -449,7 +466,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
 
     private Set<String> getMissingMandatoryInputs(Map<String, List<ResourceDescription>> providedInputResources) {
         Set<String> mandatoryInputs = this.wpsProcessDescription.getInputs().stream().filter(supportedInput -> !isInputOptional(supportedInput)).map(supportedInput -> supportedInput.getId()).collect(Collectors.toSet()); //get IDs of all mandatory inputs
-        Set<String> providedInputs = providedInputResources.keySet().stream().filter(inputID -> (providedInputResources.get(inputID) != null && providedInputResources.get(inputID).size() > 0)).collect(Collectors.toSet()); //get all provided inputs (checks if != null && size is > 0)      
+        Set<String> providedInputs = providedInputResources.keySet().stream().filter(inputID -> isResourceAvailable(providedInputResources, inputID)).collect(Collectors.toSet()); //get all provided inputs (checks if != null && size is > 0)      
         mandatoryInputs.removeAll(providedInputs); //keep all entries that are not contained in provideInputs
 
         return mandatoryInputs;

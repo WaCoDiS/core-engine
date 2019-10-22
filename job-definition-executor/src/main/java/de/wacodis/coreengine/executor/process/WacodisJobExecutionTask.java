@@ -54,9 +54,9 @@ public class WacodisJobExecutionTask implements Callable<Void> {
         publishToolExecutionStarted(this.jobDefinition);
 
         //execute processing tool
-        ProcessOutputDescription toolOutputDescription;
+        ProcessOutputDescription processOutput;
         try {
-            toolOutputDescription = this.toolProcess.execute(this.toolContext);
+            processOutput = this.toolProcess.execute(this.toolContext);
             LOGGER.debug("Process: " + toolContext.getWacodisProcessID() + ",executed toolProcess " + toolProcess);
         } catch (ExecutionException e) {
             LOGGER.warn("Process execution failed", e.getMessage());
@@ -70,7 +70,7 @@ public class WacodisJobExecutionTask implements Callable<Void> {
 
         //publish toolFinished message
         if (this.toolMessagePublisher != null) {
-            publishToolFinished(this.jobDefinition, toolOutputDescription);
+            publishToolFinished(this.jobDefinition, processOutput);
         } else {
             LOGGER.error("newProductPublisher is null, could not publish ProductDescription message for process " + toolContext.getWacodisProcessID());
         }
@@ -80,13 +80,14 @@ public class WacodisJobExecutionTask implements Callable<Void> {
         return null; //satisfy return type Void
     }
 
-    private void publishToolFinished(WacodisJobDefinition jobDefinition, ProcessOutputDescription outputDescription) {
+    private void publishToolFinished(WacodisJobDefinition jobDefinition, ProcessOutputDescription processOuput) {
         //publish newProduct message via broker
         ProductDescription msg = new ProductDescription();
-        msg.setJobIdentifier(outputDescription.getProcessIdentifier());
+        msg.setJobIdentifier(processOuput.getProcessIdentifier());
         msg.setProductCollection(jobDefinition.getProductCollection());
         // do not publish the "METADATA" output
-        msg.setOutputIdentifiers(outputDescription.getOutputIdentifiers().stream()
+        msg.setOutputIdentifiers(this.toolContext.getExpectedOutputs().stream()
+                .map(expectedOutput -> expectedOutput.getIdentifier())
                 .filter(i -> !"METADATA".equalsIgnoreCase(i))
                 .collect(Collectors.toList()));
         Message newProductMessage = MessageBuilder.withPayload(msg).build();
