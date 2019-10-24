@@ -10,7 +10,6 @@ import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobExecution;
 import de.wacodis.core.models.WacodisJobFailed;
 import de.wacodis.coreengine.executor.exception.ExecutionException;
-import java.util.concurrent.Callable;
 import org.joda.time.DateTime;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
@@ -18,7 +17,6 @@ import org.springframework.messaging.support.MessageBuilder;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
 import java.util.stream.Collectors;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHandlingException;
 
 /**
  * execute wacodis job -> execute processing tool and publish messages (started,
@@ -26,9 +24,9 @@ import org.springframework.messaging.MessageHandlingException;
  *
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
-public class WacodisJobExecutionTask implements Callable<Void> {
+public class WacodisJobExecutor {
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WacodisJobExecutionTask.class);
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WacodisJobExecutor.class);
 
     private static final String METADATAOUTPUTIDENTIFIER = "METADATA";
 
@@ -38,14 +36,14 @@ public class WacodisJobExecutionTask implements Callable<Void> {
     private ToolMessagePublisherChannel toolMessagePublisher;
     private long messagePublishingTimeout_Millis = 10000; //default of ten seconds
 
-    public WacodisJobExecutionTask(Process toolProcess, ProcessContext toolContext, WacodisJobDefinition jobDefinition, ToolMessagePublisherChannel toolMessagePublisher) {
+    public WacodisJobExecutor(Process toolProcess, ProcessContext toolContext, WacodisJobDefinition jobDefinition, ToolMessagePublisherChannel toolMessagePublisher) {
         this.toolProcess = toolProcess;
         this.toolContext = toolContext;
         this.jobDefinition = jobDefinition;
         this.toolMessagePublisher = toolMessagePublisher;
     }
 
-    public WacodisJobExecutionTask(Process toolProcess, ProcessContext toolContext, WacodisJobDefinition jobDefinition, ToolMessagePublisherChannel toolMessagePublisher, long messagePublishingTimeout_Millis) {
+    public WacodisJobExecutor(Process toolProcess, ProcessContext toolContext, WacodisJobDefinition jobDefinition, ToolMessagePublisherChannel toolMessagePublisher, long messagePublishingTimeout_Millis) {
         this(toolProcess, toolContext, jobDefinition, toolMessagePublisher);
         this.messagePublishingTimeout_Millis = messagePublishingTimeout_Millis;
     }
@@ -66,13 +64,11 @@ public class WacodisJobExecutionTask implements Callable<Void> {
         this.messagePublishingTimeout_Millis = messagePublishingTimeout_Millis;
     }
 
-    @Override
-    public Void call() throws Exception {
-        LOGGER.debug("new thread started for process " + toolContext.getWacodisProcessID() + ", toolProcess: " + toolProcess);
-
+    public void execute() throws Exception {     
+        LOGGER.debug("start execution of process " + toolContext.getWacodisProcessID() + ", toolProcess: " + toolProcess);
+        
         //publish message for execution start
          publishMessageSync(this.toolMessagePublisher.toolExecution(), buildToolExecutionStartedMessage());
-
 
         //execute processing tool
         ProcessOutputDescription processOutput;
@@ -93,8 +89,6 @@ public class WacodisJobExecutionTask implements Callable<Void> {
         publishMessageSync(this.toolMessagePublisher.toolFinished(), buildToolFinishedMessage(processOutput));
 
         LOGGER.info("Process: " + toolContext.getWacodisProcessID() + ",finished execution");
-
-        return null; //satisfy return type Void
     }
 
     private Message<ProductDescription> buildToolFinishedMessage(ProcessOutputDescription processOuput) {
