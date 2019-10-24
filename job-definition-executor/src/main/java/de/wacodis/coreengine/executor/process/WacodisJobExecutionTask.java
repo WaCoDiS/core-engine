@@ -38,14 +38,10 @@ public class WacodisJobExecutionTask implements Callable<Void> {
     private ToolMessagePublisherChannel toolMessagePublisher;
     private long messagePublishingTimeout_Millis = 10000; //default of ten seconds
 
-    public WacodisJobExecutionTask(Process toolProcess, ProcessContext toolContext, WacodisJobDefinition jobDefinition) {
+    public WacodisJobExecutionTask(Process toolProcess, ProcessContext toolContext, WacodisJobDefinition jobDefinition, ToolMessagePublisherChannel toolMessagePublisher) {
         this.toolProcess = toolProcess;
         this.toolContext = toolContext;
         this.jobDefinition = jobDefinition;
-    }
-
-    public WacodisJobExecutionTask(Process toolProcess, ProcessContext toolContext, WacodisJobDefinition jobDefinition, ToolMessagePublisherChannel toolMessagePublisher) {
-        this(toolProcess, toolContext, jobDefinition);
         this.toolMessagePublisher = toolMessagePublisher;
     }
 
