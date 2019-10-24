@@ -144,7 +144,7 @@ public class WacodisJobExecutionTask implements Callable<Void> {
             }
 
             return isSent;
-        } catch (MessageHandlingException e) {
+        } catch (Exception e) {
             LOGGER.error("could not publish message on channel " + publishChannel.toString() + ", exception of type "+ e.getClass().getSimpleName() + " occurred, message: " + msg.getPayload().toString(), e);
             return false;
         }
