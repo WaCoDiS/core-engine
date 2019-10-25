@@ -25,10 +25,9 @@ import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.Future;
 
 /**
- *
+ * start execution of wacodis jobs asynchronously in separate threads
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 @Component
@@ -39,7 +38,7 @@ public class WacodisJobTaskStarter {
     private static final ExpectedProcessOutput PRODUCTOUTPUT = new ExpectedProcessOutput("PRODUCT", "image/geotiff");
     private static final ExpectedProcessOutput METADATAOUTPUT = new ExpectedProcessOutput("METADATA", "text/json");
 
-    private static final ExpectedProcessOutput LITERALOUTPUT = new ExpectedProcessOutput("LiteralOutputData", "text/xml");
+    //private static final ExpectedProcessOutput LITERALOUTPUT = new ExpectedProcessOutput("LiteralOutputData", "text/xml");
 
     private final WPSClientSession wpsClient;
     private final ExecutorService wacodisJobExecutionService;
@@ -109,7 +108,7 @@ public class WacodisJobTaskStarter {
         if (this.expectedProcessOutputs != null && !this.expectedProcessOutputs.isEmpty()) {
             return this.expectedProcessOutputs.toArray(new ExpectedProcessOutput[this.expectedProcessOutputs.size()]);
         } else {
-            return new ExpectedProcessOutput[]{/*PRODUCTOUTPUT, METADATAOUTPUT*/LITERALOUTPUT};
+            return new ExpectedProcessOutput[]{PRODUCTOUTPUT, METADATAOUTPUT};
         }
     }
 
