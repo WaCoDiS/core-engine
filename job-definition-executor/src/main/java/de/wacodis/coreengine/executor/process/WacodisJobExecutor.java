@@ -10,13 +10,13 @@ import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobExecution;
 import de.wacodis.core.models.WacodisJobFailed;
 import de.wacodis.coreengine.executor.exception.ExecutionException;
+import de.wacodis.coreengine.executor.messaging.ToolMessagePublisher;
 import org.joda.time.DateTime;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
 import java.util.stream.Collectors;
-import org.springframework.messaging.MessageChannel;
 
 /**
  * execute wacodis job -> execute processing tool and publish messages (started,
@@ -68,7 +68,7 @@ public class WacodisJobExecutor {
         LOGGER.debug("start execution of process " + toolContext.getWacodisProcessID() + ", toolProcess: " + toolProcess);
         
         //publish message for execution start
-         publishMessageSync(this.toolMessagePublisher.toolExecution(), buildToolExecutionStartedMessage());
+         ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolExecution(), buildToolExecutionStartedMessage(), this.messagePublishingTimeout_Millis);
 
         //execute processing tool
         ProcessOutputDescription processOutput;
@@ -80,13 +80,13 @@ public class WacodisJobExecutor {
             LOGGER.warn(e.getMessage(), e);
 
             //publish message with the failure
-            publishMessageSync(this.toolMessagePublisher.toolFailure(), buildToolFailureMessage(this.jobDefinition, e.getMessage()));
+            ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFailure(), buildToolFailureMessage(this.jobDefinition, e.getMessage()), this.messagePublishingTimeout_Millis);
 
             throw e;
         }
 
         //publish toolFinished message
-        publishMessageSync(this.toolMessagePublisher.toolFinished(), buildToolFinishedMessage(processOutput));
+        ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFinished(), buildToolFinishedMessage(processOutput), this.messagePublishingTimeout_Millis);
 
         LOGGER.info("Process: " + toolContext.getWacodisProcessID() + ",finished execution");
     }
@@ -120,27 +120,5 @@ public class WacodisJobExecutor {
         msg.setCreated(new DateTime());
         msg.setReason(errorText);
         return MessageBuilder.withPayload(msg).build();
-    }
-
-    /**
-     * @param publishChannel
-     * @param msg
-     * @param timeout
-     * @return true if message was published succesfully
-     */
-    private boolean publishMessageSync(MessageChannel publishChannel, Message msg) {
-        try {
-            boolean isSent = (this.messagePublishingTimeout_Millis >= 0) ? publishChannel.send(msg, this.messagePublishingTimeout_Millis) : publishChannel.send(msg);
-            if (isSent) {
-                LOGGER.info("published message on channel {}, message: {}", publishChannel.toString(), msg.getPayload().toString());
-            } else {
-                LOGGER.error("could not publish message on channel {}, exceeded timeout of {}, message: {}", publishChannel.toString(), this.messagePublishingTimeout_Millis, msg.getPayload().toString());
-            }
-
-            return isSent;
-        } catch (Exception e) {
-            LOGGER.error("could not publish message on channel " + publishChannel.toString() + ", exception of type "+ e.getClass().getSimpleName() + " occurred, message: " + msg.getPayload().toString(), e);
-            return false;
-        }
     }
 }
