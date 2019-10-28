@@ -50,7 +50,7 @@ public class WPSResultValidator {
         if (missingProcessOutputs.isEmpty()) {
             return Optional.empty();
         } else {
-            return Optional.of(new ExecutionException("wps process " + this.wpsProcessDescription.getId() + " (wps job id: " + wpsProcessResult.getJobId() + ") returned but expected outputs are missing: " + missingProcessOutputs.toString()));
+            return Optional.of(new IllegalArgumentException("result for wps process " + this.wpsProcessDescription.getId() + " (wps job id: " + wpsProcessResult.getJobId() + ") misses expected outputs: " + missingProcessOutputs.toString()));
         }
     }
     
