@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -27,8 +29,6 @@ import java.util.stream.Collectors;
 public class WacodisJobExecutor {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WacodisJobExecutor.class);
-
-    private static final String METADATAOUTPUTIDENTIFIER = "METADATA";
 
     private final de.wacodis.coreengine.executor.process.Process toolProcess;
     private final ProcessContext toolContext;
@@ -64,11 +64,11 @@ public class WacodisJobExecutor {
         this.messagePublishingTimeout_Millis = messagePublishingTimeout_Millis;
     }
 
-    public void execute() throws Exception {     
+    public ProcessOutputDescription execute() throws Exception {
         LOGGER.debug("start execution of process " + toolContext.getWacodisProcessID() + ", toolProcess: " + toolProcess);
-        
+
         //publish message for execution start
-         ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolExecution(), buildToolExecutionStartedMessage(), this.messagePublishingTimeout_Millis);
+        ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolExecution(), buildToolExecutionStartedMessage(), this.messagePublishingTimeout_Millis);
 
         //execute processing tool
         ProcessOutputDescription processOutput;
@@ -89,17 +89,16 @@ public class WacodisJobExecutor {
         ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFinished(), buildToolFinishedMessage(processOutput), this.messagePublishingTimeout_Millis);
 
         LOGGER.info("Process: " + toolContext.getWacodisProcessID() + ",finished execution");
+        
+        return processOutput;
     }
 
     private Message<ProductDescription> buildToolFinishedMessage(ProcessOutputDescription processOuput) {
         ProductDescription msg = new ProductDescription();
         msg.setJobIdentifier(processOuput.getProcessIdentifier());
         msg.setProductCollection(this.jobDefinition.getProductCollection());
-        // do not include the metadata output
-        msg.setOutputIdentifiers(this.toolContext.getExpectedOutputs().stream()
-                .map(expectedOutput -> expectedOutput.getIdentifier())
-                .filter(i -> !METADATAOUTPUTIDENTIFIER.equalsIgnoreCase(i))
-                .collect(Collectors.toList())); //all output identifiers except metadata
+        // do not include outputs which should no be published (e.g. Metadata output)
+        msg.setOutputIdentifiers(getPublishableExpectedOutputIdentifiers());
 
         return MessageBuilder.withPayload(msg).build();
     }
@@ -120,5 +119,21 @@ public class WacodisJobExecutor {
         msg.setCreated(new DateTime());
         msg.setReason(errorText);
         return MessageBuilder.withPayload(msg).build();
+    }
+
+    /**
+     * @return a list of all expected outputs (IDs) where isPublishedOutput is true
+     */
+    private List<String> getPublishableExpectedOutputIdentifiers() {
+        List<ExpectedProcessOutput> allExpectedOutputs = this.toolContext.getExpectedOutputs();
+
+        if (allExpectedOutputs == null || allExpectedOutputs.isEmpty()) {
+            return Collections.EMPTY_LIST;
+        } else { //return all where isPublishedOuput == true
+            return allExpectedOutputs.stream()
+                    .filter(expectedOutput -> expectedOutput.isPublishedOutput())
+                    .map(expectedOuputIdentifier -> expectedOuputIdentifier.getIdentifier())
+                    .collect(Collectors.toList()); 
+        }
     }
 }

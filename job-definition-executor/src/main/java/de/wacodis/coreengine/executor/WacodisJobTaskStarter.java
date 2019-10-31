@@ -5,6 +5,7 @@
  */
 package de.wacodis.coreengine.executor;
 
+import com.sun.xml.internal.ws.util.CompletedFuture;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
 import de.wacodis.coreengine.executor.process.wps.WPSProcess;
@@ -22,12 +23,15 @@ import de.wacodis.coreengine.executor.process.ProcessContextBuilder;
 import de.wacodis.coreengine.executor.process.wps.WPSProcessContextBuilder;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
 import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
+import de.wacodis.coreengine.executor.process.ProcessOutputDescription;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 /**
  * start execution of wacodis jobs asynchronously in separate threads
+ *
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 @Component
@@ -35,10 +39,9 @@ public class WacodisJobTaskStarter {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WacodisJobTaskStarter.class);
 
+    //default expected outputs
     private static final ExpectedProcessOutput PRODUCTOUTPUT = new ExpectedProcessOutput("PRODUCT", "image/geotiff");
-    private static final ExpectedProcessOutput METADATAOUTPUT = new ExpectedProcessOutput("METADATA", "text/json");
-
-    //private static final ExpectedProcessOutput LITERALOUTPUT = new ExpectedProcessOutput("LiteralOutputData", "text/xml");
+    private static final ExpectedProcessOutput METADATAOUTPUT = new ExpectedProcessOutput("METADATA", "text/json", false); //no published output
 
     private final WPSClientSession wpsClient;
     private final ExecutorService wacodisJobExecutionService;
@@ -55,6 +58,7 @@ public class WacodisJobTaskStarter {
         this.wpsClient = WPSClientSession.getInstance();
         this.wacodisJobExecutionService = Executors.newCachedThreadPool();
         this.contextBuilder = new WPSProcessContextBuilder();
+        this.expectedProcessOutputs = getDefaultExpectedOutputs();
     }
 
     public void setWpsConfig(WebProcessingServiceConfiguration wpsConfig) {
@@ -76,40 +80,37 @@ public class WacodisJobTaskStarter {
     public void executeWacodisJob(WacodisJobWrapper job) {
         String toolProcessID = job.getJobDefinition().getProcessingTool();
         String wacodisJobID = job.getJobDefinition().getId().toString();
-        ProcessContext toolContext = this.contextBuilder.buildProcessContext(job, getExpectedProcessOutputsOrDefaults()); //expect default outputs (as long as jobdefinition provides no output information)
+        ProcessContext toolContext = this.contextBuilder.buildProcessContext(job, this.expectedProcessOutputs.toArray(new ExpectedProcessOutput[this.expectedProcessOutputs.size()]));
 
         Process toolProcess = new WPSProcess(this.wpsClient, this.wpsConfig.getUri(), this.wpsConfig.getVersion(), toolProcessID);
 
         LOGGER.info("execute Wacodis Job " + wacodisJobID + " using processing tool " + toolProcessID);
         LOGGER.debug("start thread for process " + wacodisJobID);
-        
+
         //submit job async
-        CompletableFuture.supplyAsync(() -> { 
+        CompletableFuture<ProcessOutputDescription> processFuture = CompletableFuture.supplyAsync(() -> {
             try {
                 LOGGER.info("start new thread for Wacodis Job " + wacodisJobID + ", toolProcess: " + toolProcess);
-                
-                new WacodisJobExecutor(toolProcess, toolContext, job.getJobDefinition(), this.newProductPublisher).execute();
-                return null; //satisfy return type
+
+                ProcessOutputDescription processOutput = new WacodisJobExecutor(toolProcess, toolContext, job.getJobDefinition(), this.newProductPublisher).execute();
+                return processOutput;
             } catch (Exception e) { //catch all exception from async job, rethrow as CompetionException and handle in exceptionally()
                 throw new CompletionException(e);
             }
-        }, wacodisJobExecutionService).exceptionally((Throwable t) -> { //handle exceptions that were raised by async job
-            LOGGER.error("execution of wacodis job failed, WacodisJobID: " + wacodisJobID + " toolID: " + toolProcessID, t.getCause());
+        }, wacodisJobExecutionService);
+
+        //handle process output if async job was successfully executed        
+        processFuture.thenAccept((ProcessOutputDescription processOutput)
+                -> {
+            LOGGER.info("execution of wacodis job returned successfully, WacodisJobID: {}, toolID: {}, processOutput: ", wacodisJobID, toolProcessID, processOutput.toString());
+        }).exceptionally((Throwable t) -> { //handle exceptions that were raised by async job
+            LOGGER.error("execution of wacodis job failed, WacodisJobID: " + wacodisJobID + ",toolID: " + toolProcessID, t.getCause());
             return null; //satisfy return type
         });
     }
 
-    /**
-     * @return default values (PRODUCTOUTPUT, METADATAOUTPUT) if
-     * this.expecteProcessOutputs not set or empty, otherwise
-     * this.expectedProcessOutput (as array)
-     */
-    private ExpectedProcessOutput[] getExpectedProcessOutputsOrDefaults() {
-        if (this.expectedProcessOutputs != null && !this.expectedProcessOutputs.isEmpty()) {
-            return this.expectedProcessOutputs.toArray(new ExpectedProcessOutput[this.expectedProcessOutputs.size()]);
-        } else {
-            return new ExpectedProcessOutput[]{PRODUCTOUTPUT, METADATAOUTPUT};
-        }
+    private List<ExpectedProcessOutput> getDefaultExpectedOutputs() {
+        return Arrays.asList(new ExpectedProcessOutput[]{PRODUCTOUTPUT, METADATAOUTPUT});
     }
 
     @PreDestroy

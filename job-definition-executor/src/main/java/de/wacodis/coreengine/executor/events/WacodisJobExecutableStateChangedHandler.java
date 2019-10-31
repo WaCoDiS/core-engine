@@ -32,10 +32,6 @@ public class WacodisJobExecutableStateChangedHandler implements ApplicationListe
     public WacodisJobTaskStarter getJobExecutor() {
         return jobExecutor;
     }
-
-    public void setJobExecutor(WacodisJobTaskStarter jobExecutor) {
-        this.jobExecutor = jobExecutor;
-    }
     
     @PostConstruct
     public void init() {

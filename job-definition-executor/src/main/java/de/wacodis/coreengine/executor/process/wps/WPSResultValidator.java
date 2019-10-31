@@ -5,7 +5,6 @@
  */
 package de.wacodis.coreengine.executor.process.wps;
 
-import de.wacodis.coreengine.executor.exception.ExecutionException;
 import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ProcessContext;
 import java.util.List;

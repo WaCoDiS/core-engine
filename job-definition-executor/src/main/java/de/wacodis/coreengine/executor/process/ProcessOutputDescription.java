@@ -103,4 +103,9 @@ public class ProcessOutputDescription {
     public Set<String> getAllOutputParameterKeys(){
         return this.outputParmeters.keySet();
     }
+
+    @Override
+    public String toString() {
+        return "ProcessOutputDescription{" + "processIdentifier=" + processIdentifier + ", outputParmeters=" + outputParmeters + '}';
+    }
 }

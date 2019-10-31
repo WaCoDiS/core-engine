@@ -13,10 +13,37 @@ public class ExpectedProcessOutput {
     
     private final String identifier;
     private final String mimeType;
+    private boolean publishedOutput = true;  //true by default
+    
 
+    /**
+     * isPublishOutput is true by default
+     * @param identifier
+     * @param mimeType 
+     */
     public ExpectedProcessOutput(String identifier, String mimeType) {
         this.identifier = identifier;
         this.mimeType = (mimeType != null) ? mimeType : "";
+    }
+
+    /**
+     * @param identifier
+     * @param mimeType
+     * @param publishedOutput 
+     */
+    public ExpectedProcessOutput(String identifier, String mimeType, boolean publishedOutput) {
+        this(identifier, mimeType);
+        this.publishedOutput = publishedOutput;
+    }
+    
+    
+
+    public boolean isPublishedOutput() {
+        return publishedOutput;
+    }
+
+    public void setPublishedOutput(boolean publishedOutput) {
+        this.publishedOutput = publishedOutput;
     }
 
     public String getIdentifier() {
@@ -26,10 +53,10 @@ public class ExpectedProcessOutput {
     public String getMimeType() {
         return mimeType;
     }
+    
 
     @Override
     public String toString() {
-        return "ExpectedProcessOutput{" + "identifier=" + identifier + ", mimeType=" + mimeType + '}';
+        return "ExpectedProcessOutput{" + "identifier=" + identifier + ", mimeType=" + mimeType + ", publishedOutput=" + publishedOutput + '}';
     }
-    
 }
