@@ -15,6 +15,7 @@ public class ResourceDescription {
     
     private final AbstractResource resource;
     private final String mimeType;
+    private Schema schema;
 
     public ResourceDescription(AbstractResource resource, String mimeType) {
         this.resource = resource;
@@ -29,11 +30,16 @@ public class ResourceDescription {
         return mimeType;
     }
 
+    public Schema getSchema() {
+        return schema;
+    }
+
+    public void setSchema(Schema schema) {
+        this.schema = schema;
+    }
+
     @Override
     public String toString() {
-        return "ResourceDescription{" + "resource=" + resource + ", mimeType=" + mimeType + '}';
+        return "ResourceDescription{" + "resource=" + resource + ", mimeType=" + mimeType + ", schema=" + schema + '}';
     }
-    
-    
-    
 }
