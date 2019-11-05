@@ -5,7 +5,6 @@
  */
 package de.wacodis.coreengine.executor;
 
-import com.sun.xml.internal.ws.util.CompletedFuture;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
 import de.wacodis.coreengine.executor.process.wps.WPSProcess;
