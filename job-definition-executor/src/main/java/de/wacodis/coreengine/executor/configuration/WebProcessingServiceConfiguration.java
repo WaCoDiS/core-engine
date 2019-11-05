@@ -5,6 +5,8 @@
  */
 package de.wacodis.coreengine.executor.configuration;
 
+import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
+import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +22,7 @@ public class WebProcessingServiceConfiguration {
     
     private String uri;
     private String version;
+    private List<ExpectedProcessOutput> expectedProcessOutputs;
 
     public String getUri() {
         return uri;
@@ -35,5 +38,13 @@ public class WebProcessingServiceConfiguration {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public List<ExpectedProcessOutput> getExpectedProcessOutputs() {
+        return expectedProcessOutputs;
+    }
+
+    public void setExpectedProcessOutputs(List<ExpectedProcessOutput> expectedProcessOutputs) {
+        this.expectedProcessOutputs = expectedProcessOutputs;
     }
 }

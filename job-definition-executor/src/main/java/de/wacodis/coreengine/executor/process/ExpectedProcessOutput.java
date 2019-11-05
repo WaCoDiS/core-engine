@@ -11,11 +11,16 @@ package de.wacodis.coreengine.executor.process;
  */
 public class ExpectedProcessOutput {
     
-    private final String identifier;
-    private final String mimeType;
+    private String identifier;
+    private String mimeType;
     private boolean publishedOutput = true;  //true by default
-    
 
+    /**
+     * no args constructor (needed for configuration)
+     */
+    public ExpectedProcessOutput() {
+    }
+    
     /**
      * isPublishOutput is true by default
      * @param identifier
@@ -36,8 +41,6 @@ public class ExpectedProcessOutput {
         this.publishedOutput = publishedOutput;
     }
     
-    
-
     public boolean isPublishedOutput() {
         return publishedOutput;
     }
@@ -53,7 +56,14 @@ public class ExpectedProcessOutput {
     public String getMimeType() {
         return mimeType;
     }
-    
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
 
     @Override
     public String toString() {

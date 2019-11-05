@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import javax.annotation.PostConstruct;
 
 /**
  * start execution of wacodis jobs asynchronously in separate threads
@@ -57,7 +58,6 @@ public class WacodisJobTaskStarter {
         this.wpsClient = WPSClientSession.getInstance();
         this.wacodisJobExecutionService = Executors.newCachedThreadPool();
         this.contextBuilder = new WPSProcessContextBuilder();
-        this.expectedProcessOutputs = getDefaultExpectedOutputs();
     }
 
     public void setWpsConfig(WebProcessingServiceConfiguration wpsConfig) {
@@ -108,8 +108,20 @@ public class WacodisJobTaskStarter {
         });
     }
 
-    private List<ExpectedProcessOutput> getDefaultExpectedOutputs() {
-        return Arrays.asList(new ExpectedProcessOutput[]{PRODUCTOUTPUT, METADATAOUTPUT});
+    @PostConstruct
+    private void initExpectedProcessOutputs() {
+        List<ExpectedProcessOutput> selectedOutputs;
+        
+        if (this.expectedProcessOutputs != null) {
+            selectedOutputs = this.expectedProcessOutputs;
+        } else if (this.wpsConfig.getExpectedProcessOutputs() != null) {
+          selectedOutputs = this.wpsConfig.getExpectedProcessOutputs();
+        } else {
+            selectedOutputs = Arrays.asList(new ExpectedProcessOutput[]{PRODUCTOUTPUT, METADATAOUTPUT});
+        }
+        
+        this.expectedProcessOutputs = selectedOutputs;
+        LOGGER.debug("set expected process outputs to: " + selectedOutputs.toString());
     }
 
     @PreDestroy
