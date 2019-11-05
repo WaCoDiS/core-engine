@@ -50,6 +50,7 @@ spring:
     wps:
         uri: http://localhost:8083/wps
         version: 2.0.0
+        #define expected process outputs, otherwise defaults (PRODUCT, METADATA) are used
         #expectedProcessOutputs:
          #   - identifier: PRODUCT
          #     mimeType: image/geotiff
