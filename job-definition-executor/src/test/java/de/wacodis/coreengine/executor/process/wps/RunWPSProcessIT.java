@@ -64,7 +64,7 @@ public class RunWPSProcessIT {
 
         AbstractResource refData = new GetResource();
         refData.setMethod(AbstractResource.MethodEnum.GETRESOURCE);
-        refData.setUrl("http://geoprocessing.demo.52north.org:8080/geoserver/wfs?SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=topp:tasmania_roads&SRS=EPSG:32632&OUTPUTFORMAT=GML3");
+        refData.setUrl("https://wacodis.demo.52north.org/geoserver/traindata/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=traindata:wacodis_traindata&maxFeatures=50&outputFormat=gml3");
 
         ProcessContext inputContext = new ProcessContext();
         inputContext.addInputResource("OPTICAL_IMAGES_TYPE", new ResourceDescription(opticalImgType, "text/xml"));
