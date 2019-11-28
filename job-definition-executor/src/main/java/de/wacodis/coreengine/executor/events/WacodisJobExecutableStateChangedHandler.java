@@ -31,7 +31,7 @@ public class WacodisJobExecutableStateChangedHandler implements ApplicationListe
 
     public WacodisJobTaskStarter getJobExecutor() {
         return jobExecutor;
-    }
+    } 
     
     @PostConstruct
     public void init() {
@@ -42,15 +42,14 @@ public class WacodisJobExecutableStateChangedHandler implements ApplicationListe
     public void onApplicationEvent(WacodisJobExecutableEvent event) {
         WacodisJobWrapper job = event.getJob();
         WacodisJobDefinition jobDef = job.getJobDefinition();
-        
+
         LOGGER.debug("received " + event.getClass().getSimpleName() + " for job " + jobDef.getId().toString());
         
         if(event.getStatus().equals(EvaluationStatus.EXECUTABLE)){
             LOGGER.info("EvaluationStatus for job " + jobDef.getId().toString() + " is "  + event.getStatus().toString() + ", handle job execution");
         
             //execute wacodis job
-            this.jobExecutor.executeWacodisJob(job);
-               
+            this.jobExecutor.executeWacodisJob(job); 
         }else{
             LOGGER.warn("EvaluationStatus for job " + jobDef.getId().toString() + " is "  + event.getStatus().toString() + ", excpected " + EvaluationStatus.EXECUTABLE.toString() + ", job is not executed");
         }

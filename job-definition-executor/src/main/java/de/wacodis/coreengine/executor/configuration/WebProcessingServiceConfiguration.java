@@ -6,6 +6,7 @@
 package de.wacodis.coreengine.executor.configuration;
 
 import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
+import de.wacodis.coreengine.executor.process.Schema;
 import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -23,7 +24,13 @@ public class WebProcessingServiceConfiguration {
     private String uri;
     private String version;
     private List<ExpectedProcessOutput> expectedProcessOutputs;
+    private String defaultResourceMimeType;
+    private Schema defaultResourceSchema;
 
+    public WebProcessingServiceConfiguration() {
+    }
+
+    
     public String getUri() {
         return uri;
     }
@@ -46,5 +53,21 @@ public class WebProcessingServiceConfiguration {
 
     public void setExpectedProcessOutputs(List<ExpectedProcessOutput> expectedProcessOutputs) {
         this.expectedProcessOutputs = expectedProcessOutputs;
+    }
+
+    public String getDefaultResourceMimeType() {
+        return defaultResourceMimeType;
+    }
+
+    public void setDefaultResourceMimeType(String defaultResourceMimeType) {
+        this.defaultResourceMimeType = defaultResourceMimeType;
+    }
+
+    public Schema getDefaultResourceSchema() {
+        return defaultResourceSchema;
+    }
+
+    public void setDefaultResourceSchema(Schema defaultResourceSchema) {
+        this.defaultResourceSchema = defaultResourceSchema;
     }
 }

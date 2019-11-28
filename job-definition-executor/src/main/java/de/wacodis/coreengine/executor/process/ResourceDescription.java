@@ -22,6 +22,13 @@ public class ResourceDescription {
         this.mimeType = (mimeType != null) ? mimeType : "";
     }
 
+    public ResourceDescription(AbstractResource resource, String mimeType, Schema schema) {
+        this(resource, mimeType);
+        this.schema = schema;
+    }
+    
+    
+
     public AbstractResource getResource() {
         return resource;
     }

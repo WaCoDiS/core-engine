@@ -6,7 +6,6 @@
 package de.wacodis.coreengine.executor.process.wps;
 
 import de.wacodis.core.models.AbstractResource;
-import de.wacodis.coreengine.executor.process.Schema;
 import de.wacodis.core.models.extension.staticresource.StaticDummyResource;
 import de.wacodis.coreengine.executor.exception.ExecutionException;
 import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
@@ -212,7 +211,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
             }
 
             try {
-                executeRequestBuilder.addComplexDataReference(complexProcessInput.getId(), providedResource.getResource().getUrl(), Schema.GML3.getSchemalLocation(), null, providedResource.getMimeType()); //ToDo make schema variable
+                executeRequestBuilder.addComplexDataReference(complexProcessInput.getId(), providedResource.getResource().getUrl(), providedResource.getSchema().getSchemalLocation(), null, providedResource.getMimeType());
             } catch (MalformedURLException ex) {
                 throw new IllegalArgumentException("cannot add complex input " + complexProcessInput.getId() + " as reference, invalid reference, malformed url" + providedResource.getResource().getUrl(), ex);
             }
