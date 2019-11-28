@@ -17,7 +17,7 @@ public class Schema {
     public final static Schema GML3 = new Schema("GML3", "http://schemas.opengis.net/gml/3.1.1/base/feature.xsd");
       
     private String name;
-    private String schemalLocation;
+    private String schemaLocation;
 
     public Schema() {
     }
@@ -28,17 +28,17 @@ public class Schema {
 
     public Schema(String name, String schemalLocation) {
         this.name = name;
-        this.schemalLocation = schemalLocation;
+        this.schemaLocation = schemalLocation;
     }
 
     
     
-    public String getSchemalLocation() {
-        return schemalLocation;
+    public String getSchemaLocation() {
+        return schemaLocation;
     }
 
-    public void setSchemalLocation(String schemalLocation) {
-        this.schemalLocation = schemalLocation;
+    public void setSchemaLocation(String schemaLocation) {
+        this.schemaLocation = schemaLocation;
     } 
 
     public String getName() {
@@ -52,6 +52,6 @@ public class Schema {
 
     @Override
     public String toString() {
-        return "Schema{" + "name=" + name + ", schemalLocation=" + schemalLocation + '}';
+        return "Schema{" + "name=" + name + ", schemalLocation=" + schemaLocation + '}';
     }
 }

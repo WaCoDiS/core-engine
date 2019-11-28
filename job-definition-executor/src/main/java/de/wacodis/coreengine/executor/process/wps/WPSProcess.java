@@ -211,7 +211,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
             }
 
             try {
-                executeRequestBuilder.addComplexDataReference(complexProcessInput.getId(), providedResource.getResource().getUrl(), providedResource.getSchema().getSchemalLocation(), null, providedResource.getMimeType());
+                executeRequestBuilder.addComplexDataReference(complexProcessInput.getId(), providedResource.getResource().getUrl(), providedResource.getSchema().getSchemaLocation(), null, providedResource.getMimeType());
             } catch (MalformedURLException ex) {
                 throw new IllegalArgumentException("cannot add complex input " + complexProcessInput.getId() + " as reference, invalid reference, malformed url" + providedResource.getResource().getUrl(), ex);
             }
