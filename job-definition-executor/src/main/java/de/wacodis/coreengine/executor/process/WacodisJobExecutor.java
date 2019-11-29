@@ -16,8 +16,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -89,7 +91,7 @@ public class WacodisJobExecutor {
         ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFinished(), buildToolFinishedMessage(processOutput), this.messagePublishingTimeout_Millis);
 
         LOGGER.info("Process: " + toolContext.getWacodisProcessID() + ",finished execution");
-        
+
         return processOutput;
     }
 
@@ -97,6 +99,9 @@ public class WacodisJobExecutor {
         ProductDescription msg = new ProductDescription();
         msg.setJobIdentifier(processOuput.getProcessIdentifier());
         msg.setProductCollection(this.jobDefinition.getProductCollection());
+        msg.setProcessingTool(this.jobDefinition.getProcessingTool());
+        //get list of all IDs of dataenvelopes that correspond with a input resource
+        msg.setDataEnvelopeReferences(listOriginDataEnvelopes());
         // do not include outputs which should no be published (e.g. Metadata output)
         msg.setOutputIdentifiers(getPublishableExpectedOutputIdentifiers());
 
@@ -122,7 +127,8 @@ public class WacodisJobExecutor {
     }
 
     /**
-     * @return a list of all expected outputs (IDs) where isPublishedOutput is true
+     * @return a list of all expected outputs (IDs) where isPublishedOutput is
+     * true
      */
     private List<String> getPublishableExpectedOutputIdentifiers() {
         List<ExpectedProcessOutput> allExpectedOutputs = this.toolContext.getExpectedOutputs();
@@ -133,7 +139,32 @@ public class WacodisJobExecutor {
             return allExpectedOutputs.stream()
                     .filter(expectedOutput -> expectedOutput.isPublishedOutput())
                     .map(expectedOuputIdentifier -> expectedOuputIdentifier.getIdentifier())
-                    .collect(Collectors.toList()); 
+                    .collect(Collectors.toList());
         }
+    }
+
+    /**
+     * @return list of unique DataEnvelope References
+     */
+    private List<String> listOriginDataEnvelopes() {
+        List<String> dataEnvelopeReferences = new ArrayList<>();
+        Map<String, List<ResourceDescription>> inputResources = this.toolContext.getInputResources(); //resources for all inputs
+
+        for (String key : inputResources.keySet()) {
+            List<ResourceDescription> resources = inputResources.get(key); //resources for one input
+
+            for (ResourceDescription resource : resources) { //single resources
+                
+                if (resource.getResource().getDataEnvelopeId() != null && !resource.getResource().getDataEnvelopeId().isEmpty()) {
+                    String originEnvelopeID = resource.getResource().getDataEnvelopeId();
+                    
+                    if (!dataEnvelopeReferences.contains(originEnvelopeID)) { //only add once
+                        dataEnvelopeReferences.add(originEnvelopeID);
+                    }
+                }
+            }
+        }
+
+        return dataEnvelopeReferences;
     }
 }
