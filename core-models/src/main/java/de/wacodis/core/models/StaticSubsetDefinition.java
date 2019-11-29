@@ -12,9 +12,10 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * StaticSubsetDefinition
+ * contains information for defining a subset definition for static process inputs
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-07-17T16:39:44.153+02:00[Europe/Berlin]")
+@ApiModel(description = "contains information for defining a subset definition for static process inputs")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-11-29T14:35:09.895+01:00[Europe/Berlin]")
 
 public class StaticSubsetDefinition extends AbstractSubsetDefinition implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -65,7 +66,8 @@ public class StaticSubsetDefinition extends AbstractSubsetDefinition implements 
    * string encoded value 
    * @return value
   **/
-  @ApiModelProperty(value = "string encoded value ")
+  @ApiModelProperty(required = true, value = "string encoded value ")
+  @NotNull
 
 
   public String getValue() {
@@ -85,7 +87,8 @@ public class StaticSubsetDefinition extends AbstractSubsetDefinition implements 
    * determines how the value should be interpreted 
    * @return dataType
   **/
-  @ApiModelProperty(value = "determines how the value should be interpreted ")
+  @ApiModelProperty(required = true, value = "determines how the value should be interpreted ")
+  @NotNull
 
 
   public DataTypeEnum getDataType() {

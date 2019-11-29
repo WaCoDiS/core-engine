@@ -19,9 +19,10 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * WacodisJobDefinition
+ * contains information about a WaCoDiS Job that will be used for scheduling, preparing and executing certain processes
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-07-16T11:30:07.111+02:00[Europe/Berlin]")
+@ApiModel(description = "contains information about a WaCoDiS Job that will be used for scheduling, preparing and executing certain processes")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-11-29T14:35:09.895+01:00[Europe/Berlin]")
 
 public class WacodisJobDefinition  implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -167,10 +168,10 @@ public class WacodisJobDefinition  implements Serializable {
   }
 
   /**
-   * A generic use case reference. This can be used to refer to the use cases identified during the initial phase of WaCoDiS 
+   * a generic use case reference. This can be used to refer to the use cases identified during the initial phase of WaCoDiS 
    * @return useCase
   **/
-  @ApiModelProperty(value = "A generic use case reference. This can be used to refer to the use cases identified during the initial phase of WaCoDiS ")
+  @ApiModelProperty(value = "a generic use case reference. This can be used to refer to the use cases identified during the initial phase of WaCoDiS ")
 
 
   public String getUseCase() {

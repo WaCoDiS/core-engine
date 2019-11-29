@@ -5,22 +5,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import de.wacodis.core.models.AbstractDataEnvelopeAreaOfInterest;
 import de.wacodis.core.models.AbstractDataEnvelopeTimeFrame;
-import de.wacodis.core.models.AbstractSubsetDefinition;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.ArrayList;
-import java.util.List;
+import org.joda.time.DateTime;
 import java.io.Serializable;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * represents POST body parameters that will be used for requesting dataset resource from the DataAccess API
+ * extensible datatype for metadata that describes the processing of a product 
  */
-@ApiModel(description = "represents POST body parameters that will be used for requesting dataset resource from the DataAccess API")
+@ApiModel(description = "extensible datatype for metadata that describes the processing of a product ")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-11-29T14:35:09.895+01:00[Europe/Berlin]")
 
-public class DataAccessResourceSearchBody  implements Serializable {
+public class ProcessingMetadata  implements Serializable {
   private static final long serialVersionUID = 1L;
 
   @JsonProperty("areaOfInterest")
@@ -29,11 +27,10 @@ public class DataAccessResourceSearchBody  implements Serializable {
   @JsonProperty("timeFrame")
   private AbstractDataEnvelopeTimeFrame timeFrame = null;
 
-  @JsonProperty("inputs")
-  @Valid
-  private List<AbstractSubsetDefinition> inputs = new ArrayList<AbstractSubsetDefinition>();
+  @JsonProperty("created")
+  private DateTime created = null;
 
-  public DataAccessResourceSearchBody areaOfInterest(AbstractDataEnvelopeAreaOfInterest areaOfInterest) {
+  public ProcessingMetadata areaOfInterest(AbstractDataEnvelopeAreaOfInterest areaOfInterest) {
     this.areaOfInterest = areaOfInterest;
     return this;
   }
@@ -55,7 +52,7 @@ public class DataAccessResourceSearchBody  implements Serializable {
     this.areaOfInterest = areaOfInterest;
   }
 
-  public DataAccessResourceSearchBody timeFrame(AbstractDataEnvelopeTimeFrame timeFrame) {
+  public ProcessingMetadata timeFrame(AbstractDataEnvelopeTimeFrame timeFrame) {
     this.timeFrame = timeFrame;
     return this;
   }
@@ -77,31 +74,26 @@ public class DataAccessResourceSearchBody  implements Serializable {
     this.timeFrame = timeFrame;
   }
 
-  public DataAccessResourceSearchBody inputs(List<AbstractSubsetDefinition> inputs) {
-    this.inputs = inputs;
-    return this;
-  }
-
-  public DataAccessResourceSearchBody addInputsItem(AbstractSubsetDefinition inputsItem) {
-    this.inputs.add(inputsItem);
+  public ProcessingMetadata created(DateTime created) {
+    this.created = created;
     return this;
   }
 
   /**
-   * Get inputs
-   * @return inputs
+   * time on which the dataset was created 
+   * @return created
   **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "time on which the dataset was created ")
   @NotNull
 
   @Valid
 
-  public List<AbstractSubsetDefinition> getInputs() {
-    return inputs;
+  public DateTime getCreated() {
+    return created;
   }
 
-  public void setInputs(List<AbstractSubsetDefinition> inputs) {
-    this.inputs = inputs;
+  public void setCreated(DateTime created) {
+    this.created = created;
   }
 
 
@@ -113,25 +105,25 @@ public class DataAccessResourceSearchBody  implements Serializable {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    DataAccessResourceSearchBody dataAccessResourceSearchBody = (DataAccessResourceSearchBody) o;
-    return Objects.equals(this.areaOfInterest, dataAccessResourceSearchBody.areaOfInterest) &&
-        Objects.equals(this.timeFrame, dataAccessResourceSearchBody.timeFrame) &&
-        Objects.equals(this.inputs, dataAccessResourceSearchBody.inputs);
+    ProcessingMetadata processingMetadata = (ProcessingMetadata) o;
+    return Objects.equals(this.areaOfInterest, processingMetadata.areaOfInterest) &&
+        Objects.equals(this.timeFrame, processingMetadata.timeFrame) &&
+        Objects.equals(this.created, processingMetadata.created);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(areaOfInterest, timeFrame, inputs);
+    return Objects.hash(areaOfInterest, timeFrame, created);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class DataAccessResourceSearchBody {\n");
+    sb.append("class ProcessingMetadata {\n");
     
     sb.append("    areaOfInterest: ").append(toIndentedString(areaOfInterest)).append("\n");
     sb.append("    timeFrame: ").append(toIndentedString(timeFrame)).append("\n");
-    sb.append("    inputs: ").append(toIndentedString(inputs)).append("\n");
+    sb.append("    created: ").append(toIndentedString(created)).append("\n");
     sb.append("}");
     return sb.toString();
   }
