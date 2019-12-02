@@ -56,6 +56,7 @@ public class WacodisJobExecutorIT {
         WebProcessingServiceConfiguration wpsConfig = new WebProcessingServiceConfiguration();
         wpsConfig.setVersion("2.0.0");
         wpsConfig.setUri(WPSURL);
+        wpsConfig.setDefaultResourceMimeType("text/xml");
         
         this.eventHandler.getJobExecutor().setWpsConfig(wpsConfig);
         //set outputs
@@ -81,6 +82,7 @@ public class WacodisJobExecutorIT {
         staticResource.setValue("this is a static resource");
         AbstractResource abstractResource = new AbstractResource();
         abstractResource.setUrl("test input");
+        abstractResource.setDataEnvelopeId("someID");
         
         WacodisJobWrapper jobWrapper = new WacodisJobWrapper(jobDef, DateTime.now());
         InputHelper literalInputHelper = jobWrapper.getInputs().get(0); //only one input

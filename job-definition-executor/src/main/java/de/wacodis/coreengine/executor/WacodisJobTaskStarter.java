@@ -57,7 +57,7 @@ public class WacodisJobTaskStarter {
     public WacodisJobTaskStarter() {
         this.wpsClient = WPSClientSession.getInstance();
         this.wacodisJobExecutionService = Executors.newCachedThreadPool();
-        this.contextBuilder = new WPSProcessContextBuilder();
+        this.contextBuilder = new WPSProcessContextBuilder(wpsConfig);
     }
 
     public void setWpsConfig(WebProcessingServiceConfiguration wpsConfig) {

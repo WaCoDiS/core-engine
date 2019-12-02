@@ -7,11 +7,8 @@ package de.wacodis.coreengine.executor.process.wps;
 
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
-import de.wacodis.core.models.CatalogueSubsetDefinition;
-import de.wacodis.core.models.CopernicusSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
-import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
 import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ProcessContext;
