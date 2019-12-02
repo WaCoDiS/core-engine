@@ -100,8 +100,8 @@ public class WacodisJobExecutor {
         msg.setJobIdentifier(processOuput.getProcessIdentifier());
         msg.setProductCollection(this.jobDefinition.getProductCollection());
         msg.setProcessingTool(this.jobDefinition.getProcessingTool());
-        //get list of all IDs of dataenvelopes that correspond with a input resource
-        msg.setDataEnvelopeReferences(listOriginDataEnvelopes());
+        //get list of all IDs of distinct dataenvelopes that correspond with a input resource
+        msg.setDataEnvelopeReferences(processOuput.getOriginDataEnvelopes());
         // do not include outputs which should no be published (e.g. Metadata output)
         msg.setOutputIdentifiers(getPublishableExpectedOutputIdentifiers());
 
@@ -143,28 +143,4 @@ public class WacodisJobExecutor {
         }
     }
 
-    /**
-     * @return list of unique DataEnvelope References
-     */
-    private List<String> listOriginDataEnvelopes() {
-        List<String> dataEnvelopeReferences = new ArrayList<>();
-        Map<String, List<ResourceDescription>> inputResources = this.toolContext.getInputResources(); //resources for all inputs
-
-        for (String key : inputResources.keySet()) {
-            List<ResourceDescription> resources = inputResources.get(key); //resources for one input
-
-            for (ResourceDescription resource : resources) { //single resources
-                
-                if (resource.getResource().getDataEnvelopeId() != null && !resource.getResource().getDataEnvelopeId().isEmpty()) {
-                    String originEnvelopeID = resource.getResource().getDataEnvelopeId();
-                    
-                    if (!dataEnvelopeReferences.contains(originEnvelopeID)) { //only add once
-                        dataEnvelopeReferences.add(originEnvelopeID);
-                    }
-                }
-            }
-        }
-
-        return dataEnvelopeReferences;
-    }
 }

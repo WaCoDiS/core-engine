@@ -80,9 +80,10 @@ public class WacodisJobExecutorIT {
         jobDef.setProductCollection("testMosaic");
         StaticDummyResource staticResource = new StaticDummyResource();
         staticResource.setValue("this is a static resource");
+        staticResource.setDataEnvelopeId("someDataEnvelopeID");
         AbstractResource abstractResource = new AbstractResource();
         abstractResource.setUrl("test input");
-        abstractResource.setDataEnvelopeId("someID");
+        abstractResource.setDataEnvelopeId("someOtherDataEnvelopeID");
         
         WacodisJobWrapper jobWrapper = new WacodisJobWrapper(jobDef, DateTime.now());
         InputHelper literalInputHelper = jobWrapper.getInputs().get(0); //only one input

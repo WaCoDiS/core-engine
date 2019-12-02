@@ -14,9 +14,11 @@ import de.wacodis.coreengine.executor.process.ProcessOutputDescription;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.commons.lang.NotImplementedException;
 import org.n52.geoprocessing.wps.client.ExecuteRequestBuilder;
 import org.n52.geoprocessing.wps.client.WPSClientException;
@@ -104,8 +106,9 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
 
         LOGGER.debug(
                 "building wps execute request for process " + context.getWacodisProcessID() + System.lineSeparator() + "wps url: " + this.wpsURL + ", wps version: " + this.wpsVersion + " wps process: " + this.wpsProcessID);
-        //get execute request
-        Execute executeRequest = buildExecuteRequest(context);
+        //build execute request
+        WPSProcessInput processInput = buildExecuteRequest(context);
+        Execute executeRequest = processInput.getExecute();
         //submit execute request
 
         try {
@@ -127,20 +130,21 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
 
             LOGGER.info("successfully executed process " + context.getWacodisProcessID() + " after " + ((endTimeMillis - startTimeMillis) / 1000) + " seconds");
 
-            return buildProcessOutput(wpsProcessResult, startTimeMillis, endTimeMillis);
+            return buildProcessOutput(wpsProcessResult, processInput.getOriginDataEnvelopes(), startTimeMillis, endTimeMillis);
         } catch (WPSClientException | IOException ex) {
             endTimeMillis = System.currentTimeMillis();
             throw new ExecutionException("execution of wps process for wacodis job " + this.wpsProcessID + " failed after " + ((endTimeMillis - startTimeMillis) / 1000) + " seconds", ex);
         }
     }
 
-    private Execute buildExecuteRequest(ProcessContext context) {
+    private WPSProcessInput buildExecuteRequest(ProcessContext context) {
         ExecuteRequestBuilder executeRequestBuilder = new ExecuteRequestBuilder(this.wpsProcessDescription);
-        setWPSInputs(context.getInputResources(), executeRequestBuilder); //register inputs
+        List <String> originDataEnvelopes = setWPSInputs(context.getInputResources(), executeRequestBuilder); //register inputs
         setExpectedWPSOutputs(context.getExpectedOutputs(), executeRequestBuilder); //register expected outputs
         executeRequestBuilder.setAsynchronousExecute(); //make execute request asynchronous
+        Execute execute = executeRequestBuilder.getExecute();
 
-        return executeRequestBuilder.getExecute();
+        return new WPSProcessInput(execute, originDataEnvelopes);
     }
 
     /**
@@ -149,7 +153,8 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
      * @param availableInputs
      * @param executeRequestBuilder
      */
-    private void setWPSInputs(Map<String, List<ResourceDescription>> providedInputResources, ExecuteRequestBuilder executeRequestBuilder) {
+    private List<String> setWPSInputs(Map<String, List<ResourceDescription>> providedInputResources, ExecuteRequestBuilder executeRequestBuilder) {
+        List<String> originDataEnvelopes = new ArrayList<>();
         List<InputDescription> processInputs = this.wpsProcessDescription.getInputs();
         List<ResourceDescription> providedResourcesForProcessInput;
         String inputID;
@@ -164,22 +169,35 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
             providedResourcesForProcessInput = providedInputResources.get(inputID);
 
             if (processInput instanceof LiteralInputDescription) {
-                setLiteralInputData((LiteralInputDescription) processInput, providedResourcesForProcessInput, executeRequestBuilder);
+                List<String> literalInputOrigins = setLiteralInputData((LiteralInputDescription) processInput, providedResourcesForProcessInput, executeRequestBuilder);
+                originDataEnvelopes.addAll(literalInputOrigins);
             } else if (processInput instanceof ComplexInputDescription) {
-                setComplexInputData((ComplexInputDescription) processInput, providedResourcesForProcessInput, executeRequestBuilder);
+                List<String> complexInputOrigins = setComplexInputData((ComplexInputDescription) processInput, providedResourcesForProcessInput, executeRequestBuilder);
+                originDataEnvelopes.addAll(complexInputOrigins);
             } else if (processInput instanceof BoundingBoxInputDescription) {
+                //ToDo
                 throw new NotImplementedException("cannot handle wps input " + inputID + ": BoundingBoxInput not supported");
+                //originDataEnvelopes.addAll(bboxInputOrigins);
             } else {
                 throw new IllegalArgumentException("cannot handle wps input " + inputID + ": input is of unknown type " + processInput.getClass().getSimpleName());
             }
 
         }
-
+        
+        
+        return removeDuplicates(originDataEnvelopes);
     }
 
-    private void setLiteralInputData(LiteralInputDescription literalProcessInput, List<ResourceDescription> providedResources, ExecuteRequestBuilder executeRequestBuilder) {
+    /**
+     * @param literalProcessInput
+     * @param providedResources
+     * @param executeRequestBuilder
+     * @return list of data envelope id's that correspond with the used input resources
+     */
+    private List<String> setLiteralInputData(LiteralInputDescription literalProcessInput, List<ResourceDescription> providedResources, ExecuteRequestBuilder executeRequestBuilder) {
         String literalValue;
         ResourceDescription providedResource;
+        List<String> originDataEnvelopes = new ArrayList<>();
 
         for (int i = 0; i < providedResources.size(); i++) {
             if (literalProcessInput.getMaxOccurs() < (i + 1)) {
@@ -190,11 +208,16 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
             providedResource = providedResources.get(i);
             literalValue = getValueFromResource(providedResource);
             executeRequestBuilder.addLiteralData(literalProcessInput.getId(), literalValue, "", "", providedResource.getMimeType()); //input id, value, schema, encoding, mime type 
+            
+            originDataEnvelopes.add(providedResource.getResource().getDataEnvelopeId()); //add data envelope id to list of origins of process result
         }
+        
+        return originDataEnvelopes;
     }
 
-    private void setComplexInputData(ComplexInputDescription complexProcessInput, List<ResourceDescription> providedResources, ExecuteRequestBuilder executeRequestBuilder) {
+    private List<String> setComplexInputData(ComplexInputDescription complexProcessInput, List<ResourceDescription> providedResources, ExecuteRequestBuilder executeRequestBuilder) {
         ResourceDescription providedResource;
+        List<String> originDataEnvelopes = new ArrayList<>();
 
         for (int i = 0; i < providedResources.size(); i++) {
             if (complexProcessInput.getMaxOccurs() < (i + 1)) {
@@ -215,7 +238,11 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
             } catch (MalformedURLException ex) {
                 throw new IllegalArgumentException("cannot add complex input " + complexProcessInput.getId() + " as reference, invalid reference, malformed url" + providedResource.getResource().getUrl(), ex);
             }
+            
+            originDataEnvelopes.add(providedResource.getResource().getDataEnvelopeId());
         }
+        
+        return originDataEnvelopes;
     }
 
     /**
@@ -275,10 +302,11 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         return wpsProcessResult;
     }
 
-    private ProcessOutputDescription buildProcessOutput(Result wpsProcessResult, long startTimeMillis, long endTimeMillis) {
+    private ProcessOutputDescription buildProcessOutput(Result wpsProcessResult, List<String> originDataEnvelopes, long startTimeMillis, long endTimeMillis) {
         ProcessOutputDescription processOutput = new ProcessOutputDescription();
 
         processOutput.setProcessIdentifier(wpsProcessResult.getJobId()); //wps job-id
+        processOutput.setOriginDataEnvelopes(originDataEnvelopes);
         processOutput.addOutputParameter("startTimeMillis", Long.toString(startTimeMillis));
         processOutput.addOutputParameter("endTimeMillis", Long.toString(endTimeMillis));
 
@@ -360,5 +388,36 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         }
         
         return Optional.empty();
+    }
+    
+    /**
+     * @param <T>
+     * @param list
+     * @return list of unique items
+     */
+    private <T> List<T> removeDuplicates(List<T> list){
+        return list.stream().distinct().collect(Collectors.toList());
+    }
+    
+    
+    /**
+     * helper class to wrap execute request and origin data envelopes
+     */
+    private class WPSProcessInput{
+        private final Execute execute;
+        private final List<String> originDataEnvelopes;
+
+        public WPSProcessInput(Execute execute, List<String> originDataEnvelopes) {
+            this.execute = execute;
+            this.originDataEnvelopes = originDataEnvelopes;
+        }
+
+        public Execute getExecute() {
+            return execute;
+        }
+
+        public List<String> getOriginDataEnvelopes() {
+            return originDataEnvelopes;
+        }
     }
 }
