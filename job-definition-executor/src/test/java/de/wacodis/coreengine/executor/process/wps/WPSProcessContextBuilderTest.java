@@ -23,7 +23,6 @@ import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
-import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
@@ -52,8 +51,7 @@ public class WPSProcessContextBuilderTest {
         resourceList.add(resource);
         jobWrapper.getInputs().get(0).setResource(resourceList);
 
-        WPSProcessContextBuilder contextBuilder = new WPSProcessContextBuilder();
-        ReflectionTestUtils.setField(contextBuilder, "wpsConfig", getWPSConfig()); //inject usually autowired config
+        WPSProcessContextBuilder contextBuilder = new WPSProcessContextBuilder(getWPSConfig());
         ProcessContext context = contextBuilder.buildProcessContext(jobWrapper);
         
         Set<String> contextInputs = context.getInputResources().keySet();
