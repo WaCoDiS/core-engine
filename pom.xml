@@ -30,6 +30,7 @@
         <cron-utils.version>8.0.0</cron-utils.version>
         <h2.version>1.4.196</h2.version>
         <wps-client-lib.version>1.0.4-SNAPSHOT</wps-client-lib.version>
+        <maven.javadocplugin.version>3.1.1</maven.javadocplugin.version>
     </properties>
     
     <dependencyManagement>
@@ -109,7 +110,7 @@
                 <version>${wps-client-lib.version}</version>
             </dependency>
 		
-             <!-- Test Dependencies  --> 
+            <!-- Test Dependencies  --> 
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-test</artifactId>
@@ -124,6 +125,24 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire-plugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven.javadocplugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <phase>
+                            package
+                        </phase>
+                        <configuration>
+                            <doclint>none</doclint>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
