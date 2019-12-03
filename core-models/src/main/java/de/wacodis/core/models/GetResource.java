@@ -11,7 +11,7 @@ import javax.validation.constraints.*;
  * resource that can be fetched with a HTTP GET request
  */
 @ApiModel(description = "resource that can be fetched with a HTTP GET request")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-11-29T15:03:40.466+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-03T09:55:06.704+01:00[Europe/Berlin]")
 
 public class GetResource extends AbstractResource implements Serializable {
   private static final long serialVersionUID = 1L;

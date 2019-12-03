@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import de.wacodis.core.models.AbstractBackend;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
 import java.io.Serializable;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -15,7 +17,7 @@ import javax.validation.constraints.*;
  * contains specific information about a ArcGIS Image Server product backend
  */
 @ApiModel(description = "contains specific information about a ArcGIS Image Server product backend")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-11-29T15:03:40.466+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-03T09:55:06.704+01:00[Europe/Berlin]")
 
 public class ArcGISImageServerBackend extends AbstractBackend implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -27,7 +29,8 @@ public class ArcGISImageServerBackend extends AbstractBackend implements Seriali
   private String baseUrl = null;
 
   @JsonProperty("serviceTypes")
-  private String serviceTypes = null;
+  @Valid
+  private List<String> serviceTypes = new ArrayList<String>();
 
   public ArcGISImageServerBackend productCollection(String productCollection) {
     this.productCollection = productCollection;
@@ -71,8 +74,13 @@ public class ArcGISImageServerBackend extends AbstractBackend implements Seriali
     this.baseUrl = baseUrl;
   }
 
-  public ArcGISImageServerBackend serviceTypes(String serviceTypes) {
+  public ArcGISImageServerBackend serviceTypes(List<String> serviceTypes) {
     this.serviceTypes = serviceTypes;
+    return this;
+  }
+
+  public ArcGISImageServerBackend addServiceTypesItem(String serviceTypesItem) {
+    this.serviceTypes.add(serviceTypesItem);
     return this;
   }
 
@@ -84,11 +92,11 @@ public class ArcGISImageServerBackend extends AbstractBackend implements Seriali
   @NotNull
 
 
-  public String getServiceTypes() {
+  public List<String> getServiceTypes() {
     return serviceTypes;
   }
 
-  public void setServiceTypes(String serviceTypes) {
+  public void setServiceTypes(List<String> serviceTypes) {
     this.serviceTypes = serviceTypes;
   }
 

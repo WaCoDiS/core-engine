@@ -13,7 +13,7 @@ import javax.validation.constraints.*;
  * represents a paginated reponse
  */
 @ApiModel(description = "represents a paginated reponse")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-11-29T15:03:40.466+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-03T09:55:06.704+01:00[Europe/Berlin]")
 
 public class PaginatedResponse  implements Serializable {
   private static final long serialVersionUID = 1L;

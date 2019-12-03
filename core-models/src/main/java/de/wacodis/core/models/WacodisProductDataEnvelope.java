@@ -21,7 +21,7 @@ import javax.validation.constraints.*;
  * describes specific metadata information about a product dataset created from the WaCoDiS System
  */
 @ApiModel(description = "describes specific metadata information about a product dataset created from the WaCoDiS System")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-11-29T15:03:40.466+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-03T09:55:06.704+01:00[Europe/Berlin]")
 
 public class WacodisProductDataEnvelope extends AbstractDataEnvelope implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -36,8 +36,8 @@ public class WacodisProductDataEnvelope extends AbstractDataEnvelope implements 
   @JsonProperty("process")
   private String process = null;
 
-  @JsonProperty("backendType")
-  private AbstractBackend backendType = null;
+  @JsonProperty("serviceDefinition")
+  private AbstractBackend serviceDefinition = null;
 
   public WacodisProductDataEnvelope productType(String productType) {
     this.productType = productType;
@@ -109,25 +109,25 @@ public class WacodisProductDataEnvelope extends AbstractDataEnvelope implements 
     this.process = process;
   }
 
-  public WacodisProductDataEnvelope backendType(AbstractBackend backendType) {
-    this.backendType = backendType;
+  public WacodisProductDataEnvelope serviceDefinition(AbstractBackend serviceDefinition) {
+    this.serviceDefinition = serviceDefinition;
     return this;
   }
 
   /**
-   * Get backendType
-   * @return backendType
+   * Get serviceDefinition
+   * @return serviceDefinition
   **/
   @ApiModelProperty(value = "")
 
   @Valid
 
-  public AbstractBackend getBackendType() {
-    return backendType;
+  public AbstractBackend getServiceDefinition() {
+    return serviceDefinition;
   }
 
-  public void setBackendType(AbstractBackend backendType) {
-    this.backendType = backendType;
+  public void setServiceDefinition(AbstractBackend serviceDefinition) {
+    this.serviceDefinition = serviceDefinition;
   }
 
 
@@ -143,13 +143,13 @@ public class WacodisProductDataEnvelope extends AbstractDataEnvelope implements 
     return Objects.equals(this.productType, wacodisProductDataEnvelope.productType) &&
         Objects.equals(this.dataEnvelopeReferences, wacodisProductDataEnvelope.dataEnvelopeReferences) &&
         Objects.equals(this.process, wacodisProductDataEnvelope.process) &&
-        Objects.equals(this.backendType, wacodisProductDataEnvelope.backendType) &&
+        Objects.equals(this.serviceDefinition, wacodisProductDataEnvelope.serviceDefinition) &&
         super.equals(o);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(productType, dataEnvelopeReferences, process, backendType, super.hashCode());
+    return Objects.hash(productType, dataEnvelopeReferences, process, serviceDefinition, super.hashCode());
   }
 
   @Override
@@ -160,7 +160,7 @@ public class WacodisProductDataEnvelope extends AbstractDataEnvelope implements 
     sb.append("    productType: ").append(toIndentedString(productType)).append("\n");
     sb.append("    dataEnvelopeReferences: ").append(toIndentedString(dataEnvelopeReferences)).append("\n");
     sb.append("    process: ").append(toIndentedString(process)).append("\n");
-    sb.append("    backendType: ").append(toIndentedString(backendType)).append("\n");
+    sb.append("    serviceDefinition: ").append(toIndentedString(serviceDefinition)).append("\n");
     sb.append("}");
     return sb.toString();
   }
