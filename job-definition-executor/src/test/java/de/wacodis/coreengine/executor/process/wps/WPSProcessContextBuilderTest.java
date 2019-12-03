@@ -7,13 +7,14 @@ package de.wacodis.coreengine.executor.process.wps;
 
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
-import de.wacodis.core.models.CatalogueSubsetDefinition;
-import de.wacodis.core.models.CopernicusSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
-import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
+import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
+import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ProcessContext;
+import de.wacodis.coreengine.executor.process.Schema;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -50,9 +51,9 @@ public class WPSProcessContextBuilderTest {
         resourceList.add(resource);
         jobWrapper.getInputs().get(0).setResource(resourceList);
 
-        WPSProcessContextBuilder contextBuilder = new WPSProcessContextBuilder();
+        WPSProcessContextBuilder contextBuilder = new WPSProcessContextBuilder(getWPSConfig());
         ProcessContext context = contextBuilder.buildProcessContext(jobWrapper);
-
+        
         Set<String> contextInputs = context.getInputResources().keySet();
         List<String> jobWrapperInputs = jobWrapper.getInputs().stream().map(helper -> helper.getSubsetDefinitionIdentifier()).collect(Collectors.toList());
         assertTrue(context.getInputResources().keySet().containsAll(jobWrapperInputs));
@@ -69,7 +70,20 @@ public class WPSProcessContextBuilderTest {
         WPSProcessContextBuilder contextBuilder = new WPSProcessContextBuilder();
         ProcessContext context = contextBuilder.buildProcessContext(jobWrapper);
 
-        assertEquals(processID.toString(), context.getProcessID());
+        assertEquals(processID.toString(), context.getWacodisProcessID());
     }
 
+    private WebProcessingServiceConfiguration getWPSConfig() {
+        ExpectedProcessOutput productOutput = new ExpectedProcessOutput("PRODUCT", "image/geotiff");
+        ExpectedProcessOutput metadataOutput = new ExpectedProcessOutput("METADATA", "text/json", false);
+        WebProcessingServiceConfiguration config = new WebProcessingServiceConfiguration();
+
+        config.setVersion("2.0.0");
+        config.setUri("localhost:8080");
+        config.setDefaultResourceMimeType("text/xml");
+        config.setDefaultResourceSchema(Schema.GML3);
+        config.setExpectedProcessOutputs(Arrays.asList(new ExpectedProcessOutput[]{metadataOutput, productOutput}));
+
+        return config;
+    }
 }

@@ -15,7 +15,7 @@ import javax.validation.constraints.*;
  * message to indicate a finished wps job 
  */
 @ApiModel(description = "message to indicate a finished wps job ")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-07-16T11:30:07.111+02:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-03T09:55:06.704+01:00[Europe/Berlin]")
 
 public class ProductDescription  implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -29,6 +29,13 @@ public class ProductDescription  implements Serializable {
 
   @JsonProperty("productCollection")
   private String productCollection = null;
+
+  @JsonProperty("dataEnvelopeReferences")
+  @Valid
+  private List<String> dataEnvelopeReferences = new ArrayList<String>();
+
+  @JsonProperty("processingTool")
+  private String processingTool = null;
 
   public ProductDescription jobIdentifier(String jobIdentifier) {
     this.jobIdentifier = jobIdentifier;
@@ -98,6 +105,53 @@ public class ProductDescription  implements Serializable {
     this.productCollection = productCollection;
   }
 
+  public ProductDescription dataEnvelopeReferences(List<String> dataEnvelopeReferences) {
+    this.dataEnvelopeReferences = dataEnvelopeReferences;
+    return this;
+  }
+
+  public ProductDescription addDataEnvelopeReferencesItem(String dataEnvelopeReferencesItem) {
+    this.dataEnvelopeReferences.add(dataEnvelopeReferencesItem);
+    return this;
+  }
+
+  /**
+   * Get dataEnvelopeReferences
+   * @return dataEnvelopeReferences
+  **/
+  @ApiModelProperty(required = true, value = "")
+  @NotNull
+
+
+  public List<String> getDataEnvelopeReferences() {
+    return dataEnvelopeReferences;
+  }
+
+  public void setDataEnvelopeReferences(List<String> dataEnvelopeReferences) {
+    this.dataEnvelopeReferences = dataEnvelopeReferences;
+  }
+
+  public ProductDescription processingTool(String processingTool) {
+    this.processingTool = processingTool;
+    return this;
+  }
+
+  /**
+   * Get processingTool
+   * @return processingTool
+  **/
+  @ApiModelProperty(required = true, value = "")
+  @NotNull
+
+
+  public String getProcessingTool() {
+    return processingTool;
+  }
+
+  public void setProcessingTool(String processingTool) {
+    this.processingTool = processingTool;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -110,12 +164,14 @@ public class ProductDescription  implements Serializable {
     ProductDescription productDescription = (ProductDescription) o;
     return Objects.equals(this.jobIdentifier, productDescription.jobIdentifier) &&
         Objects.equals(this.outputIdentifiers, productDescription.outputIdentifiers) &&
-        Objects.equals(this.productCollection, productDescription.productCollection);
+        Objects.equals(this.productCollection, productDescription.productCollection) &&
+        Objects.equals(this.dataEnvelopeReferences, productDescription.dataEnvelopeReferences) &&
+        Objects.equals(this.processingTool, productDescription.processingTool);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(jobIdentifier, outputIdentifiers, productCollection);
+    return Objects.hash(jobIdentifier, outputIdentifiers, productCollection, dataEnvelopeReferences, processingTool);
   }
 
   @Override
@@ -126,6 +182,8 @@ public class ProductDescription  implements Serializable {
     sb.append("    jobIdentifier: ").append(toIndentedString(jobIdentifier)).append("\n");
     sb.append("    outputIdentifiers: ").append(toIndentedString(outputIdentifiers)).append("\n");
     sb.append("    productCollection: ").append(toIndentedString(productCollection)).append("\n");
+    sb.append("    dataEnvelopeReferences: ").append(toIndentedString(dataEnvelopeReferences)).append("\n");
+    sb.append("    processingTool: ").append(toIndentedString(processingTool)).append("\n");
     sb.append("}");
     return sb.toString();
   }

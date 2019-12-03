@@ -282,7 +282,7 @@ public class BasicDataEnvelopeMatcherTest {
         WacodisProductSubsetDefinition productSubset = getProductSubsetDefinition();
         WacodisJobWrapper wrapper = getJobWrapper();
 
-        productSubset.setProductCollection("someCollection");
+        productSubset.setProductType("unknown product type");
         assertFalse(this.matcher.match(productEnvelope, wrapper, productSubset));
     }
 
@@ -513,8 +513,6 @@ public class BasicDataEnvelopeMatcherTest {
     private WacodisProductDataEnvelope getProductDataEnvelope() {
         WacodisProductDataEnvelope productEnvelope = new WacodisProductDataEnvelope();
         productEnvelope.setSourceType(AbstractDataEnvelope.SourceTypeEnum.WACODISPRODUCTDATAENVELOPE);
-        productEnvelope.serviceName("http://example.com");
-        productEnvelope.setProductCollection("testCollection");
         productEnvelope.setProductType("testType");
 
         AbstractDataEnvelopeAreaOfInterest aoi = new AbstractDataEnvelopeAreaOfInterest();

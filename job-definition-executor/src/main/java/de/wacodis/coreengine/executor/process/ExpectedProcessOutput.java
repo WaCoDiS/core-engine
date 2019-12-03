@@ -11,12 +11,42 @@ package de.wacodis.coreengine.executor.process;
  */
 public class ExpectedProcessOutput {
     
-    private final String identifier;
-    private final String mimeType;
+    private String identifier;
+    private String mimeType;
+    private boolean publishedOutput = true;  //true by default
 
+    /**
+     * no args constructor (needed for configuration)
+     */
+    public ExpectedProcessOutput() {
+    }
+    
+    /**
+     * isPublishOutput is true by default
+     * @param identifier
+     * @param mimeType 
+     */
     public ExpectedProcessOutput(String identifier, String mimeType) {
         this.identifier = identifier;
         this.mimeType = (mimeType != null) ? mimeType : "";
+    }
+
+    /**
+     * @param identifier
+     * @param mimeType
+     * @param publishedOutput 
+     */
+    public ExpectedProcessOutput(String identifier, String mimeType, boolean publishedOutput) {
+        this(identifier, mimeType);
+        this.publishedOutput = publishedOutput;
+    }
+    
+    public boolean isPublishedOutput() {
+        return publishedOutput;
+    }
+
+    public void setPublishedOutput(boolean publishedOutput) {
+        this.publishedOutput = publishedOutput;
     }
 
     public String getIdentifier() {
@@ -27,9 +57,16 @@ public class ExpectedProcessOutput {
         return mimeType;
     }
 
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
     @Override
     public String toString() {
-        return "ExpectedProcessOutput{" + "identifier=" + identifier + ", mimeType=" + mimeType + '}';
+        return "ExpectedProcessOutput{" + "identifier=" + identifier + ", mimeType=" + mimeType + ", publishedOutput=" + publishedOutput + '}';
     }
-    
 }
