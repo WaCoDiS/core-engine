@@ -82,7 +82,7 @@ public class WacodisJobExecutor {
             LOGGER.warn(e.getMessage(), e);
 
             //publish message with the failure
-            ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFailure(), buildToolFailureMessage(this.jobDefinition, e.getMessage()), this.messagePublishingTimeout_Millis);
+            ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFailure(), buildToolFailureMessage(e.getMessage()), this.messagePublishingTimeout_Millis);
 
             throw e;
         }
@@ -104,25 +104,30 @@ public class WacodisJobExecutor {
         msg.setDataEnvelopeReferences(processOuput.getOriginDataEnvelopes());
         // do not include outputs which should no be published (e.g. Metadata output)
         msg.setOutputIdentifiers(getPublishableExpectedOutputIdentifiers());
+        msg.setWacodisJobIdentifier(this.jobDefinition.getId().toString());
 
         return MessageBuilder.withPayload(msg).build();
     }
 
     private Message<WacodisJobExecution> buildToolExecutionStartedMessage() {
         WacodisJobExecution msg = new WacodisJobExecution();
-        msg.setJobIdentifier(this.jobDefinition.getId().toString());
+        //TODO remove from schema since it is impossible to set wps job identifer before wps started process
+        msg.setJobIdentifier(null);
         msg.setCreated(new DateTime());
         msg.setProcessingTool(this.jobDefinition.getProcessingTool());
         msg.setProductCollection(this.jobDefinition.getProductCollection());
+        msg.setWacodisJobIdentifier(this.jobDefinition.getId().toString());
 
         return MessageBuilder.withPayload(msg).build();
     }
 
-    private Message<WacodisJobFailed> buildToolFailureMessage(WacodisJobDefinition jobDefinition, String errorText) {
+    private Message<WacodisJobFailed> buildToolFailureMessage( String errorText) {
         WacodisJobFailed msg = new WacodisJobFailed();
-        msg.setJobIdentifier(jobDefinition.getId().toString());
+        //TODO include wps job identifier (not wacodis job identifier)
+        msg.setJobIdentifier(null);
         msg.setCreated(new DateTime());
         msg.setReason(errorText);
+        msg.setWacodisJobIdentifier(jobDefinition.getId().toString());
         return MessageBuilder.withPayload(msg).build();
     }
 
