@@ -14,7 +14,7 @@ import javax.validation.constraints.*;
  * message to indicate a job execution is being started 
  */
 @ApiModel(description = "message to indicate a job execution is being started ")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-03T09:55:06.704+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-06T14:41:56.509+01:00[Europe/Berlin]")
 
 public class WacodisJobFailed  implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -27,6 +27,9 @@ public class WacodisJobFailed  implements Serializable {
 
   @JsonProperty("created")
   private DateTime created = null;
+
+  @JsonProperty("wacodisJobIdentifier")
+  private String wacodisJobIdentifier = null;
 
   public WacodisJobFailed jobIdentifier(String jobIdentifier) {
     this.jobIdentifier = jobIdentifier;
@@ -92,6 +95,27 @@ public class WacodisJobFailed  implements Serializable {
     this.created = created;
   }
 
+  public WacodisJobFailed wacodisJobIdentifier(String wacodisJobIdentifier) {
+    this.wacodisJobIdentifier = wacodisJobIdentifier;
+    return this;
+  }
+
+  /**
+   * wacodis job identifer (from WacodisJobDefinition, not wps job identifier!) 
+   * @return wacodisJobIdentifier
+  **/
+  @ApiModelProperty(required = true, value = "wacodis job identifer (from WacodisJobDefinition, not wps job identifier!) ")
+  @NotNull
+
+
+  public String getWacodisJobIdentifier() {
+    return wacodisJobIdentifier;
+  }
+
+  public void setWacodisJobIdentifier(String wacodisJobIdentifier) {
+    this.wacodisJobIdentifier = wacodisJobIdentifier;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -104,12 +128,13 @@ public class WacodisJobFailed  implements Serializable {
     WacodisJobFailed wacodisJobFailed = (WacodisJobFailed) o;
     return Objects.equals(this.jobIdentifier, wacodisJobFailed.jobIdentifier) &&
         Objects.equals(this.reason, wacodisJobFailed.reason) &&
-        Objects.equals(this.created, wacodisJobFailed.created);
+        Objects.equals(this.created, wacodisJobFailed.created) &&
+        Objects.equals(this.wacodisJobIdentifier, wacodisJobFailed.wacodisJobIdentifier);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(jobIdentifier, reason, created);
+    return Objects.hash(jobIdentifier, reason, created, wacodisJobIdentifier);
   }
 
   @Override
@@ -120,6 +145,7 @@ public class WacodisJobFailed  implements Serializable {
     sb.append("    jobIdentifier: ").append(toIndentedString(jobIdentifier)).append("\n");
     sb.append("    reason: ").append(toIndentedString(reason)).append("\n");
     sb.append("    created: ").append(toIndentedString(created)).append("\n");
+    sb.append("    wacodisJobIdentifier: ").append(toIndentedString(wacodisJobIdentifier)).append("\n");
     sb.append("}");
     return sb.toString();
   }

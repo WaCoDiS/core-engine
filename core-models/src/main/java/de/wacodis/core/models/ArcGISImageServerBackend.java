@@ -17,7 +17,7 @@ import javax.validation.constraints.*;
  * contains specific information about a ArcGIS Image Server product backend
  */
 @ApiModel(description = "contains specific information about a ArcGIS Image Server product backend")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-03T09:55:06.704+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-06T14:41:56.509+01:00[Europe/Berlin]")
 
 public class ArcGISImageServerBackend extends AbstractBackend implements Serializable {
   private static final long serialVersionUID = 1L;
