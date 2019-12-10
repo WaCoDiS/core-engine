@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.UUID;
 import org.joda.time.DateTime;
 import java.io.Serializable;
 import javax.validation.Valid;
@@ -14,13 +15,13 @@ import javax.validation.constraints.*;
  * message to indicate a job execution is being started 
  */
 @ApiModel(description = "message to indicate a job execution is being started ")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-06T14:41:56.509+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-10T10:50:17.158+01:00[Europe/Berlin]")
 
 public class WacodisJobExecution  implements Serializable {
   private static final long serialVersionUID = 1L;
 
   @JsonProperty("jobIdentifier")
-  private String jobIdentifier = null;
+  private UUID jobIdentifier = null;
 
   @JsonProperty("processingTool")
   private String processingTool = null;
@@ -31,27 +32,25 @@ public class WacodisJobExecution  implements Serializable {
   @JsonProperty("created")
   private DateTime created = null;
 
-  @JsonProperty("wacodisJobIdentifier")
-  private String wacodisJobIdentifier = null;
-
-  public WacodisJobExecution jobIdentifier(String jobIdentifier) {
+  public WacodisJobExecution jobIdentifier(UUID jobIdentifier) {
     this.jobIdentifier = jobIdentifier;
     return this;
   }
 
   /**
-   * wps job identifier 
+   * wacodis job identifer (from WacodisJobDefinition, not wps job identifier!) 
    * @return jobIdentifier
   **/
-  @ApiModelProperty(required = true, value = "wps job identifier ")
+  @ApiModelProperty(required = true, value = "wacodis job identifer (from WacodisJobDefinition, not wps job identifier!) ")
   @NotNull
 
+  @Valid
 
-  public String getJobIdentifier() {
+  public UUID getJobIdentifier() {
     return jobIdentifier;
   }
 
-  public void setJobIdentifier(String jobIdentifier) {
+  public void setJobIdentifier(UUID jobIdentifier) {
     this.jobIdentifier = jobIdentifier;
   }
 
@@ -106,8 +105,7 @@ public class WacodisJobExecution  implements Serializable {
    * time on which the execution was invoked 
    * @return created
   **/
-  @ApiModelProperty(required = true, value = "time on which the execution was invoked ")
-  @NotNull
+  @ApiModelProperty(value = "time on which the execution was invoked ")
 
   @Valid
 
@@ -117,27 +115,6 @@ public class WacodisJobExecution  implements Serializable {
 
   public void setCreated(DateTime created) {
     this.created = created;
-  }
-
-  public WacodisJobExecution wacodisJobIdentifier(String wacodisJobIdentifier) {
-    this.wacodisJobIdentifier = wacodisJobIdentifier;
-    return this;
-  }
-
-  /**
-   * wacodis job identifer (from WacodisJobDefinition, not wps job identifier!) 
-   * @return wacodisJobIdentifier
-  **/
-  @ApiModelProperty(required = true, value = "wacodis job identifer (from WacodisJobDefinition, not wps job identifier!) ")
-  @NotNull
-
-
-  public String getWacodisJobIdentifier() {
-    return wacodisJobIdentifier;
-  }
-
-  public void setWacodisJobIdentifier(String wacodisJobIdentifier) {
-    this.wacodisJobIdentifier = wacodisJobIdentifier;
   }
 
 
@@ -153,13 +130,12 @@ public class WacodisJobExecution  implements Serializable {
     return Objects.equals(this.jobIdentifier, wacodisJobExecution.jobIdentifier) &&
         Objects.equals(this.processingTool, wacodisJobExecution.processingTool) &&
         Objects.equals(this.productCollection, wacodisJobExecution.productCollection) &&
-        Objects.equals(this.created, wacodisJobExecution.created) &&
-        Objects.equals(this.wacodisJobIdentifier, wacodisJobExecution.wacodisJobIdentifier);
+        Objects.equals(this.created, wacodisJobExecution.created);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(jobIdentifier, processingTool, productCollection, created, wacodisJobIdentifier);
+    return Objects.hash(jobIdentifier, processingTool, productCollection, created);
   }
 
   @Override
@@ -171,7 +147,6 @@ public class WacodisJobExecution  implements Serializable {
     sb.append("    processingTool: ").append(toIndentedString(processingTool)).append("\n");
     sb.append("    productCollection: ").append(toIndentedString(productCollection)).append("\n");
     sb.append("    created: ").append(toIndentedString(created)).append("\n");
-    sb.append("    wacodisJobIdentifier: ").append(toIndentedString(wacodisJobIdentifier)).append("\n");
     sb.append("}");
     return sb.toString();
   }

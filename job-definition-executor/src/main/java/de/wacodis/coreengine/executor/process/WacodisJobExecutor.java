@@ -104,7 +104,8 @@ public class WacodisJobExecutor {
         msg.setDataEnvelopeReferences(processOuput.getOriginDataEnvelopes());
         // do not include outputs which should no be published (e.g. Metadata output)
         msg.setOutputIdentifiers(getPublishableExpectedOutputIdentifiers());
-        msg.setWacodisJobIdentifier(this.jobDefinition.getId().toString());
+        msg.setWacodisJobIdentifier(this.jobDefinition.getId());
+ 
 
         return MessageBuilder.withPayload(msg).build();
     }
@@ -112,11 +113,10 @@ public class WacodisJobExecutor {
     private Message<WacodisJobExecution> buildToolExecutionStartedMessage() {
         WacodisJobExecution msg = new WacodisJobExecution();
         //TODO remove from schema since it is impossible to set wps job identifer before wps started process
-        msg.setJobIdentifier(null);
+        msg.setJobIdentifier(this.jobDefinition.getId());
         msg.setCreated(new DateTime());
         msg.setProcessingTool(this.jobDefinition.getProcessingTool());
         msg.setProductCollection(this.jobDefinition.getProductCollection());
-        msg.setWacodisJobIdentifier(this.jobDefinition.getId().toString());
 
         return MessageBuilder.withPayload(msg).build();
     }
@@ -127,7 +127,7 @@ public class WacodisJobExecutor {
         msg.setJobIdentifier(null);
         msg.setCreated(new DateTime());
         msg.setReason(errorText);
-        msg.setWacodisJobIdentifier(jobDefinition.getId().toString());
+        msg.setWacodisJobIdentifier(jobDefinition.getId());
         return MessageBuilder.withPayload(msg).build();
     }
 

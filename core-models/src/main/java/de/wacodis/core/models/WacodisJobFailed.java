@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.UUID;
 import org.joda.time.DateTime;
 import java.io.Serializable;
 import javax.validation.Valid;
@@ -14,7 +15,7 @@ import javax.validation.constraints.*;
  * message to indicate a job execution is being started 
  */
 @ApiModel(description = "message to indicate a job execution is being started ")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-06T14:41:56.509+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-10T10:50:17.158+01:00[Europe/Berlin]")
 
 public class WacodisJobFailed  implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -29,7 +30,7 @@ public class WacodisJobFailed  implements Serializable {
   private DateTime created = null;
 
   @JsonProperty("wacodisJobIdentifier")
-  private String wacodisJobIdentifier = null;
+  private UUID wacodisJobIdentifier = null;
 
   public WacodisJobFailed jobIdentifier(String jobIdentifier) {
     this.jobIdentifier = jobIdentifier;
@@ -95,7 +96,7 @@ public class WacodisJobFailed  implements Serializable {
     this.created = created;
   }
 
-  public WacodisJobFailed wacodisJobIdentifier(String wacodisJobIdentifier) {
+  public WacodisJobFailed wacodisJobIdentifier(UUID wacodisJobIdentifier) {
     this.wacodisJobIdentifier = wacodisJobIdentifier;
     return this;
   }
@@ -107,12 +108,13 @@ public class WacodisJobFailed  implements Serializable {
   @ApiModelProperty(required = true, value = "wacodis job identifer (from WacodisJobDefinition, not wps job identifier!) ")
   @NotNull
 
+  @Valid
 
-  public String getWacodisJobIdentifier() {
+  public UUID getWacodisJobIdentifier() {
     return wacodisJobIdentifier;
   }
 
-  public void setWacodisJobIdentifier(String wacodisJobIdentifier) {
+  public void setWacodisJobIdentifier(UUID wacodisJobIdentifier) {
     this.wacodisJobIdentifier = wacodisJobIdentifier;
   }
 

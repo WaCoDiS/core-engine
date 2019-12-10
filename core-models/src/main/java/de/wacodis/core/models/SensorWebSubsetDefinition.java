@@ -15,7 +15,7 @@ import javax.validation.constraints.*;
  * contains information for defining a subset definition for Sensor Web process inputs
  */
 @ApiModel(description = "contains information for defining a subset definition for Sensor Web process inputs")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-06T14:41:56.509+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-10T10:50:17.158+01:00[Europe/Berlin]")
 
 public class SensorWebSubsetDefinition extends AbstractSubsetDefinition implements Serializable {
   private static final long serialVersionUID = 1L;
