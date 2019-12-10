@@ -105,7 +105,7 @@ public class WacodisJobExecutor {
         // do not include outputs which should no be published (e.g. Metadata output)
         msg.setOutputIdentifiers(getPublishableExpectedOutputIdentifiers());
         msg.setWacodisJobIdentifier(this.jobDefinition.getId());
- 
+        msg.setExecutionFinished(DateTime.now()); //set to time of tool finished message publication
 
         return MessageBuilder.withPayload(msg).build();
     }
