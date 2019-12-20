@@ -12,16 +12,16 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * message to indicate a job execution is being started 
+ * message to indicate a job execution failed 
  */
-@ApiModel(description = "message to indicate a job execution is being started ")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-10T15:35:27.058+01:00[Europe/Berlin]")
+@ApiModel(description = "message to indicate a job execution failed ")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-20T13:50:52.962+01:00[Europe/Berlin]")
 
 public class WacodisJobFailed  implements Serializable {
   private static final long serialVersionUID = 1L;
 
-  @JsonProperty("jobIdentifier")
-  private String jobIdentifier = null;
+  @JsonProperty("wpsJobIdentifier")
+  private String wpsJobIdentifier = null;
 
   @JsonProperty("reason")
   private String reason = null;
@@ -32,25 +32,24 @@ public class WacodisJobFailed  implements Serializable {
   @JsonProperty("wacodisJobIdentifier")
   private UUID wacodisJobIdentifier = null;
 
-  public WacodisJobFailed jobIdentifier(String jobIdentifier) {
-    this.jobIdentifier = jobIdentifier;
+  public WacodisJobFailed wpsJobIdentifier(String wpsJobIdentifier) {
+    this.wpsJobIdentifier = wpsJobIdentifier;
     return this;
   }
 
   /**
    * wps job identifier 
-   * @return jobIdentifier
+   * @return wpsJobIdentifier
   **/
-  @ApiModelProperty(required = true, value = "wps job identifier ")
-  @NotNull
+  @ApiModelProperty(value = "wps job identifier ")
 
 
-  public String getJobIdentifier() {
-    return jobIdentifier;
+  public String getWpsJobIdentifier() {
+    return wpsJobIdentifier;
   }
 
-  public void setJobIdentifier(String jobIdentifier) {
-    this.jobIdentifier = jobIdentifier;
+  public void setWpsJobIdentifier(String wpsJobIdentifier) {
+    this.wpsJobIdentifier = wpsJobIdentifier;
   }
 
   public WacodisJobFailed reason(String reason) {
@@ -128,7 +127,7 @@ public class WacodisJobFailed  implements Serializable {
       return false;
     }
     WacodisJobFailed wacodisJobFailed = (WacodisJobFailed) o;
-    return Objects.equals(this.jobIdentifier, wacodisJobFailed.jobIdentifier) &&
+    return Objects.equals(this.wpsJobIdentifier, wacodisJobFailed.wpsJobIdentifier) &&
         Objects.equals(this.reason, wacodisJobFailed.reason) &&
         Objects.equals(this.created, wacodisJobFailed.created) &&
         Objects.equals(this.wacodisJobIdentifier, wacodisJobFailed.wacodisJobIdentifier);
@@ -136,7 +135,7 @@ public class WacodisJobFailed  implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(jobIdentifier, reason, created, wacodisJobIdentifier);
+    return Objects.hash(wpsJobIdentifier, reason, created, wacodisJobIdentifier);
   }
 
   @Override
@@ -144,7 +143,7 @@ public class WacodisJobFailed  implements Serializable {
     StringBuilder sb = new StringBuilder();
     sb.append("class WacodisJobFailed {\n");
     
-    sb.append("    jobIdentifier: ").append(toIndentedString(jobIdentifier)).append("\n");
+    sb.append("    wpsJobIdentifier: ").append(toIndentedString(wpsJobIdentifier)).append("\n");
     sb.append("    reason: ").append(toIndentedString(reason)).append("\n");
     sb.append("    created: ").append(toIndentedString(created)).append("\n");
     sb.append("    wacodisJobIdentifier: ").append(toIndentedString(wacodisJobIdentifier)).append("\n");

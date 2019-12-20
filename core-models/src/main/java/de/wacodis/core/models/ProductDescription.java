@@ -7,8 +7,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import org.joda.time.DateTime;
 import java.io.Serializable;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -17,13 +15,13 @@ import javax.validation.constraints.*;
  * message to indicate a finished wps job 
  */
 @ApiModel(description = "message to indicate a finished wps job ")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-10T15:35:27.058+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-20T13:50:52.962+01:00[Europe/Berlin]")
 
 public class ProductDescription  implements Serializable {
   private static final long serialVersionUID = 1L;
 
-  @JsonProperty("jobIdentifier")
-  private String jobIdentifier = null;
+  @JsonProperty("wpsJobIdentifier")
+  private String wpsJobIdentifier = null;
 
   @JsonProperty("outputIdentifiers")
   @Valid
@@ -39,31 +37,24 @@ public class ProductDescription  implements Serializable {
   @JsonProperty("processingTool")
   private String processingTool = null;
 
-  @JsonProperty("wacodisJobIdentifier")
-  private UUID wacodisJobIdentifier = null;
-
-  @JsonProperty("executionFinished")
-  private DateTime executionFinished = null;
-
-  public ProductDescription jobIdentifier(String jobIdentifier) {
-    this.jobIdentifier = jobIdentifier;
+  public ProductDescription wpsJobIdentifier(String wpsJobIdentifier) {
+    this.wpsJobIdentifier = wpsJobIdentifier;
     return this;
   }
 
   /**
    * wps job identifier 
-   * @return jobIdentifier
+   * @return wpsJobIdentifier
   **/
-  @ApiModelProperty(required = true, value = "wps job identifier ")
-  @NotNull
+  @ApiModelProperty(value = "wps job identifier ")
 
 
-  public String getJobIdentifier() {
-    return jobIdentifier;
+  public String getWpsJobIdentifier() {
+    return wpsJobIdentifier;
   }
 
-  public void setJobIdentifier(String jobIdentifier) {
-    this.jobIdentifier = jobIdentifier;
+  public void setWpsJobIdentifier(String wpsJobIdentifier) {
+    this.wpsJobIdentifier = wpsJobIdentifier;
   }
 
   public ProductDescription outputIdentifiers(List<String> outputIdentifiers) {
@@ -160,49 +151,6 @@ public class ProductDescription  implements Serializable {
     this.processingTool = processingTool;
   }
 
-  public ProductDescription wacodisJobIdentifier(UUID wacodisJobIdentifier) {
-    this.wacodisJobIdentifier = wacodisJobIdentifier;
-    return this;
-  }
-
-  /**
-   * wacodis job identifer (from WacodisJobDefinition, not wps job identifier!) 
-   * @return wacodisJobIdentifier
-  **/
-  @ApiModelProperty(value = "wacodis job identifer (from WacodisJobDefinition, not wps job identifier!) ")
-
-  @Valid
-
-  public UUID getWacodisJobIdentifier() {
-    return wacodisJobIdentifier;
-  }
-
-  public void setWacodisJobIdentifier(UUID wacodisJobIdentifier) {
-    this.wacodisJobIdentifier = wacodisJobIdentifier;
-  }
-
-  public ProductDescription executionFinished(DateTime executionFinished) {
-    this.executionFinished = executionFinished;
-    return this;
-  }
-
-  /**
-   * timestamp when message was published 
-   * @return executionFinished
-  **/
-  @ApiModelProperty(required = true, value = "timestamp when message was published ")
-  @NotNull
-
-  @Valid
-
-  public DateTime getExecutionFinished() {
-    return executionFinished;
-  }
-
-  public void setExecutionFinished(DateTime executionFinished) {
-    this.executionFinished = executionFinished;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -213,18 +161,16 @@ public class ProductDescription  implements Serializable {
       return false;
     }
     ProductDescription productDescription = (ProductDescription) o;
-    return Objects.equals(this.jobIdentifier, productDescription.jobIdentifier) &&
+    return Objects.equals(this.wpsJobIdentifier, productDescription.wpsJobIdentifier) &&
         Objects.equals(this.outputIdentifiers, productDescription.outputIdentifiers) &&
         Objects.equals(this.productCollection, productDescription.productCollection) &&
         Objects.equals(this.dataEnvelopeReferences, productDescription.dataEnvelopeReferences) &&
-        Objects.equals(this.processingTool, productDescription.processingTool) &&
-        Objects.equals(this.wacodisJobIdentifier, productDescription.wacodisJobIdentifier) &&
-        Objects.equals(this.executionFinished, productDescription.executionFinished);
+        Objects.equals(this.processingTool, productDescription.processingTool);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(jobIdentifier, outputIdentifiers, productCollection, dataEnvelopeReferences, processingTool, wacodisJobIdentifier, executionFinished);
+    return Objects.hash(wpsJobIdentifier, outputIdentifiers, productCollection, dataEnvelopeReferences, processingTool);
   }
 
   @Override
@@ -232,13 +178,11 @@ public class ProductDescription  implements Serializable {
     StringBuilder sb = new StringBuilder();
     sb.append("class ProductDescription {\n");
     
-    sb.append("    jobIdentifier: ").append(toIndentedString(jobIdentifier)).append("\n");
+    sb.append("    wpsJobIdentifier: ").append(toIndentedString(wpsJobIdentifier)).append("\n");
     sb.append("    outputIdentifiers: ").append(toIndentedString(outputIdentifiers)).append("\n");
     sb.append("    productCollection: ").append(toIndentedString(productCollection)).append("\n");
     sb.append("    dataEnvelopeReferences: ").append(toIndentedString(dataEnvelopeReferences)).append("\n");
     sb.append("    processingTool: ").append(toIndentedString(processingTool)).append("\n");
-    sb.append("    wacodisJobIdentifier: ").append(toIndentedString(wacodisJobIdentifier)).append("\n");
-    sb.append("    executionFinished: ").append(toIndentedString(executionFinished)).append("\n");
     sb.append("}");
     return sb.toString();
   }

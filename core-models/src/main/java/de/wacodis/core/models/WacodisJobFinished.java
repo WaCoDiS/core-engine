@@ -3,7 +3,7 @@ package de.wacodis.core.models;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import de.wacodis.core.models.WacodisJobStatus;
+import de.wacodis.core.models.ProductDescription;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.UUID;
@@ -13,11 +13,12 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * WacodisJobStatusUpdate
+ * message to indicate that a job execution finished succesfully 
  */
+@ApiModel(description = "message to indicate that a job execution finished succesfully ")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-20T13:50:52.962+01:00[Europe/Berlin]")
 
-public class WacodisJobStatusUpdate  implements Serializable {
+public class WacodisJobFinished  implements Serializable {
   private static final long serialVersionUID = 1L;
 
   @JsonProperty("wacodisJobIdentifier")
@@ -26,19 +27,19 @@ public class WacodisJobStatusUpdate  implements Serializable {
   @JsonProperty("executionFinished")
   private DateTime executionFinished = null;
 
-  @JsonProperty("newStatus")
-  private WacodisJobStatus newStatus = null;
+  @JsonProperty("productDescription")
+  private ProductDescription productDescription = null;
 
-  public WacodisJobStatusUpdate wacodisJobIdentifier(UUID wacodisJobIdentifier) {
+  public WacodisJobFinished wacodisJobIdentifier(UUID wacodisJobIdentifier) {
     this.wacodisJobIdentifier = wacodisJobIdentifier;
     return this;
   }
 
   /**
-   * Get wacodisJobIdentifier
+   * wacodis job identifer (from WacodisJobDefinition, not wps job identifier!) 
    * @return wacodisJobIdentifier
   **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "wacodis job identifer (from WacodisJobDefinition, not wps job identifier!) ")
   @NotNull
 
   @Valid
@@ -51,16 +52,17 @@ public class WacodisJobStatusUpdate  implements Serializable {
     this.wacodisJobIdentifier = wacodisJobIdentifier;
   }
 
-  public WacodisJobStatusUpdate executionFinished(DateTime executionFinished) {
+  public WacodisJobFinished executionFinished(DateTime executionFinished) {
     this.executionFinished = executionFinished;
     return this;
   }
 
   /**
-   * point in time when job execution finished successfully, only needed for updates after succesful job execution 
+   * timestamp when message was published 
    * @return executionFinished
   **/
-  @ApiModelProperty(value = "point in time when job execution finished successfully, only needed for updates after succesful job execution ")
+  @ApiModelProperty(required = true, value = "timestamp when message was published ")
+  @NotNull
 
   @Valid
 
@@ -72,26 +74,26 @@ public class WacodisJobStatusUpdate  implements Serializable {
     this.executionFinished = executionFinished;
   }
 
-  public WacodisJobStatusUpdate newStatus(WacodisJobStatus newStatus) {
-    this.newStatus = newStatus;
+  public WacodisJobFinished productDescription(ProductDescription productDescription) {
+    this.productDescription = productDescription;
     return this;
   }
 
   /**
-   * Get newStatus
-   * @return newStatus
+   * Get productDescription
+   * @return productDescription
   **/
   @ApiModelProperty(required = true, value = "")
   @NotNull
 
   @Valid
 
-  public WacodisJobStatus getNewStatus() {
-    return newStatus;
+  public ProductDescription getProductDescription() {
+    return productDescription;
   }
 
-  public void setNewStatus(WacodisJobStatus newStatus) {
-    this.newStatus = newStatus;
+  public void setProductDescription(ProductDescription productDescription) {
+    this.productDescription = productDescription;
   }
 
 
@@ -103,25 +105,25 @@ public class WacodisJobStatusUpdate  implements Serializable {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    WacodisJobStatusUpdate wacodisJobStatusUpdate = (WacodisJobStatusUpdate) o;
-    return Objects.equals(this.wacodisJobIdentifier, wacodisJobStatusUpdate.wacodisJobIdentifier) &&
-        Objects.equals(this.executionFinished, wacodisJobStatusUpdate.executionFinished) &&
-        Objects.equals(this.newStatus, wacodisJobStatusUpdate.newStatus);
+    WacodisJobFinished wacodisJobFinished = (WacodisJobFinished) o;
+    return Objects.equals(this.wacodisJobIdentifier, wacodisJobFinished.wacodisJobIdentifier) &&
+        Objects.equals(this.executionFinished, wacodisJobFinished.executionFinished) &&
+        Objects.equals(this.productDescription, wacodisJobFinished.productDescription);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(wacodisJobIdentifier, executionFinished, newStatus);
+    return Objects.hash(wacodisJobIdentifier, executionFinished, productDescription);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class WacodisJobStatusUpdate {\n");
+    sb.append("class WacodisJobFinished {\n");
     
     sb.append("    wacodisJobIdentifier: ").append(toIndentedString(wacodisJobIdentifier)).append("\n");
     sb.append("    executionFinished: ").append(toIndentedString(executionFinished)).append("\n");
-    sb.append("    newStatus: ").append(toIndentedString(newStatus)).append("\n");
+    sb.append("    productDescription: ").append(toIndentedString(productDescription)).append("\n");
     sb.append("}");
     return sb.toString();
   }

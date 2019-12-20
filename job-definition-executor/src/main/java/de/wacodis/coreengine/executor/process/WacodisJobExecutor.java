@@ -9,6 +9,7 @@ import de.wacodis.core.models.ProductDescription;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobExecution;
 import de.wacodis.core.models.WacodisJobFailed;
+import de.wacodis.core.models.WacodisJobFinished;
 import de.wacodis.coreengine.executor.exception.ExecutionException;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisher;
 import org.joda.time.DateTime;
@@ -95,17 +96,21 @@ public class WacodisJobExecutor {
         return processOutput;
     }
 
-    private Message<ProductDescription> buildToolFinishedMessage(ProcessOutputDescription processOuput) {
-        ProductDescription msg = new ProductDescription();
-        msg.setJobIdentifier(processOuput.getProcessIdentifier());
-        msg.setProductCollection(this.jobDefinition.getProductCollection());
-        msg.setProcessingTool(this.jobDefinition.getProcessingTool());
+    private Message<WacodisJobFinished> buildToolFinishedMessage(ProcessOutputDescription processOuput) {
+        WacodisJobFinished msg = new WacodisJobFinished();
+        ProductDescription pd = new ProductDescription();
+        
+        pd.setWpsJobIdentifier(processOuput.getProcessIdentifier());
+        pd.setProductCollection(this.jobDefinition.getProductCollection());
+        pd.setProcessingTool(this.jobDefinition.getProcessingTool());
         //get list of all IDs of distinct dataenvelopes that correspond with a input resource
-        msg.setDataEnvelopeReferences(processOuput.getOriginDataEnvelopes());
+        pd.setDataEnvelopeReferences(processOuput.getOriginDataEnvelopes());
         // do not include outputs which should no be published (e.g. Metadata output)
-        msg.setOutputIdentifiers(getPublishableExpectedOutputIdentifiers());
-        msg.setWacodisJobIdentifier(this.jobDefinition.getId());
+        pd.setOutputIdentifiers(getPublishableExpectedOutputIdentifiers());
+        
         msg.setExecutionFinished(DateTime.now()); //set to time of tool finished message publication
+        msg.setWacodisJobIdentifier(this.jobDefinition.getId());
+        msg.setProductDescription(pd);
 
         return MessageBuilder.withPayload(msg).build();
     }
@@ -113,7 +118,7 @@ public class WacodisJobExecutor {
     private Message<WacodisJobExecution> buildToolExecutionStartedMessage() {
         WacodisJobExecution msg = new WacodisJobExecution();
         //TODO remove from schema since it is impossible to set wps job identifer before wps started process
-        msg.setJobIdentifier(this.jobDefinition.getId());
+        msg.setWacodisJobIdentifier(this.jobDefinition.getId());
         msg.setCreated(new DateTime());
         msg.setProcessingTool(this.jobDefinition.getProcessingTool());
         msg.setProductCollection(this.jobDefinition.getProductCollection());
@@ -124,7 +129,7 @@ public class WacodisJobExecutor {
     private Message<WacodisJobFailed> buildToolFailureMessage( String errorText) {
         WacodisJobFailed msg = new WacodisJobFailed();
         //TODO include wps job identifier (not wacodis job identifier)
-        msg.setJobIdentifier(null);
+        msg.setWpsJobIdentifier(null);
         msg.setCreated(new DateTime());
         msg.setReason(errorText);
         msg.setWacodisJobIdentifier(jobDefinition.getId());
