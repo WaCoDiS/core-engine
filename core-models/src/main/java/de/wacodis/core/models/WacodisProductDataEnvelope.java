@@ -21,7 +21,7 @@ import javax.validation.constraints.*;
  * describes specific metadata information about a product dataset created from the WaCoDiS System
  */
 @ApiModel(description = "describes specific metadata information about a product dataset created from the WaCoDiS System")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-20T13:50:52.962+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-01-08T09:20:28.480+01:00[Europe/Berlin]")
 
 public class WacodisProductDataEnvelope extends AbstractDataEnvelope implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -31,7 +31,7 @@ public class WacodisProductDataEnvelope extends AbstractDataEnvelope implements 
 
   @JsonProperty("dataEnvelopeReferences")
   @Valid
-  private List<String> dataEnvelopeReferences = null;
+  private List<String> dataEnvelopeReferences = new ArrayList<String>();
 
   @JsonProperty("process")
   private String process = null;
@@ -66,9 +66,6 @@ public class WacodisProductDataEnvelope extends AbstractDataEnvelope implements 
   }
 
   public WacodisProductDataEnvelope addDataEnvelopeReferencesItem(String dataEnvelopeReferencesItem) {
-    if (this.dataEnvelopeReferences == null) {
-      this.dataEnvelopeReferences = new ArrayList<String>();
-    }
     this.dataEnvelopeReferences.add(dataEnvelopeReferencesItem);
     return this;
   }
@@ -77,7 +74,8 @@ public class WacodisProductDataEnvelope extends AbstractDataEnvelope implements 
    * array of identfiers that reference data envelopes the WaCoDiS product results from 
    * @return dataEnvelopeReferences
   **/
-  @ApiModelProperty(value = "array of identfiers that reference data envelopes the WaCoDiS product results from ")
+  @ApiModelProperty(required = true, value = "array of identfiers that reference data envelopes the WaCoDiS product results from ")
+  @NotNull
 
 
   public List<String> getDataEnvelopeReferences() {
@@ -118,7 +116,8 @@ public class WacodisProductDataEnvelope extends AbstractDataEnvelope implements 
    * Get serviceDefinition
    * @return serviceDefinition
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
+  @NotNull
 
   @Valid
 

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import de.wacodis.core.models.AbstractSubsetDefinition;
+import de.wacodis.core.models.ProductBackend;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
@@ -15,61 +16,16 @@ import javax.validation.constraints.*;
  * contains information for defining a subset definition for WaCoDiS product process inputs
  */
 @ApiModel(description = "contains information for defining a subset definition for WaCoDiS product process inputs")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-20T13:50:52.962+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-01-08T09:20:28.480+01:00[Europe/Berlin]")
 
 public class WacodisProductSubsetDefinition extends AbstractSubsetDefinition implements Serializable {
   private static final long serialVersionUID = 1L;
 
-  @JsonProperty("serviceUrl")
-  private String serviceUrl = null;
-
-  @JsonProperty("productCollection")
-  private String productCollection = null;
-
   @JsonProperty("productType")
   private String productType = null;
 
-  public WacodisProductSubsetDefinition serviceUrl(String serviceUrl) {
-    this.serviceUrl = serviceUrl;
-    return this;
-  }
-
-  /**
-   * the base URL of the service from which the data should be requested 
-   * @return serviceUrl
-  **/
-  @ApiModelProperty(required = true, value = "the base URL of the service from which the data should be requested ")
-  @NotNull
-
-
-  public String getServiceUrl() {
-    return serviceUrl;
-  }
-
-  public void setServiceUrl(String serviceUrl) {
-    this.serviceUrl = serviceUrl;
-  }
-
-  public WacodisProductSubsetDefinition productCollection(String productCollection) {
-    this.productCollection = productCollection;
-    return this;
-  }
-
-  /**
-   * collection in which the data is stored 
-   * @return productCollection
-  **/
-  @ApiModelProperty(required = true, value = "collection in which the data is stored ")
-  @NotNull
-
-
-  public String getProductCollection() {
-    return productCollection;
-  }
-
-  public void setProductCollection(String productCollection) {
-    this.productCollection = productCollection;
-  }
+  @JsonProperty("backendType")
+  private ProductBackend backendType = null;
 
   public WacodisProductSubsetDefinition productType(String productType) {
     this.productType = productType;
@@ -77,10 +33,11 @@ public class WacodisProductSubsetDefinition extends AbstractSubsetDefinition imp
   }
 
   /**
-   * data type 
+   * the type of the product (collection). e.g. \"land cover classification\" 
    * @return productType
   **/
-  @ApiModelProperty(value = "data type ")
+  @ApiModelProperty(required = true, value = "the type of the product (collection). e.g. \"land cover classification\" ")
+  @NotNull
 
 
   public String getProductType() {
@@ -89,6 +46,28 @@ public class WacodisProductSubsetDefinition extends AbstractSubsetDefinition imp
 
   public void setProductType(String productType) {
     this.productType = productType;
+  }
+
+  public WacodisProductSubsetDefinition backendType(ProductBackend backendType) {
+    this.backendType = backendType;
+    return this;
+  }
+
+  /**
+   * Get backendType
+   * @return backendType
+  **/
+  @ApiModelProperty(required = true, value = "")
+  @NotNull
+
+  @Valid
+
+  public ProductBackend getBackendType() {
+    return backendType;
+  }
+
+  public void setBackendType(ProductBackend backendType) {
+    this.backendType = backendType;
   }
 
 
@@ -101,15 +80,14 @@ public class WacodisProductSubsetDefinition extends AbstractSubsetDefinition imp
       return false;
     }
     WacodisProductSubsetDefinition wacodisProductSubsetDefinition = (WacodisProductSubsetDefinition) o;
-    return Objects.equals(this.serviceUrl, wacodisProductSubsetDefinition.serviceUrl) &&
-        Objects.equals(this.productCollection, wacodisProductSubsetDefinition.productCollection) &&
-        Objects.equals(this.productType, wacodisProductSubsetDefinition.productType) &&
+    return Objects.equals(this.productType, wacodisProductSubsetDefinition.productType) &&
+        Objects.equals(this.backendType, wacodisProductSubsetDefinition.backendType) &&
         super.equals(o);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(serviceUrl, productCollection, productType, super.hashCode());
+    return Objects.hash(productType, backendType, super.hashCode());
   }
 
   @Override
@@ -117,9 +95,8 @@ public class WacodisProductSubsetDefinition extends AbstractSubsetDefinition imp
     StringBuilder sb = new StringBuilder();
     sb.append("class WacodisProductSubsetDefinition {\n");
     sb.append("    ").append(toIndentedString(super.toString())).append("\n");
-    sb.append("    serviceUrl: ").append(toIndentedString(serviceUrl)).append("\n");
-    sb.append("    productCollection: ").append(toIndentedString(productCollection)).append("\n");
     sb.append("    productType: ").append(toIndentedString(productType)).append("\n");
+    sb.append("    backendType: ").append(toIndentedString(backendType)).append("\n");
     sb.append("}");
     return sb.toString();
   }

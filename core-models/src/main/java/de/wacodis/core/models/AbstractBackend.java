@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonValue;
+import de.wacodis.core.models.ProductBackend;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
@@ -16,7 +16,7 @@ import javax.validation.constraints.*;
  * abstract type for a backend that provides WaCoDiS products 
  */
 @ApiModel(description = "abstract type for a backend that provides WaCoDiS products ")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-12-20T13:50:52.962+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-01-08T09:20:28.480+01:00[Europe/Berlin]")
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "backendType", visible = true)
 @JsonSubTypes({
@@ -26,58 +26,28 @@ import javax.validation.constraints.*;
 public class AbstractBackend  implements Serializable {
   private static final long serialVersionUID = 1L;
 
-  /**
-   * shall be used to determine the responsible product backend type 
-   */
-  public enum BackendTypeEnum {
-    ARCGISIMAGESERVERBACKEND("ArcGISImageServerBackend"),
-    
-    GEOSERVERBACKEND("GeoServerBackend");
-
-    private String value;
-
-    BackendTypeEnum(String value) {
-      this.value = value;
-    }
-
-    @Override
-    @JsonValue
-    public String toString() {
-      return String.valueOf(value);
-    }
-
-    @JsonCreator
-    public static BackendTypeEnum fromValue(String text) {
-      for (BackendTypeEnum b : BackendTypeEnum.values()) {
-        if (String.valueOf(b.value).equals(text)) {
-          return b;
-        }
-      }
-      throw new IllegalArgumentException("Unexpected value '" + text + "'");
-    }
-  }
-
   @JsonProperty("backendType")
-  private BackendTypeEnum backendType = null;
+  private ProductBackend backendType = null;
 
-  public AbstractBackend backendType(BackendTypeEnum backendType) {
+  public AbstractBackend backendType(ProductBackend backendType) {
     this.backendType = backendType;
     return this;
   }
 
   /**
-   * shall be used to determine the responsible product backend type 
+   * Get backendType
    * @return backendType
   **/
-  @ApiModelProperty(required = true, value = "shall be used to determine the responsible product backend type ")
+  @ApiModelProperty(required = true, value = "")
   @NotNull
 
+  @Valid
 
-  public BackendTypeEnum getBackendType() {
+  public ProductBackend getBackendType() {
     return backendType;
   }
 
-  public void setBackendType(BackendTypeEnum backendType) {
+  public void setBackendType(ProductBackend backendType) {
     this.backendType = backendType;
   }
 
