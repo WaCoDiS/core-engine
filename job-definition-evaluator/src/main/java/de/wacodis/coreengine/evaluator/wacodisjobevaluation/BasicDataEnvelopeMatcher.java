@@ -193,18 +193,8 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
     }
     
     private boolean matchProductdataEnvelope(WacodisProductDataEnvelope dataEnvelope, WacodisProductSubsetDefinition subsetDefinition){
-        boolean isMatch = true;
-                //TODO update to new schema definition
-                /*dataEnvelope.().equalsIgnoreCase(subsetDefinition.getServiceUrl()) 
-                  && dataEnvelope.getProductCollection().equals(subsetDefinition.getProductCollection());*/
-        
-        
-               //match productType if set
-               if(subsetDefinition.getProductType() != null && !subsetDefinition.getProductType().isEmpty()){
-                   isMatch &= dataEnvelope.getProductType().equals(subsetDefinition.getProductType());
-               }
-             
-        return isMatch;
+        return dataEnvelope.getProductType().equalsIgnoreCase(subsetDefinition.getProductType())
+                && dataEnvelope.getServiceDefinition().getBackendType().equals(subsetDefinition.getBackendType());
     }
 
     /**
