@@ -117,7 +117,6 @@ public class WacodisJobExecutor {
 
     private Message<WacodisJobExecution> buildToolExecutionStartedMessage() {
         WacodisJobExecution msg = new WacodisJobExecution();
-        //TODO remove from schema since it is impossible to set wps job identifer before wps started process
         msg.setWacodisJobIdentifier(this.jobDefinition.getId());
         msg.setCreated(new DateTime());
         msg.setProcessingTool(this.jobDefinition.getProcessingTool());
