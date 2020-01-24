@@ -5,7 +5,8 @@
  */
 package de.wacodis.coreengine.executor.process;
 
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -13,65 +14,132 @@ import java.util.Set;
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 public class ProcessOutputDescription {
-    
+
     private String processIdentifier;
-    private Set<String> outputIdentifiers;
+    private List<String> originDataEnvelopes;
+    private final HashMap<String, String> outputParmeters;
 
     public ProcessOutputDescription() {
-        this.outputIdentifiers = new HashSet<>();
+        this.outputParmeters = new HashMap<>();
     }
 
     /**
-     * @param processIdentifier ID of the described process (e.g. WPS jobID)
-     * @param outputIdentifiers IDs of outputs produced by the described process
+     * @param processIdentifier ID of the specific process (e.g. WPS jobID)
      */
-    public ProcessOutputDescription(String processIdentifier, Set outputIdentifiers) {
+    public ProcessOutputDescription(String processIdentifier) {
+        this();
         this.processIdentifier = processIdentifier;
-        this.outputIdentifiers = outputIdentifiers;
     }
 
     /**
-     * @return ID of the described process (e.g. WPS jobID)
+     * @param processIdentifier ID of the specific process (e.g. WPS jobID)
+     * @param outputParameters generic map of process outputs
+     */
+    public ProcessOutputDescription(String processIdentifier, HashMap<String, String> outputParameters) {
+        this.processIdentifier = processIdentifier;
+        this.outputParmeters = outputParameters;
+    }
+
+    /**
+     *
+     * @param processIdentifier ID of the specific process (e.g. WPS jobID)
+     * @param outputParmeters generic map of process outputs
+     * @param originDataEnvelopes IDs of DataEnvelopes that describe the data sets that were used to genereate to process output
+     */
+    public ProcessOutputDescription(String processIdentifier, HashMap<String, String> outputParmeters, List<String> originDataEnvelopes) {
+        this.processIdentifier = processIdentifier;
+        this.originDataEnvelopes = originDataEnvelopes;
+        this.outputParmeters = outputParmeters;
+    }
+
+    /**
+     * @return ID of the specific process (e.g. WPS jobID)
      */
     public String getProcessIdentifier() {
         return processIdentifier;
     }
 
     /**
-     * @param processIdentifier ID of the described process (e.g. WPS jobID)
+     * @param processIdentifier ID of the specific process (e.g. WPS jobID)
      */
     public void setProcessIdentifier(String processIdentifier) {
         this.processIdentifier = processIdentifier;
     }
 
     /**
-     * @return IDs of outputs produced by the described process
+     * add output parameter
+     *
+     * @param key
+     * @param value
      */
-    public Set<String> getOutputIdentifiers() {
-        return outputIdentifiers;
+    public void addOutputParameter(String key, String value) {
+        this.outputParmeters.put(key, value);
     }
 
     /**
-     * @param outputIdentifiers IDs of outputs produced by the described process
+     * get ouput paramter
+     *
+     * @param key
+     * @return return value or null if no value for specific key available
      */
-    public void setOutputIdentifiers(Set<String> outputIdentifiers) {
-        this.outputIdentifiers = outputIdentifiers;
+    public String getOutputParameter(String key) {
+        return this.outputParmeters.get(key);
     }
-    
+
     /**
-     * @param outputIdentifier
-     * @return true if this set did not already contain outputIdentifier
+     * remove output parameter
+     *
+     * @param key
      */
-    public boolean addOutputIdentifier(String outputIdentifier){
-        return this.outputIdentifiers.add(outputIdentifier);
+    public void removeOutputParameter(String key) {
+        this.outputParmeters.remove(key);
     }
-    
+
     /**
-     * @param outputIdentifier
-     * @return true if the set contained outputIdentifier 
+     * replace value for specific key
+     *
+     * @param key
+     * @param value
      */
-    public boolean removeOutputIdentifier(String outputIdentifier){
-        return outputIdentifiers.remove(outputIdentifier);
+    public void replaceOutputParameter(String key, String value) {
+        this.outputParmeters.replace(key, value);
     }
-    
+
+    /**
+     * add output parameter only if no value for specific key available
+     *
+     * @param key
+     * @param value
+     */
+    public void addOutputParameterIfAbsent(String key, String value) {
+        this.outputParmeters.putIfAbsent(key, value);
+    }
+
+    /**
+     * get all used parameter keys
+     *
+     * @return
+     */
+    public Set<String> getAllOutputParameterKeys() {
+        return this.outputParmeters.keySet();
+    }
+
+    /**
+     * @return IDs of DataEnvelopes that describe the data sets that were used to genereate to process output
+     */
+    public List<String> getOriginDataEnvelopes() {
+        return originDataEnvelopes;
+    }
+
+    /**
+     * @param originDataEnvelopes IDs of DataEnvelopes that describe the data sets that were used to genereate to process output
+     */
+    public void setOriginDataEnvelopes(List<String> originDataEnvelopes) {
+        this.originDataEnvelopes = originDataEnvelopes;
+    }
+
+    @Override
+    public String toString() {
+        return "ProcessOutputDescription{" + "processIdentifier=" + processIdentifier + ", originDataEnvelopes=" + originDataEnvelopes + ", outputParmeters=" + outputParmeters + '}';
+    }
 }

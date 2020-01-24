@@ -23,11 +23,4 @@ public interface Process {
      */
     ProcessOutputDescription execute(ProcessContext context) throws ExecutionException;
     
-    /**
-     * check if context object is applicable for the specific implementation of Process
-     * @param context
-     * @return 
-     */
-    boolean validateContext(ProcessContext context);
-    
 }

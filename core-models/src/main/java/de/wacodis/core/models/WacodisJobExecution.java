@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.UUID;
 import org.joda.time.DateTime;
 import java.io.Serializable;
 import javax.validation.Valid;
@@ -14,13 +15,13 @@ import javax.validation.constraints.*;
  * message to indicate a job execution is being started 
  */
 @ApiModel(description = "message to indicate a job execution is being started ")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-07-16T11:30:07.111+02:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-01-24T15:11:15.577+01:00[Europe/Berlin]")
 
 public class WacodisJobExecution  implements Serializable {
   private static final long serialVersionUID = 1L;
 
-  @JsonProperty("jobIdentifier")
-  private String jobIdentifier = null;
+  @JsonProperty("wacodisJobIdentifier")
+  private UUID wacodisJobIdentifier = null;
 
   @JsonProperty("processingTool")
   private String processingTool = null;
@@ -31,25 +32,25 @@ public class WacodisJobExecution  implements Serializable {
   @JsonProperty("created")
   private DateTime created = null;
 
-  public WacodisJobExecution jobIdentifier(String jobIdentifier) {
-    this.jobIdentifier = jobIdentifier;
+  public WacodisJobExecution wacodisJobIdentifier(UUID wacodisJobIdentifier) {
+    this.wacodisJobIdentifier = wacodisJobIdentifier;
     return this;
   }
 
   /**
-   * wps job identifier 
-   * @return jobIdentifier
+   * wacodis job identifer (from WacodisJobDefinition, not wps job identifier!) 
+   * @return wacodisJobIdentifier
   **/
-  @ApiModelProperty(required = true, value = "wps job identifier ")
-  @NotNull
+  @ApiModelProperty(value = "wacodis job identifer (from WacodisJobDefinition, not wps job identifier!) ")
 
+  @Valid
 
-  public String getJobIdentifier() {
-    return jobIdentifier;
+  public UUID getWacodisJobIdentifier() {
+    return wacodisJobIdentifier;
   }
 
-  public void setJobIdentifier(String jobIdentifier) {
-    this.jobIdentifier = jobIdentifier;
+  public void setWacodisJobIdentifier(UUID wacodisJobIdentifier) {
+    this.wacodisJobIdentifier = wacodisJobIdentifier;
   }
 
   public WacodisJobExecution processingTool(String processingTool) {
@@ -103,8 +104,7 @@ public class WacodisJobExecution  implements Serializable {
    * time on which the execution was invoked 
    * @return created
   **/
-  @ApiModelProperty(required = true, value = "time on which the execution was invoked ")
-  @NotNull
+  @ApiModelProperty(value = "time on which the execution was invoked ")
 
   @Valid
 
@@ -126,7 +126,7 @@ public class WacodisJobExecution  implements Serializable {
       return false;
     }
     WacodisJobExecution wacodisJobExecution = (WacodisJobExecution) o;
-    return Objects.equals(this.jobIdentifier, wacodisJobExecution.jobIdentifier) &&
+    return Objects.equals(this.wacodisJobIdentifier, wacodisJobExecution.wacodisJobIdentifier) &&
         Objects.equals(this.processingTool, wacodisJobExecution.processingTool) &&
         Objects.equals(this.productCollection, wacodisJobExecution.productCollection) &&
         Objects.equals(this.created, wacodisJobExecution.created);
@@ -134,7 +134,7 @@ public class WacodisJobExecution  implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(jobIdentifier, processingTool, productCollection, created);
+    return Objects.hash(wacodisJobIdentifier, processingTool, productCollection, created);
   }
 
   @Override
@@ -142,7 +142,7 @@ public class WacodisJobExecution  implements Serializable {
     StringBuilder sb = new StringBuilder();
     sb.append("class WacodisJobExecution {\n");
     
-    sb.append("    jobIdentifier: ").append(toIndentedString(jobIdentifier)).append("\n");
+    sb.append("    wacodisJobIdentifier: ").append(toIndentedString(wacodisJobIdentifier)).append("\n");
     sb.append("    processingTool: ").append(toIndentedString(processingTool)).append("\n");
     sb.append("    productCollection: ").append(toIndentedString(productCollection)).append("\n");
     sb.append("    created: ").append(toIndentedString(created)).append("\n");

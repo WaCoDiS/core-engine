@@ -5,22 +5,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.UUID;
 import org.joda.time.DateTime;
 import java.io.Serializable;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * message to indicate a job execution is being started 
+ * message to indicate a job execution failed 
  */
-@ApiModel(description = "message to indicate a job execution is being started ")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-07-16T11:30:07.111+02:00[Europe/Berlin]")
+@ApiModel(description = "message to indicate a job execution failed ")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-01-24T15:11:15.577+01:00[Europe/Berlin]")
 
 public class WacodisJobFailed  implements Serializable {
   private static final long serialVersionUID = 1L;
 
-  @JsonProperty("jobIdentifier")
-  private String jobIdentifier = null;
+  @JsonProperty("wpsJobIdentifier")
+  private String wpsJobIdentifier = null;
 
   @JsonProperty("reason")
   private String reason = null;
@@ -28,25 +29,27 @@ public class WacodisJobFailed  implements Serializable {
   @JsonProperty("created")
   private DateTime created = null;
 
-  public WacodisJobFailed jobIdentifier(String jobIdentifier) {
-    this.jobIdentifier = jobIdentifier;
+  @JsonProperty("wacodisJobIdentifier")
+  private UUID wacodisJobIdentifier = null;
+
+  public WacodisJobFailed wpsJobIdentifier(String wpsJobIdentifier) {
+    this.wpsJobIdentifier = wpsJobIdentifier;
     return this;
   }
 
   /**
    * wps job identifier 
-   * @return jobIdentifier
+   * @return wpsJobIdentifier
   **/
-  @ApiModelProperty(required = true, value = "wps job identifier ")
-  @NotNull
+  @ApiModelProperty(value = "wps job identifier ")
 
 
-  public String getJobIdentifier() {
-    return jobIdentifier;
+  public String getWpsJobIdentifier() {
+    return wpsJobIdentifier;
   }
 
-  public void setJobIdentifier(String jobIdentifier) {
-    this.jobIdentifier = jobIdentifier;
+  public void setWpsJobIdentifier(String wpsJobIdentifier) {
+    this.wpsJobIdentifier = wpsJobIdentifier;
   }
 
   public WacodisJobFailed reason(String reason) {
@@ -92,6 +95,28 @@ public class WacodisJobFailed  implements Serializable {
     this.created = created;
   }
 
+  public WacodisJobFailed wacodisJobIdentifier(UUID wacodisJobIdentifier) {
+    this.wacodisJobIdentifier = wacodisJobIdentifier;
+    return this;
+  }
+
+  /**
+   * wacodis job identifer (from WacodisJobDefinition, not wps job identifier!) 
+   * @return wacodisJobIdentifier
+  **/
+  @ApiModelProperty(required = true, value = "wacodis job identifer (from WacodisJobDefinition, not wps job identifier!) ")
+  @NotNull
+
+  @Valid
+
+  public UUID getWacodisJobIdentifier() {
+    return wacodisJobIdentifier;
+  }
+
+  public void setWacodisJobIdentifier(UUID wacodisJobIdentifier) {
+    this.wacodisJobIdentifier = wacodisJobIdentifier;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -102,14 +127,15 @@ public class WacodisJobFailed  implements Serializable {
       return false;
     }
     WacodisJobFailed wacodisJobFailed = (WacodisJobFailed) o;
-    return Objects.equals(this.jobIdentifier, wacodisJobFailed.jobIdentifier) &&
+    return Objects.equals(this.wpsJobIdentifier, wacodisJobFailed.wpsJobIdentifier) &&
         Objects.equals(this.reason, wacodisJobFailed.reason) &&
-        Objects.equals(this.created, wacodisJobFailed.created);
+        Objects.equals(this.created, wacodisJobFailed.created) &&
+        Objects.equals(this.wacodisJobIdentifier, wacodisJobFailed.wacodisJobIdentifier);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(jobIdentifier, reason, created);
+    return Objects.hash(wpsJobIdentifier, reason, created, wacodisJobIdentifier);
   }
 
   @Override
@@ -117,9 +143,10 @@ public class WacodisJobFailed  implements Serializable {
     StringBuilder sb = new StringBuilder();
     sb.append("class WacodisJobFailed {\n");
     
-    sb.append("    jobIdentifier: ").append(toIndentedString(jobIdentifier)).append("\n");
+    sb.append("    wpsJobIdentifier: ").append(toIndentedString(wpsJobIdentifier)).append("\n");
     sb.append("    reason: ").append(toIndentedString(reason)).append("\n");
     sb.append("    created: ").append(toIndentedString(created)).append("\n");
+    sb.append("    wacodisJobIdentifier: ").append(toIndentedString(wacodisJobIdentifier)).append("\n");
     sb.append("}");
     return sb.toString();
   }

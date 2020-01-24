@@ -9,12 +9,14 @@ import de.wacodis.core.models.AbstractDataEnvelope;
 import de.wacodis.core.models.AbstractDataEnvelopeAreaOfInterest;
 import de.wacodis.core.models.AbstractDataEnvelopeTimeFrame;
 import de.wacodis.core.models.AbstractSubsetDefinition;
+import de.wacodis.core.models.ArcGISImageServerBackend;
 import de.wacodis.core.models.CatalogueSubsetDefinition;
 import de.wacodis.core.models.CopernicusDataEnvelope;
 import de.wacodis.core.models.CopernicusSubsetDefinition;
 import de.wacodis.core.models.DwdDataEnvelope;
 import de.wacodis.core.models.DwdSubsetDefinition;
 import de.wacodis.core.models.GdiDeDataEnvelope;
+import de.wacodis.core.models.ProductBackend;
 import de.wacodis.core.models.SensorWebDataEnvelope;
 import de.wacodis.core.models.SensorWebSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinition;
@@ -23,6 +25,7 @@ import de.wacodis.core.models.WacodisJobDefinitionTemporalCoverage;
 import de.wacodis.core.models.WacodisProductDataEnvelope;
 import de.wacodis.core.models.WacodisProductSubsetDefinition;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
@@ -268,31 +271,50 @@ public class BasicDataEnvelopeMatcherTest {
     }
 
     @Test
-    public void testMatchWacodisProductDataEnvelope() {
+    public void testMatchWacodisProductDataEnvelope_DifferentProductType() {
         WacodisProductDataEnvelope productEnvelope = getProductDataEnvelope();
         WacodisProductSubsetDefinition productSubset = getProductSubsetDefinition();
         WacodisJobWrapper wrapper = getJobWrapper();
+
+        productEnvelope.setProductType("land cover classification");
+        productSubset.setProductType("unknown product type");
+
+        assertFalse(this.matcher.match(productEnvelope, wrapper, productSubset));
+    }
+
+    @Test
+    public void testMatchWacodisProductDataEnvelope_EqualProductType() {
+        WacodisProductDataEnvelope productEnvelope = getProductDataEnvelope();
+        WacodisProductSubsetDefinition productSubset = getProductSubsetDefinition();
+        WacodisJobWrapper wrapper = getJobWrapper();
+
+        productEnvelope.setProductType("land cover classification");
+        productSubset.setProductType("land cover classification");
 
         assertTrue(this.matcher.match(productEnvelope, wrapper, productSubset));
     }
 
     @Test
-    public void testMatchWacodisProductDataEnvelope_False() {
+    public void testMatchWacodisProductDataEnvelope_DifferentBackendType() {
         WacodisProductDataEnvelope productEnvelope = getProductDataEnvelope();
         WacodisProductSubsetDefinition productSubset = getProductSubsetDefinition();
         WacodisJobWrapper wrapper = getJobWrapper();
 
-        productSubset.setProductCollection("someCollection");
+        productEnvelope.getServiceDefinition().setBackendType(ProductBackend.ARCGISIMAGESERVERBACKEND);
+        productSubset.setBackendType(ProductBackend.GEOSERVERBACKEND);
+
         assertFalse(this.matcher.match(productEnvelope, wrapper, productSubset));
     }
 
     @Test
-    public void testMatchWacodisProductDataEnvelope_WithProductType() {
+    public void testMatchWacodisProductDataEnvelope_EqualBackendType() {
         WacodisProductDataEnvelope productEnvelope = getProductDataEnvelope();
         WacodisProductSubsetDefinition productSubset = getProductSubsetDefinition();
         WacodisJobWrapper wrapper = getJobWrapper();
 
-        productSubset.setProductType("testType");
+        productEnvelope.getServiceDefinition().setBackendType(ProductBackend.ARCGISIMAGESERVERBACKEND);
+        productSubset.setBackendType(ProductBackend.ARCGISIMAGESERVERBACKEND);
+        
         assertTrue(this.matcher.match(productEnvelope, wrapper, productSubset));
     }
 
@@ -504,8 +526,9 @@ public class BasicDataEnvelopeMatcherTest {
     private WacodisProductSubsetDefinition getProductSubsetDefinition() {
         WacodisProductSubsetDefinition productSubset = new WacodisProductSubsetDefinition();
         productSubset.setSourceType(AbstractSubsetDefinition.SourceTypeEnum.WACODISPRODUCTSUBSETDEFINITION);
-        productSubset.setProductCollection("testCollection");
-        productSubset.setServiceUrl("http://example.com");
+        productSubset.setBackendType(ProductBackend.ARCGISIMAGESERVERBACKEND);
+        productSubset.setProductType("land cover classification");
+        productSubset.setIdentifier("testID");
 
         return productSubset;
     }
@@ -513,9 +536,7 @@ public class BasicDataEnvelopeMatcherTest {
     private WacodisProductDataEnvelope getProductDataEnvelope() {
         WacodisProductDataEnvelope productEnvelope = new WacodisProductDataEnvelope();
         productEnvelope.setSourceType(AbstractDataEnvelope.SourceTypeEnum.WACODISPRODUCTDATAENVELOPE);
-        productEnvelope.serviceName("http://example.com");
-        productEnvelope.setProductCollection("testCollection");
-        productEnvelope.setProductType("testType");
+        productEnvelope.setProductType("land cover classification");
 
         AbstractDataEnvelopeAreaOfInterest aoi = new AbstractDataEnvelopeAreaOfInterest();
         aoi.addExtentItem(0.0f);
@@ -528,6 +549,13 @@ public class BasicDataEnvelopeMatcherTest {
         tf.setStartTime(new DateTime(DateTime.parse("2018-01-01T07:30:15Z")));
         tf.setEndTime(new DateTime(DateTime.parse("2018-01-02T07:30:15Z")));
         productEnvelope.setTimeFrame(tf);
+
+        ArcGISImageServerBackend serviceDef = new ArcGISImageServerBackend();
+        serviceDef.setBackendType(ProductBackend.ARCGISIMAGESERVERBACKEND);
+        serviceDef.setBaseUrl("www.example.com");
+        serviceDef.setProductCollection("landcover");
+        serviceDef.setServiceTypes(Arrays.asList("WmsServer, ImageServer"));
+        productEnvelope.setServiceDefinition(serviceDef);
 
         return productEnvelope;
     }

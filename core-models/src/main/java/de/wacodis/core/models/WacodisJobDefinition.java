@@ -3,11 +3,11 @@ package de.wacodis.core.models;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import de.wacodis.core.models.AbstractDataEnvelopeAreaOfInterest;
 import de.wacodis.core.models.AbstractSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionExecution;
 import de.wacodis.core.models.WacodisJobDefinitionTemporalCoverage;
+import de.wacodis.core.models.WacodisJobStatus;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -19,9 +19,10 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * WacodisJobDefinition
+ * contains information about a WaCoDiS Job that will be used for scheduling, preparing and executing certain processes
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-07-16T11:30:07.111+02:00[Europe/Berlin]")
+@ApiModel(description = "contains information about a WaCoDiS Job that will be used for scheduling, preparing and executing certain processes")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-01-24T15:11:15.577+01:00[Europe/Berlin]")
 
 public class WacodisJobDefinition  implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -44,41 +45,8 @@ public class WacodisJobDefinition  implements Serializable {
   @JsonProperty("lastFinishedExecution")
   private DateTime lastFinishedExecution = null;
 
-  /**
-   * Gets or Sets status
-   */
-  public enum StatusEnum {
-    WAITING("waiting"),
-    
-    RUNNING("running"),
-    
-    DELETED("deleted");
-
-    private String value;
-
-    StatusEnum(String value) {
-      this.value = value;
-    }
-
-    @Override
-    @JsonValue
-    public String toString() {
-      return String.valueOf(value);
-    }
-
-    @JsonCreator
-    public static StatusEnum fromValue(String text) {
-      for (StatusEnum b : StatusEnum.values()) {
-        if (String.valueOf(b.value).equals(text)) {
-          return b;
-        }
-      }
-      throw new IllegalArgumentException("Unexpected value '" + text + "'");
-    }
-  }
-
   @JsonProperty("status")
-  private StatusEnum status = null;
+  private WacodisJobStatus status = null;
 
   @JsonProperty("execution")
   private WacodisJobDefinitionExecution execution = null;
@@ -167,10 +135,10 @@ public class WacodisJobDefinition  implements Serializable {
   }
 
   /**
-   * A generic use case reference. This can be used to refer to the use cases identified during the initial phase of WaCoDiS 
+   * a generic use case reference. This can be used to refer to the use cases identified during the initial phase of WaCoDiS 
    * @return useCase
   **/
-  @ApiModelProperty(value = "A generic use case reference. This can be used to refer to the use cases identified during the initial phase of WaCoDiS ")
+  @ApiModelProperty(value = "a generic use case reference. This can be used to refer to the use cases identified during the initial phase of WaCoDiS ")
 
 
   public String getUseCase() {
@@ -223,7 +191,7 @@ public class WacodisJobDefinition  implements Serializable {
     this.lastFinishedExecution = lastFinishedExecution;
   }
 
-  public WacodisJobDefinition status(StatusEnum status) {
+  public WacodisJobDefinition status(WacodisJobStatus status) {
     this.status = status;
     return this;
   }
@@ -234,12 +202,13 @@ public class WacodisJobDefinition  implements Serializable {
   **/
   @ApiModelProperty(value = "")
 
+  @Valid
 
-  public StatusEnum getStatus() {
+  public WacodisJobStatus getStatus() {
     return status;
   }
 
-  public void setStatus(StatusEnum status) {
+  public void setStatus(WacodisJobStatus status) {
     this.status = status;
   }
 

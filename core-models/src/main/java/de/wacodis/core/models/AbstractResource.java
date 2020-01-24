@@ -13,9 +13,10 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * AbstractResource
+ * abstract type for a remote resource that can be identified by an URL
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2019-07-16T11:30:07.111+02:00[Europe/Berlin]")
+@ApiModel(description = "abstract type for a remote resource that can be identified by an URL")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-01-24T15:11:15.577+01:00[Europe/Berlin]")
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "method", visible = true)
 @JsonSubTypes({
@@ -63,6 +64,9 @@ public class AbstractResource  implements Serializable {
   @JsonProperty("method")
   private MethodEnum method = null;
 
+  @JsonProperty("dataEnvelopeId")
+  private String dataEnvelopeId = null;
+
   public AbstractResource url(String url) {
     this.url = url;
     return this;
@@ -105,6 +109,26 @@ public class AbstractResource  implements Serializable {
     this.method = method;
   }
 
+  public AbstractResource dataEnvelopeId(String dataEnvelopeId) {
+    this.dataEnvelopeId = dataEnvelopeId;
+    return this;
+  }
+
+  /**
+   * the ID (assigned by data access) of the DataEnvelope from which this resource was derived 
+   * @return dataEnvelopeId
+  **/
+  @ApiModelProperty(value = "the ID (assigned by data access) of the DataEnvelope from which this resource was derived ")
+
+
+  public String getDataEnvelopeId() {
+    return dataEnvelopeId;
+  }
+
+  public void setDataEnvelopeId(String dataEnvelopeId) {
+    this.dataEnvelopeId = dataEnvelopeId;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -116,12 +140,13 @@ public class AbstractResource  implements Serializable {
     }
     AbstractResource abstractResource = (AbstractResource) o;
     return Objects.equals(this.url, abstractResource.url) &&
-        Objects.equals(this.method, abstractResource.method);
+        Objects.equals(this.method, abstractResource.method) &&
+        Objects.equals(this.dataEnvelopeId, abstractResource.dataEnvelopeId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(url, method);
+    return Objects.hash(url, method, dataEnvelopeId);
   }
 
   @Override
@@ -131,6 +156,7 @@ public class AbstractResource  implements Serializable {
     
     sb.append("    url: ").append(toIndentedString(url)).append("\n");
     sb.append("    method: ").append(toIndentedString(method)).append("\n");
+    sb.append("    dataEnvelopeId: ").append(toIndentedString(dataEnvelopeId)).append("\n");
     sb.append("}");
     return sb.toString();
   }
