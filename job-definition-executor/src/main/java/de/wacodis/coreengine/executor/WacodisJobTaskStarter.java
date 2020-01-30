@@ -7,6 +7,7 @@ package de.wacodis.coreengine.executor;
 
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
+import de.wacodis.coreengine.executor.events.WacodisJobExecutionFailedEvent;
 import de.wacodis.coreengine.executor.process.wps.WPSProcess;
 import de.wacodis.coreengine.executor.process.WacodisJobExecutor;
 import java.util.concurrent.ExecutorService;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import javax.annotation.PostConstruct;
+import org.springframework.context.ApplicationEventPublisher;
 
 /**
  * start execution of wacodis jobs asynchronously in separate threads
@@ -50,6 +52,9 @@ public class WacodisJobTaskStarter {
 
     @Autowired
     ToolMessagePublisherChannel newProductPublisher;
+    
+    @Autowired
+    private ApplicationEventPublisher jobExecutionFailedPublisher;
 
     @Autowired
     private WebProcessingServiceConfiguration wpsConfig;
@@ -104,6 +109,8 @@ public class WacodisJobTaskStarter {
             LOGGER.info("execution of wacodis job returned successfully, WacodisJobID: {}, toolID: {}, processOutput: ", wacodisJobID, toolProcessID, processOutput.toString());
         }).exceptionally((Throwable t) -> { //handle exceptions that were raised by async job
             LOGGER.error("execution of wacodis job failed, WacodisJobID: " + wacodisJobID + ",toolID: " + toolProcessID, t.getCause());
+            //trigger job execution failed event
+            this.jobExecutionFailedPublisher.publishEvent(new WacodisJobExecutionFailedEvent(this, job.getJobDefinition()));
             return null; //satisfy return type
         });
     }
