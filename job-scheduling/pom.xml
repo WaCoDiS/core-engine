@@ -20,6 +20,10 @@
             <artifactId>job-definition-evaluator</artifactId>
         </dependency>
         <dependency>
+            <groupId>de.wacodis</groupId>
+            <artifactId>job-definition-executor</artifactId>
+        </dependency>
+        <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
         </dependency>
