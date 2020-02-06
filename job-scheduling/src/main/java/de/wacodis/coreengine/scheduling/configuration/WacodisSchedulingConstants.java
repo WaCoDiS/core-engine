@@ -16,5 +16,9 @@ public class WacodisSchedulingConstants {
     public static final String JOB_KEY_ID = "keyId";
     
     public static final String DEFAULT_TIMEZONE = "Europe/Berlin";
+    
+    public static final String EXECUTION_ID_KEY = "executionID";
+    
+    public static final String RETRY_COUNT_KEY = "retryCount";
 
 }

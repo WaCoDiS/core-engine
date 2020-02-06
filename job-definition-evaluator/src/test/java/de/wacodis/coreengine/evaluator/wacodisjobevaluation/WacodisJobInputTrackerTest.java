@@ -10,6 +10,7 @@ import de.wacodis.core.models.AbstractSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.coreengine.evaluator.EvaluationStatus;
 import java.util.List;
+import java.util.UUID;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,7 +55,7 @@ public class WacodisJobInputTrackerTest {
     @Test
     public void testAddJob() {
         WacodisJobDefinition jobDef = new WacodisJobDefinition();
-        WacodisJobWrapper job = new WacodisJobWrapper(jobDef, DateTime.parse("2019-01-01T00:00:00Z"));
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(),DateTime.parse("2019-01-01T00:00:00Z"), 0), jobDef);
 
         this.inputTracker.addJob(job);
         assertTrue(this.inputTracker.getScheduledJobs().contains(job));
@@ -66,7 +67,7 @@ public class WacodisJobInputTrackerTest {
     @Test
     public void testRemoveJob() {
         WacodisJobDefinition jobDef = new WacodisJobDefinition();
-        WacodisJobWrapper job = new WacodisJobWrapper(jobDef, DateTime.parse("2019-01-01T00:00:00Z"));
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(),DateTime.parse("2019-01-01T00:00:00Z"), 0), jobDef);
 
         this.inputTracker.addJob(job);
         this.inputTracker.removeJob(job);
@@ -93,7 +94,7 @@ public class WacodisJobInputTrackerTest {
     @Test
     public void testClear_scheduledJobs() {
         WacodisJobDefinition jobDef = new WacodisJobDefinition();
-        WacodisJobWrapper job = new WacodisJobWrapper(jobDef, DateTime.parse("2019-01-01T00:00:00Z"));
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(),DateTime.parse("2019-01-01T00:00:00Z"), 0), jobDef);
 
         this.inputTracker.addJob(job);
         this.inputTracker.clearJobs();
@@ -107,7 +108,7 @@ public class WacodisJobInputTrackerTest {
     @DisplayName("check no executable jobs if scheduledJobs are cleared")
     public void testClear_executableJobs() {
         WacodisJobDefinition jobDef = new WacodisJobDefinition();
-        WacodisJobWrapper job = new WacodisJobWrapper(jobDef, DateTime.parse("2019-01-01T00:00:00Z"));
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(),DateTime.parse("2019-01-01T00:00:00Z"), 0), jobDef);
 
         this.inputTracker.addJob(job);
         this.inputTracker.clearJobs();
@@ -120,7 +121,7 @@ public class WacodisJobInputTrackerTest {
     @Test
     public void testContains() {
         WacodisJobDefinition jobDef = new WacodisJobDefinition();
-        WacodisJobWrapper job = new WacodisJobWrapper(jobDef, DateTime.parse("2019-01-01T00:00:00Z"));
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(),DateTime.parse("2019-01-01T00:00:00Z"), 0), jobDef);
 
         this.inputTracker.addJob(job);
         assertTrue(this.inputTracker.containsJob(job));
@@ -136,7 +137,7 @@ public class WacodisJobInputTrackerTest {
         AbstractSubsetDefinition input = new AbstractSubsetDefinition();
         input.setIdentifier("testID");
         jobDef.getInputs().add(input);
-        WacodisJobWrapper job = new WacodisJobWrapper(jobDef, DateTime.parse("2019-01-01T00:00:00Z"));
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(),DateTime.parse("2019-01-01T00:00:00Z"), 0), jobDef);
         JobIsExecutableChangeTestListener listener = new JobIsExecutableChangeTestListener();
         this.inputTracker.addJob(job);
         this.inputTracker.addJobIsExecutableChangeListener(listener);
@@ -155,7 +156,7 @@ public class WacodisJobInputTrackerTest {
         AbstractSubsetDefinition input = new AbstractSubsetDefinition();
         input.setIdentifier("testID");
         jobDef.getInputs().add(input);
-        WacodisJobWrapper job = new WacodisJobWrapper(jobDef, DateTime.parse("2019-01-01T00:00:00Z"));
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(),DateTime.parse("2019-01-01T00:00:00Z"), 0), jobDef);
         JobIsExecutableChangeTestListener listener = new JobIsExecutableChangeTestListener();
         this.inputTracker.addJob(job);
         this.inputTracker.addJobIsExecutableChangeListener(listener);
@@ -220,7 +221,7 @@ public class WacodisJobInputTrackerTest {
         AbstractSubsetDefinition input = new AbstractSubsetDefinition();
         input.setIdentifier("testID");
         jobDef.getInputs().add(input);
-        WacodisJobWrapper job = new WacodisJobWrapper(jobDef, DateTime.parse("2019-01-01T00:00:00Z"));
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(),DateTime.parse("2019-01-01T00:00:00Z"), 0), jobDef);
 
         //order matters
         job.getInputs().get(0).setResourceAvailable(true);
@@ -236,7 +237,7 @@ public class WacodisJobInputTrackerTest {
     @DisplayName("check getExecutableJobs returns unmodifiable collection")
     public void testGetExecutableJobs_Unmodifiable() {
         WacodisJobDefinition jobDef = new WacodisJobDefinition();
-        WacodisJobWrapper job = new WacodisJobWrapper(jobDef, DateTime.parse("2019-01-01T00:00:00Z"));
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(),DateTime.parse("2019-01-01T00:00:00Z"), 0), jobDef);
 
         assertThrows(UnsupportedOperationException.class, () -> this.inputTracker.getExecutableJobs().add(job));
     }
@@ -248,7 +249,7 @@ public class WacodisJobInputTrackerTest {
     @DisplayName("check getScheduledJobs returns unmodifiable collection")
     public void testGetScheduledJobs_Unmodifiable() {
         WacodisJobDefinition jobDef = new WacodisJobDefinition();
-        WacodisJobWrapper job = new WacodisJobWrapper(jobDef, DateTime.parse("2019-01-01T00:00:00Z"));
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(),DateTime.parse("2019-01-01T00:00:00Z"), 0), jobDef);
 
         assertThrows(UnsupportedOperationException.class, () -> this.inputTracker.getScheduledJobs().add(job));
     }
@@ -261,7 +262,7 @@ public class WacodisJobInputTrackerTest {
         AbstractSubsetDefinition input = new AbstractSubsetDefinition();
         input.setIdentifier("testID");
         jobDef.getInputs().add(input);
-        WacodisJobWrapper job = new WacodisJobWrapper(jobDef, DateTime.parse("2019-01-01T00:00:00Z"));
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(),DateTime.parse("2019-01-01T00:00:00Z"), 0), jobDef);
         JobIsExecutableChangeTestListener listener = new JobIsExecutableChangeTestListener();
         this.inputTracker.addJobIsExecutableChangeListener(listener);
 

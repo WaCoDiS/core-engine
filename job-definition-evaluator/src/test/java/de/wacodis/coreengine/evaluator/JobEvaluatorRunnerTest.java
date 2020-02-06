@@ -14,6 +14,7 @@ import de.wacodis.core.models.WacodisJobDefinitionExecution;
 import de.wacodis.core.models.WacodisJobDefinitionTemporalCoverage;
 import de.wacodis.coreengine.evaluator.http.dataaccess.DataAccessConnector;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.BasicDataEnvelopeMatcher;
+import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionContext;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobInputTracker;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import java.io.IOException;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import javax.annotation.PostConstruct;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
@@ -117,7 +119,7 @@ public class JobEvaluatorRunnerTest {
         tempCov.setPreviousExecution(Boolean.TRUE);
         jobDefinition.setTemporalCoverage(tempCov);
         jobDefinition.setExecution(execution);
-        WacodisJobWrapper job = new WacodisJobWrapper(jobDefinition, new DateTime());
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), DateTime.now(), 0), jobDefinition);
 
         //job has no inputs, empty response
         assertAll(
@@ -144,7 +146,7 @@ public class JobEvaluatorRunnerTest {
         jobDefinition.setTemporalCoverage(tempCov);
         jobDefinition.setExecution(execution);
 
-        WacodisJobWrapper job = new WacodisJobWrapper(jobDefinition, new DateTime());
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), DateTime.now(), 0), jobDefinition);
 
         //job has one input, empty response
         assertAll(
@@ -172,7 +174,7 @@ public class JobEvaluatorRunnerTest {
         jobDefinition.setTemporalCoverage(tempCov);
         jobDefinition.setExecution(execution);
 
-        WacodisJobWrapper job = new WacodisJobWrapper(jobDefinition, new DateTime());
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), DateTime.now(), 0), jobDefinition);
 
         //expect UNEVALUATED because data access request throws exception
         assertAll(
@@ -196,7 +198,7 @@ public class JobEvaluatorRunnerTest {
         tempCov.setPreviousExecution(Boolean.TRUE);
         jobDefinition.setTemporalCoverage(tempCov);
         jobDefinition.setExecution(execution);
-        WacodisJobWrapper job = new WacodisJobWrapper(jobDefinition, new DateTime());
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), DateTime.now(), 0), jobDefinition);
 
         //job has one input, empty response, waiting for further data
         EvaluationStatus status = this.evaluator.evaluateJob(job, true);
@@ -218,7 +220,7 @@ public class JobEvaluatorRunnerTest {
         tempCov.setPreviousExecution(Boolean.TRUE);
         jobDefinition.setTemporalCoverage(tempCov);
         jobDefinition.setExecution(execution);
-        WacodisJobWrapper job = new WacodisJobWrapper(jobDefinition, new DateTime());
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), DateTime.now(), 0), jobDefinition);
 
         evaluator.evaluateJob(job, false);
         assertFalse(this.evaluator.getInputTracker().containsJob(job));
@@ -235,7 +237,7 @@ public class JobEvaluatorRunnerTest {
         tempCov.setPreviousExecution(Boolean.TRUE);
         jobDefinition.setTemporalCoverage(tempCov);
         jobDefinition.setExecution(execution);
-        WacodisJobWrapper job = new WacodisJobWrapper(jobDefinition, new DateTime());
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), DateTime.now(), 0), jobDefinition);
 
         EvaluationStatus status = this.evaluator.evaluateJob(job, true); //add to input tracker
         

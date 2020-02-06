@@ -12,6 +12,7 @@ import de.wacodis.core.models.extension.staticresource.StaticDummyResource;
 import de.wacodis.coreengine.evaluator.EvaluationStatus;
 import de.wacodis.coreengine.evaluator.WacodisJobExecutableEvent;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
+import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionContext;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
 import de.wacodis.coreengine.executor.events.WacodisJobExecutableStateChangedHandler;
@@ -84,8 +85,9 @@ public class WacodisJobExecutorIT {
         AbstractResource abstractResource = new AbstractResource();
         abstractResource.setUrl("test input");
         abstractResource.setDataEnvelopeId("someOtherDataEnvelopeID");
+        WacodisJobExecutionContext context = new WacodisJobExecutionContext(UUID.randomUUID(), DateTime.now(), 0);
         
-        WacodisJobWrapper jobWrapper = new WacodisJobWrapper(jobDef, DateTime.now());
+        WacodisJobWrapper jobWrapper = new WacodisJobWrapper(context, jobDef);
         InputHelper literalInputHelper = jobWrapper.getInputs().get(0); //only one input
         List<AbstractResource> input1ResourceList = new ArrayList<>();
         input1ResourceList.add(staticResource);

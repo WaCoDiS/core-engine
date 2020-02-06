@@ -17,10 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -125,7 +123,7 @@ public class WacodisJobExecutor {
         return MessageBuilder.withPayload(msg).build();
     }
 
-    private Message<WacodisJobFailed> buildToolFailureMessage( String errorText) {
+    private Message<WacodisJobFailed> buildToolFailureMessage(String errorText) {
         WacodisJobFailed msg = new WacodisJobFailed();
         //TODO include wps job identifier (not wacodis job identifier)
         msg.setWpsJobIdentifier(null);

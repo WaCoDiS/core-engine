@@ -13,6 +13,7 @@ import de.wacodis.core.models.WacodisJobDefinitionExecution;
 import de.wacodis.core.models.WacodisJobDefinitionTemporalCoverage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,7 +34,7 @@ public class WacodisJobWrapperTest {
     @Test
     public void testGetInputs() {
         WacodisJobDefinition jobDef = getJobDefinition();
-        WacodisJobWrapper job = new WacodisJobWrapper(jobDef, new DateTime());
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(),new DateTime(), 0), jobDef);
 
         assertEquals(2, job.getInputs().size());
     }
@@ -42,7 +43,7 @@ public class WacodisJobWrapperTest {
     @DisplayName("check GetInputs returns umodifiable collection")
     public void testGetInputsUnmodifiable() {
         WacodisJobDefinition jobDef = getJobDefinition();
-        WacodisJobWrapper job = new WacodisJobWrapper(jobDef, new DateTime());
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(),new DateTime(), 0), jobDef);
 
         //exception expected because collection should be unmodifiable
         assertThrows(java.lang.UnsupportedOperationException.class, () -> {
@@ -55,7 +56,7 @@ public class WacodisJobWrapperTest {
      */
     @Test
     public void testIsExecutable() {
-        WacodisJobWrapper job = new WacodisJobWrapper(getJobDefinition(), new DateTime());
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(),new DateTime(), 0), getJobDefinition());
         assertFalse(job.isExecutable());
 
         job.getInputs().get(0).setResourceAvailable(true);
@@ -77,7 +78,7 @@ public class WacodisJobWrapperTest {
     @Test
     @DisplayName("check every resource is unavailable initially")
     public void testSubsetsInitialized() {
-        WacodisJobWrapper job = new WacodisJobWrapper(getJobDefinition(), new DateTime());
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(),new DateTime(), 0), getJobDefinition());
 
         for (InputHelper pair : job.getInputs()) {
             assertFalse(pair.hasResource());
@@ -87,7 +88,7 @@ public class WacodisJobWrapperTest {
     @Test
     public void testCalculateInputRelevancyTimeFrame_PrevExecution() {
         DateTime execTime = DateTime.parse("2000-01-15T00:00:00Z");
-        WacodisJobWrapper job = new WacodisJobWrapper(getJobDefinition(), execTime);
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(),execTime, 0), getJobDefinition());
         WacodisJobDefinitionExecution exec = new WacodisJobDefinitionExecution();
         WacodisJobDefinitionTemporalCoverage tmpCov = new WacodisJobDefinitionTemporalCoverage();
         tmpCov.setPreviousExecution(true);
@@ -101,7 +102,7 @@ public class WacodisJobWrapperTest {
     @Test
     public void testCalculateInputRelevancyTimeFrame_Period() {
         DateTime execTime = DateTime.parse("2000-02-01T00:00:00Z");
-        WacodisJobWrapper job = new WacodisJobWrapper(getJobDefinition(), execTime);
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(),execTime, 0), getJobDefinition());
         WacodisJobDefinitionTemporalCoverage tmpCov = new WacodisJobDefinitionTemporalCoverage();
         tmpCov.setPreviousExecution(false);
         tmpCov.setDuration("P1M"); //one month
@@ -113,7 +114,7 @@ public class WacodisJobWrapperTest {
     @Test
     public void testCalculateInputRelevancyTimeFrame_EndTime() {
         DateTime execTime = DateTime.parse("2000-02-01T00:00:00Z");
-        WacodisJobWrapper job = new WacodisJobWrapper(getJobDefinition(), execTime);
+        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(),execTime, 0), getJobDefinition());
         WacodisJobDefinitionTemporalCoverage tmpCov = new WacodisJobDefinitionTemporalCoverage();
         tmpCov.setPreviousExecution(false);
         tmpCov.setDuration("P1M"); //one month

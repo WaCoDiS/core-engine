@@ -5,6 +5,8 @@
  */
 package de.wacodis.coreengine.executor;
 
+import de.wacodis.core.models.WacodisJobDefinition;
+import de.wacodis.core.models.WacodisJobDefinitionRetrySettings;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
 import de.wacodis.coreengine.executor.events.WacodisJobExecutionFailedEvent;
@@ -44,6 +46,9 @@ public class WacodisJobTaskStarter {
     //default expected outputs
     private static final ExpectedProcessOutput PRODUCTOUTPUT = new ExpectedProcessOutput("PRODUCT", "image/geotiff");
     private static final ExpectedProcessOutput METADATAOUTPUT = new ExpectedProcessOutput("METADATA", "text/json", false); //no published output
+    //default retry settings
+    private static final int DEFAULT_MAXRETRIES = 0;
+    private static final long DEFAULT_RETRIEDELAY_MILLIES = 0l;
 
     private final WPSClientSession wpsClient;
     private final ExecutorService wacodisJobExecutionService;
@@ -52,7 +57,7 @@ public class WacodisJobTaskStarter {
 
     @Autowired
     ToolMessagePublisherChannel newProductPublisher;
-    
+
     @Autowired
     private ApplicationEventPublisher jobExecutionFailedPublisher;
 
@@ -108,9 +113,20 @@ public class WacodisJobTaskStarter {
                 -> {
             LOGGER.info("execution of wacodis job returned successfully, WacodisJobID: {}, toolID: {}, processOutput: ", wacodisJobID, toolProcessID, processOutput.toString());
         }).exceptionally((Throwable t) -> { //handle exceptions that were raised by async job
-            LOGGER.error("execution of wacodis job failed, WacodisJobID: " + wacodisJobID + ",toolID: " + toolProcessID, t.getCause());
+            setDefaultRetrySettingsIfAbsent(job.getJobDefinition()); //use defaults if retry settings are not set in job definition
+            LOGGER.error("execution of wacodis job failed, WacodisJobID: " + wacodisJobID + ",toolID: " + toolProcessID + ", retry attempt: " + job.getExecutionContext().getRetryCount() + " of " + job.getJobDefinition().getRetrySettings().getMaxRetries(), t.getCause());
             //trigger job execution failed event
-            this.jobExecutionFailedPublisher.publishEvent(new WacodisJobExecutionFailedEvent(this, job.getJobDefinition()));
+
+            if (job.getExecutionContext().getRetryCount() <= job.getJobDefinition().getRetrySettings().getMaxRetries()) { //check if retry
+                //fire event to schedule retry attempt
+                int retries = job.incrementRetryCount();
+                LOGGER.info("publish jobExecutionFailedEvent to schedule retry attempt {} of {}, WacodisJobID {}, toolID: {}", retries, job.getJobDefinition().getRetrySettings().getMaxRetries(), wacodisJobID, toolProcessID);
+                WacodisJobExecutionFailedEvent failEvent = new WacodisJobExecutionFailedEvent(this, job, t);
+                this.jobExecutionFailedPublisher.publishEvent(failEvent);
+            } else {
+                //retries exceeded, job failed ultimately
+                LOGGER.error("execution of wacodis job failed ultimately after " + job.getExecutionContext().getRetryCount() + " of " + job.getJobDefinition().getRetrySettings().getMaxRetries() + " retries, WacodisJobID: " + wacodisJobID + ",toolID: " + toolProcessID);
+            }
             return null; //satisfy return type
         });
     }
@@ -118,15 +134,15 @@ public class WacodisJobTaskStarter {
     @PostConstruct
     private void initExpectedProcessOutputs() {
         List<ExpectedProcessOutput> selectedOutputs;
-        
+
         if (this.expectedProcessOutputs != null) {
             selectedOutputs = this.expectedProcessOutputs;
         } else if (this.wpsConfig.getExpectedProcessOutputs() != null) {
-          selectedOutputs = this.wpsConfig.getExpectedProcessOutputs();
+            selectedOutputs = this.wpsConfig.getExpectedProcessOutputs();
         } else {
             selectedOutputs = Arrays.asList(new ExpectedProcessOutput[]{PRODUCTOUTPUT, METADATAOUTPUT});
         }
-        
+
         this.expectedProcessOutputs = selectedOutputs;
         LOGGER.debug("set expected process outputs to: " + selectedOutputs.toString());
     }
@@ -135,5 +151,15 @@ public class WacodisJobTaskStarter {
     private void shutdownJobExecutionService() {
         this.wacodisJobExecutionService.shutdown();
         LOGGER.info("shutdown wacodis job executor service");
+    }
+
+    private void setDefaultRetrySettingsIfAbsent(WacodisJobDefinition jobDef){
+        if(jobDef.getRetrySettings() == null){
+            WacodisJobDefinitionRetrySettings defaultRetrySettings = new WacodisJobDefinitionRetrySettings();
+            defaultRetrySettings.setMaxRetries(DEFAULT_MAXRETRIES);
+            defaultRetrySettings.setRetryDelayMillies(DEFAULT_RETRIEDELAY_MILLIES);
+            
+            jobDef.setRetrySettings(defaultRetrySettings);
+        }
     }
 }

@@ -15,7 +15,6 @@ import de.wacodis.coreengine.evaluator.wacodisjobevaluation.cron.CronExecutionTi
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -32,13 +31,13 @@ public class WacodisJobWrapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(WacodisJobWrapper.class);
 
     private final WacodisJobDefinition jobDefinition;
-    private final DateTime executionTime;
     private final List<InputHelper> inputs;
+    private WacodisJobExecutionContext executionContext;
 
-    public WacodisJobWrapper(WacodisJobDefinition job, DateTime executionTime) {
+    public WacodisJobWrapper(WacodisJobExecutionContext executionContext, WacodisJobDefinition job) {
         this.jobDefinition = job;
-        this.executionTime = executionTime;
         this.inputs = new ArrayList<>();
+        this.executionContext = executionContext;
 
         initInputs();
 
@@ -58,8 +57,8 @@ public class WacodisJobWrapper {
         return jobDefinition;
     }
 
-    public DateTime getExecutionTime() {
-        return executionTime;
+    public WacodisJobExecutionContext getExecutionContext() {
+        return executionContext;
     }
 
     /**
@@ -89,7 +88,7 @@ public class WacodisJobWrapper {
             try {
                 String cronExpression = this.jobDefinition.getExecution().getPattern();
                 CronExecutionTimeCalculator timeCalculator = new CronExecutionTimeCalculator(cronExpression);
-                start = timeCalculator.previousExecution(this.executionTime); //scheduled time of previous job execution
+                start = timeCalculator.previousExecution(this.executionContext.getExecutionTime()); //scheduled time of previous job execution
             } catch (NullPointerException e) {
                 LOGGER.error("temporalCoverage previousExecution is true but no execution pattern (cron) is set");
                 throw new java.lang.IllegalArgumentException("No execution pattern provided but attribute previousExecution is set true for JobDefinition: " + jobDefinition.getId(), e);
@@ -97,33 +96,37 @@ public class WacodisJobWrapper {
 
         } else { //duration (data since a specified point in time is relevant)
             Period period = Period.parse(tempCov.getDuration()); //terms duration and period are mixed up
-            start = this.executionTime.minus(period);
+            start = this.executionContext.getExecutionTime().minus(period);
         }
-        
-        return new Interval(start, this.executionTime);
+
+        return new Interval(start, this.executionContext.getExecutionTime());
+    }
+    
+    public int incrementRetryCount(){
+        this.executionContext = this.executionContext.createCopyWithIncrementedRetryCount();
+        return this.executionContext.getRetryCount();
     }
 
     private void initInputs() {
-        for (AbstractSubsetDefinition subset : this.jobDefinition.getInputs()) {    
+        for (AbstractSubsetDefinition subset : this.jobDefinition.getInputs()) {
             InputHelper input = new InputHelper(subset);
- 
-            if(StaticSubsetDefinition.class.isAssignableFrom(subset.getClass())){ //handle static inputs
+
+            if (StaticSubsetDefinition.class.isAssignableFrom(subset.getClass())) { //handle static inputs
                 input.setResourceAvailable(true); //static input always available 
-                input.setResource(createStaticDummyResource(((StaticSubsetDefinition)subset)));  
+                input.setResource(createStaticDummyResource(((StaticSubsetDefinition) subset)));
             }
-            
-            this.inputs.add(input); 
+
+            this.inputs.add(input);
         }
     }
-    
-    
-    private List<AbstractResource> createStaticDummyResource(StaticSubsetDefinition subset){
+
+    private List<AbstractResource> createStaticDummyResource(StaticSubsetDefinition subset) {
         List<AbstractResource> resourceList = new ArrayList<>();
-        
+
         StaticDummyResource resource = new StaticDummyResource();
         resource.setDataType(subset.getDataType());
         resource.setValue(subset.getValue());
-        
+
         resourceList.add(resource);
         return resourceList;
     }

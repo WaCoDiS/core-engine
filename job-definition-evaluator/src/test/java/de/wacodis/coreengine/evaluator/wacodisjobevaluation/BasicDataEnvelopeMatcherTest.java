@@ -27,6 +27,7 @@ import de.wacodis.core.models.WacodisProductSubsetDefinition;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -587,7 +588,7 @@ public class BasicDataEnvelopeMatcherTest {
         jobDef.setExecution(execution);
 
         DateTime executionTime = new DateTime(DateTime.parse("2018-02-01T00:00:00Z"));
-        WacodisJobWrapper jobWrapper = new WacodisJobWrapper(jobDef, executionTime);
+        WacodisJobWrapper jobWrapper =new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), executionTime, 0), jobDef);
 
         return jobWrapper;
     }

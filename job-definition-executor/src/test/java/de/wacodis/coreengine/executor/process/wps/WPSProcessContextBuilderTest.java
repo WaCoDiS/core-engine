@@ -8,6 +8,7 @@ package de.wacodis.coreengine.executor.process.wps;
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinition;
+import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionContext;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
 import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
@@ -45,7 +46,7 @@ public class WPSProcessContextBuilderTest {
         AbstractSubsetDefinition input = new AbstractSubsetDefinition();
         input.setIdentifier("input1");
         jobDef.addInputsItem(input);
-        WacodisJobWrapper jobWrapper = new WacodisJobWrapper(jobDef, DateTime.now());
+        WacodisJobWrapper jobWrapper = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), DateTime.now(), 0), jobDef);
         AbstractResource resource = new AbstractResource();
         List<AbstractResource> resourceList = new ArrayList<>();
         resourceList.add(resource);
@@ -65,7 +66,7 @@ public class WPSProcessContextBuilderTest {
         WacodisJobDefinition jobDef = new WacodisJobDefinition();
         UUID processID = UUID.randomUUID();
         jobDef.setId(processID);
-        WacodisJobWrapper jobWrapper = new WacodisJobWrapper(jobDef, DateTime.now());
+        WacodisJobWrapper jobWrapper = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), DateTime.now(), 0), jobDef);
 
         WPSProcessContextBuilder contextBuilder = new WPSProcessContextBuilder();
         ProcessContext context = contextBuilder.buildProcessContext(jobWrapper);

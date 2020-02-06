@@ -38,6 +38,7 @@ public class QuartzSchedulingManager implements SchedulingManager {
     @Autowired
     private JobContextFactory jCFactory;
 
+    @Override
     public Date scheduleNewJob(WacodisJobDefinition jobDefinition) {
         Date firstFiringTime = null;
         try {
@@ -50,6 +51,7 @@ public class QuartzSchedulingManager implements SchedulingManager {
         return firstFiringTime;
     }
 
+    @Override
     public Date scheduleNewJob(WacodisJobDefinition jobDefinition, String timeZoneId) {
         Date firstFiringTime = null;
         try {

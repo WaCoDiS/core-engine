@@ -5,7 +5,8 @@
  */
 package de.wacodis.coreengine.executor.events;
 
-import de.wacodis.core.models.WacodisJobDefinition;
+
+import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import org.springframework.context.ApplicationEvent;
 
 /**
@@ -14,14 +15,20 @@ import org.springframework.context.ApplicationEvent;
  */
 public class WacodisJobExecutionFailedEvent extends ApplicationEvent {
     
-    private final WacodisJobDefinition wacodisJob;
+    private final WacodisJobWrapper wacodisJob;
+    private final Throwable failure;
 
-    public WacodisJobExecutionFailedEvent(Object source, WacodisJobDefinition wacodisJob) {
+    public WacodisJobExecutionFailedEvent(Object source, WacodisJobWrapper wacodisJob, Throwable failure) {
         super(source);
         this.wacodisJob = wacodisJob;
+        this.failure = failure;
     }
 
-    public WacodisJobDefinition getWacodisJob() {
+    public WacodisJobWrapper getWacodisJob() {
         return wacodisJob;
     } 
+
+    public Throwable getFailure() {
+        return failure;
+    }
 }
