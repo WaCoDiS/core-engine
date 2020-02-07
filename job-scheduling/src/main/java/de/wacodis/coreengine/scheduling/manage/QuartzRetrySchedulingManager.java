@@ -33,29 +33,36 @@ public class QuartzRetrySchedulingManager implements RetrySchedulingManager {
     private RetryJobContextFactory jCFactory;
 
     @Override
-    public void scheduleRetryImmediately(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
+    public Date scheduleRetryImmediately(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
+        Date firstFiringTime = null;
         JobContext quartzJobContext = jCFactory.createRetryJobContext(jobDefinition, context);
 
         try {
-            Date firstFiringTime = schedulerFactoryBean.getScheduler().scheduleJob(quartzJobContext.getJobDetails(), quartzJobContext.getTrigger());	//runs QuartzJob's execute()
+            firstFiringTime = schedulerFactoryBean.getScheduler().scheduleJob(quartzJobContext.getJobDetails(), quartzJobContext.getTrigger());	//runs QuartzJob's execute()
             LOGGER.info("Scheduling retry attempt for job {} was successful. Retry fire time: {}", quartzJobContext.getJobDetails().getKey(), firstFiringTime);
+
         } catch (SchedulerException ex) {
             LOGGER.error(ex.getMessage());
             LOGGER.debug("Error while trying to schedule retry attempt for  job " + quartzJobContext.getJobDetails().getKey(), ex);
         }
+
+        return firstFiringTime;
     }
 
     @Override
-    public void scheduleRetryAt(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context, Date at) {
+    public Date scheduleRetryAt(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context, Date at) {
+        Date firstFiringTime = null;
         JobContext quartzJobContext = jCFactory.createRetryJobContext(jobDefinition, context, at);
 
         try {
-            Date firstFiringTime = schedulerFactoryBean.getScheduler().scheduleJob(quartzJobContext.getJobDetails(), quartzJobContext.getTrigger());	//runs QuartzJob's execute()
+            firstFiringTime = schedulerFactoryBean.getScheduler().scheduleJob(quartzJobContext.getJobDetails(), quartzJobContext.getTrigger());	//runs QuartzJob's execute()
             LOGGER.info("Scheduling retry attempt for job {} was successful. Retry fire time: {}", quartzJobContext.getJobDetails().getKey(), firstFiringTime);
         } catch (SchedulerException ex) {
             LOGGER.error(ex.getMessage());
             LOGGER.debug("Error while trying to schedule retry attempt for  job " + quartzJobContext.getJobDetails().getKey(), ex);
         }
+
+        return firstFiringTime;
     }
 
 }

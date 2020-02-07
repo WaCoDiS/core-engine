@@ -15,8 +15,8 @@ import java.util.Date;
  */
 public interface RetrySchedulingManager {
     
-    void scheduleRetryImmediately(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context);
+    Date scheduleRetryImmediately(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context);
     
-    void scheduleRetryAt(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context, Date at);
+    Date scheduleRetryAt(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context, Date at);
     
 }
