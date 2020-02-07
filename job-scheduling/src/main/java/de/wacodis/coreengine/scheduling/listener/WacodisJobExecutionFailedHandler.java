@@ -23,26 +23,33 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class WacodisJobExecutionFailedHandler implements ApplicationListener<WacodisJobExecutionFailedEvent> {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(WacodisJobExecutionFailedHandler.class);
-    
+
     @Autowired
     private QuartzRetrySchedulingManager schedulingManager;
-    
+
     @Override
     public void onApplicationEvent(WacodisJobExecutionFailedEvent e) {
+        Date scheduledRetry;
         WacodisJobDefinition jobDef = e.getWacodisJob().getJobDefinition();
         WacodisJobExecutionContext execContex = e.getWacodisJob().getExecutionContext();
-         WacodisJobDefinitionRetrySettings retrySettings = jobDef.getRetrySettings();
-        
-        LOGGER.info("handle failed execution of wacodis job {}", jobDef.getId());
-        
-        if (retrySettings.getRetryDelayMillies()<= 0) {
-            schedulingManager.scheduleRetryImmediately(jobDef, execContex);
+        WacodisJobDefinitionRetrySettings retrySettings = jobDef.getRetrySettings();
+
+        LOGGER.debug("handle failed execution of wacodis job {}, retry attempt: {}, executionID: {}", jobDef.getId(), execContex.getRetryCount(), execContex.getExecutionID());
+
+        if (retrySettings.getRetryDelayMillies() <= 0) {
+            scheduledRetry = schedulingManager.scheduleRetryImmediately(jobDef, execContex);
         } else {
             Date retryAt = new Date(System.currentTimeMillis() + retrySettings.getRetryDelayMillies());
-            schedulingManager.scheduleRetryAt(jobDef, execContex, retryAt);
+            scheduledRetry = schedulingManager.scheduleRetryAt(jobDef, execContex, retryAt);
+        }
+
+        if (scheduledRetry != null) {
+            LOGGER.debug("scheduled retry for failed wacodis job {} at {}, retry attempt: {} of {}, executionID: {}", jobDef.getId(), scheduledRetry, execContex.getRetryCount(), retrySettings.getMaxRetries(), execContex.getExecutionID());
+        } else {
+            LOGGER.error("unable to schedule retry for failed wacodis job {}, retry attempt: {} of {}, executionID: {}", jobDef.getId(), execContex.getRetryCount(), retrySettings.getMaxRetries(), execContex.getExecutionID());
         }
     }
-    
+
 }
