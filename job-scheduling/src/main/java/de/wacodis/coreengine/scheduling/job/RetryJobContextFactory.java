@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * factory class for job context information for single (retry) wacodis job execution
  * @author Arne
  */
 @Component
@@ -37,6 +37,12 @@ public class RetryJobContextFactory {
     @Autowired
     private JobContextFactory jobContextFactory;
 
+    /**
+     * create job context with trigger that fires once immediately
+     * @param jobDefinition
+     * @param context
+     * @return 
+     */
     public JobContext createRetryJobContextStartNow(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
         JobContext jobContext = new JobContext();
         jobContext.setJobDetails(createJobDetail(jobDefinition, context));
@@ -44,6 +50,13 @@ public class RetryJobContextFactory {
         return jobContext;
     }
 
+    /**
+     * create job context with trigger that fires once with a delay specified in jobDefiontion.retrySettings,
+     * if retrySettings are not available default delay of 10 minutes is applied
+     * @param jobDefinition
+     * @param context
+     * @return 
+     */
     public JobContext createRetryJobContextStartDelayed(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
         WacodisJobDefinitionRetrySettings retrySettings = (jobDefinition.getRetrySettings() != null) ? jobDefinition.getRetrySettings() : getDefaultRetrySettings();
         

@@ -10,13 +10,25 @@ import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionC
 import java.util.Date;
 
 /**
- *
+ * schedule single wacodis job excution
  * @author Arne
  */
 public interface RetrySchedulingManager {
     
+    /**
+     * schedule single wacodis job execution that starts as soon as possible
+     * @param jobDefinition
+     * @param context
+     * @return date of scheduled job execution event
+     */
     Date scheduleRetryImmediately(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context);
     
+    /**
+     * schedule single wacodis job execution that starts delayed, delay is calculated from jobDefiontion.retrySettings
+     * @param jobDefinition
+     * @param context
+     * @return date of scheduled job execution event
+     */
     Date scheduleRetryDelayed(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context);
     
 }

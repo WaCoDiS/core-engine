@@ -18,7 +18,7 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * schedule single wacodis job excution
  * @author Arne
  */
 @Component
@@ -32,6 +32,12 @@ public class QuartzRetrySchedulingManager implements RetrySchedulingManager {
     @Autowired
     private RetryJobContextFactory jCFactory;
 
+    /**
+     * schedule single retry, scheduler will fire immediately
+     * @param jobDefinition
+     * @param context
+     * @return firing time, null if scheduling failed
+     */
     @Override
     public Date scheduleRetryImmediately(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
         Date firstFiringTime = null;
@@ -49,6 +55,12 @@ public class QuartzRetrySchedulingManager implements RetrySchedulingManager {
         return firstFiringTime;
     }
 
+    /**
+     * schedule single retry, scheduler will fire delayed, firing time is calculate considering jobDefinition.retrySettings.retryDelaysMillies
+     * @param jobDefinition
+     * @param context
+     * @return firing time, null if scheduling failed
+     */
     @Override
     public Date scheduleRetryDelayed(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
         Date firstFiringTime = null;

@@ -18,7 +18,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * handle failed wacodis job execution
  * @author Arne
  */
 @Component
@@ -29,6 +29,10 @@ public class WacodisJobExecutionFailedHandler implements ApplicationListener<Wac
     @Autowired
     private QuartzRetrySchedulingManager schedulingManager;
 
+    /**
+     * schedule retry for previously failed wacodis job execution
+     * @param e 
+     */
     @Override
     public void onApplicationEvent(WacodisJobExecutionFailedEvent e) {
         Date scheduledRetry;
