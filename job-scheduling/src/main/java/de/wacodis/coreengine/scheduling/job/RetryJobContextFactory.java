@@ -6,6 +6,7 @@
 package de.wacodis.coreengine.scheduling.job;
 
 import de.wacodis.core.models.WacodisJobDefinition;
+import de.wacodis.core.models.WacodisJobDefinitionRetrySettings;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionContext;
 import static de.wacodis.coreengine.scheduling.configuration.WacodisSchedulingConstants.EXECUTION_ID_KEY;
 import static de.wacodis.coreengine.scheduling.configuration.WacodisSchedulingConstants.GROUP_NAME;
@@ -26,6 +27,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class RetryJobContextFactory {
+    
+    private final static int DEFAULTMAXRETRIES = 3;
+    private final static long DEFAULTRETRYDELAY = 600000l; //10 min
 
     @Autowired
     private JobDetailFactory jobDetailFactory;
@@ -33,20 +37,21 @@ public class RetryJobContextFactory {
     @Autowired
     private JobContextFactory jobContextFactory;
 
-    public JobContext createRetryJobContext(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
+    public JobContext createRetryJobContextStartNow(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
         JobContext jobContext = new JobContext();
         jobContext.setJobDetails(createJobDetail(jobDefinition, context));
         jobContext.setTrigger(createFireOnceTriggerNow(jobDefinition));
         return jobContext;
     }
 
-    public JobContext createRetryJobContext(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context, Date retryAt) {
+    public JobContext createRetryJobContextStartDelayed(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
+        WacodisJobDefinitionRetrySettings retrySettings = (jobDefinition.getRetrySettings() != null) ? jobDefinition.getRetrySettings() : getDefaultRetrySettings();
+        
         JobContext jobContext = new JobContext();
         jobContext.setJobDetails(createJobDetail(jobDefinition, context));
-        jobContext.setTrigger(createFireOnceTriggerAt(jobDefinition, retryAt));
+        jobContext.setTrigger(createFireOnceTriggerAt(jobDefinition, getDelayedFireTime(retrySettings)));
         return jobContext;
     }
-
 
     private Trigger createFireOnceTriggerNow(WacodisJobDefinition jobDefinition) {
         SimpleTrigger trigger = (SimpleTrigger) TriggerBuilder.newTrigger()
@@ -77,5 +82,21 @@ public class RetryJobContextFactory {
         jobData.put(RETRY_COUNT_KEY, context.getRetryCount());
 
         return jobData;
+    }
+
+    private Date getDelayedFireTime(WacodisJobDefinitionRetrySettings retrySettings) {
+        long now = System.currentTimeMillis();
+        long delay = retrySettings.getRetryDelayMillies();
+
+        return new Date(now + delay);
+    }
+    
+    
+    private WacodisJobDefinitionRetrySettings getDefaultRetrySettings(){
+        WacodisJobDefinitionRetrySettings retrySettings = new WacodisJobDefinitionRetrySettings();
+        retrySettings.setMaxRetries(DEFAULTMAXRETRIES);
+        retrySettings.setRetryDelayMillies(DEFAULTRETRYDELAY);
+        
+        return retrySettings;
     }
 }

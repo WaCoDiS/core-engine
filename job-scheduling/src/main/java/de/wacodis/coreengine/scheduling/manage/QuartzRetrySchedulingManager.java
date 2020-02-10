@@ -35,7 +35,7 @@ public class QuartzRetrySchedulingManager implements RetrySchedulingManager {
     @Override
     public Date scheduleRetryImmediately(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
         Date firstFiringTime = null;
-        JobContext quartzJobContext = jCFactory.createRetryJobContext(jobDefinition, context);
+        JobContext quartzJobContext = jCFactory.createRetryJobContextStartNow(jobDefinition, context);
 
         try {
             firstFiringTime = schedulerFactoryBean.getScheduler().scheduleJob(quartzJobContext.getJobDetails(), quartzJobContext.getTrigger());	//runs QuartzJob's execute()
@@ -50,9 +50,9 @@ public class QuartzRetrySchedulingManager implements RetrySchedulingManager {
     }
 
     @Override
-    public Date scheduleRetryAt(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context, Date at) {
+    public Date scheduleRetryDelayed(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
         Date firstFiringTime = null;
-        JobContext quartzJobContext = jCFactory.createRetryJobContext(jobDefinition, context, at);
+        JobContext quartzJobContext = jCFactory.createRetryJobContextStartDelayed(jobDefinition, context); //respect delay for schedule
 
         try {
             firstFiringTime = schedulerFactoryBean.getScheduler().scheduleJob(quartzJobContext.getJobDetails(), quartzJobContext.getTrigger());	//runs QuartzJob's execute()

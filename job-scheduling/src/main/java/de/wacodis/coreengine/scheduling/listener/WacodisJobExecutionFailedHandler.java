@@ -41,8 +41,7 @@ public class WacodisJobExecutionFailedHandler implements ApplicationListener<Wac
         if (retrySettings.getRetryDelayMillies() <= 0) {
             scheduledRetry = schedulingManager.scheduleRetryImmediately(jobDef, execContex);
         } else {
-            Date retryAt = new Date(System.currentTimeMillis() + retrySettings.getRetryDelayMillies());
-            scheduledRetry = schedulingManager.scheduleRetryAt(jobDef, execContex, retryAt);
+            scheduledRetry = schedulingManager.scheduleRetryDelayed(jobDef, execContex);
         }
 
         if (scheduledRetry != null) {

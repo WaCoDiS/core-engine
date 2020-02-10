@@ -17,6 +17,6 @@ public interface RetrySchedulingManager {
     
     Date scheduleRetryImmediately(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context);
     
-    Date scheduleRetryAt(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context, Date at);
+    Date scheduleRetryDelayed(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context);
     
 }
