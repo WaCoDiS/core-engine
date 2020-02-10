@@ -29,14 +29,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = {JobContextFactory.class, JobDetailFactory.class, RetryJobContextFactory.class})
+@SpringBootTest(classes = {JobContextFactory.class, JobDetailFactory.class, SingleExecutionJobContextFactory.class})
 public class RetryJobContextFactoryTest {
 
     private static final String GROUP_NAME = "de.hsbo.wacodis";
     private static final UUID JOB_KEY = UUID.randomUUID();
 
     @Autowired
-    private RetryJobContextFactory jobContextFactory;
+    private SingleExecutionJobContextFactory jobContextFactory;
 
     private WacodisJobDefinition jobDefinition;
     private WacodisJobExecutionContext execContext;
@@ -60,7 +60,7 @@ public class RetryJobContextFactoryTest {
     @Test
     @DisplayName("test create job context for immediate retry")
     public void testCreateRetryJobContext() {
-        JobContext jc = jobContextFactory.createRetryJobContextStartNow(jobDefinition, execContext);
+        JobContext jc = jobContextFactory.createSingleExecutionJobContextStartNow(jobDefinition, execContext);
 
         JobDetail jd = jc.getJobDetails();
         JobDataMap jdm = jd.getJobDataMap();
@@ -76,7 +76,7 @@ public class RetryJobContextFactoryTest {
     @DisplayName("test create job context for delayed retry")
     public void testCreateRetryJobContextDelayed() {
         long earliestTriggerTime = System.currentTimeMillis() + jobDefinition.getRetrySettings().getRetryDelayMillies();
-        JobContext jc = jobContextFactory.createRetryJobContextStartDelayed(jobDefinition, execContext);
+        JobContext jc = jobContextFactory.createdSingleExecutionContextStartDelayed(jobDefinition, execContext);
 
         JobDetail jd = jc.getJobDetails();
         JobDataMap jdm = jd.getJobDataMap();
@@ -92,6 +92,6 @@ public class RetryJobContextFactoryTest {
     @Test
     @DisplayName("test delayed trigger is after immediate trigger")
     public void testCompareRetryDelayedRetryNow() {
-        assertTrue(jobContextFactory.createRetryJobContextStartDelayed(jobDefinition, execContext).getTrigger().getFinalFireTime().after(jobContextFactory.createRetryJobContextStartNow(jobDefinition, execContext).getTrigger().getFinalFireTime()));
+        assertTrue(jobContextFactory.createdSingleExecutionContextStartDelayed(jobDefinition, execContext).getTrigger().getFinalFireTime().after(jobContextFactory.createSingleExecutionJobContextStartNow(jobDefinition, execContext).getTrigger().getFinalFireTime()));
     }
 }

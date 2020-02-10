@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
  * @author Arne
  */
 @Component
-public class RetryJobContextFactory {
+public class SingleExecutionJobContextFactory {
     
     private final static int DEFAULTMAXRETRIES = 3;
     private final static long DEFAULTRETRYDELAY = 600000l; //10 min
@@ -43,7 +43,7 @@ public class RetryJobContextFactory {
      * @param context
      * @return 
      */
-    public JobContext createRetryJobContextStartNow(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
+    public JobContext createSingleExecutionJobContextStartNow(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
         JobContext jobContext = new JobContext();
         jobContext.setJobDetails(createJobDetail(jobDefinition, context));
         jobContext.setTrigger(createFireOnceTriggerNow(jobDefinition));
@@ -57,7 +57,7 @@ public class RetryJobContextFactory {
      * @param context
      * @return 
      */
-    public JobContext createRetryJobContextStartDelayed(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
+    public JobContext createdSingleExecutionContextStartDelayed(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
         WacodisJobDefinitionRetrySettings retrySettings = (jobDefinition.getRetrySettings() != null) ? jobDefinition.getRetrySettings() : getDefaultRetrySettings();
         
         JobContext jobContext = new JobContext();

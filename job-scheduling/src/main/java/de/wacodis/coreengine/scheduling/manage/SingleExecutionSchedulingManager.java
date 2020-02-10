@@ -13,7 +13,7 @@ import java.util.Date;
  * schedule single wacodis job excution
  * @author Arne
  */
-public interface RetrySchedulingManager {
+public interface SingleExecutionSchedulingManager {
     
     /**
      * schedule single wacodis job execution that starts as soon as possible
@@ -21,7 +21,7 @@ public interface RetrySchedulingManager {
      * @param context
      * @return date of scheduled job execution event
      */
-    Date scheduleRetryImmediately(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context);
+    Date scheduleSingleExecutionImmediately(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context);
     
     /**
      * schedule single wacodis job execution that starts delayed, delay is calculated from jobDefiontion.retrySettings
@@ -29,6 +29,6 @@ public interface RetrySchedulingManager {
      * @param context
      * @return date of scheduled job execution event
      */
-    Date scheduleRetryDelayed(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context);
+    Date scheduleSingleExecutionDelayed(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context);
     
 }

@@ -9,7 +9,7 @@ import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionRetrySettings;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionContext;
 import de.wacodis.coreengine.executor.events.WacodisJobExecutionFailedEvent;
-import de.wacodis.coreengine.scheduling.manage.QuartzRetrySchedulingManager;
+import de.wacodis.coreengine.scheduling.manage.QuartSingleExecutionSchedulingManager;
 import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +27,7 @@ public class WacodisJobExecutionFailedHandler implements ApplicationListener<Wac
     private static final Logger LOGGER = LoggerFactory.getLogger(WacodisJobExecutionFailedHandler.class);
 
     @Autowired
-    private QuartzRetrySchedulingManager schedulingManager;
+    private QuartSingleExecutionSchedulingManager schedulingManager;
 
     /**
      * schedule retry for previously failed wacodis job execution
@@ -43,9 +43,9 @@ public class WacodisJobExecutionFailedHandler implements ApplicationListener<Wac
         LOGGER.debug("handle failed execution of wacodis job {}, retry attempt: {}, executionID: {}", jobDef.getId(), execContex.getRetryCount(), execContex.getExecutionID());
 
         if (retrySettings.getRetryDelayMillies() <= 0) {
-            scheduledRetry = schedulingManager.scheduleRetryImmediately(jobDef, execContex);
+            scheduledRetry = schedulingManager.scheduleSingleExecutionImmediately(jobDef, execContex);
         } else {
-            scheduledRetry = schedulingManager.scheduleRetryDelayed(jobDef, execContex);
+            scheduledRetry = schedulingManager.scheduleSingleExecutionDelayed(jobDef, execContex);
         }
 
         if (scheduledRetry != null) {

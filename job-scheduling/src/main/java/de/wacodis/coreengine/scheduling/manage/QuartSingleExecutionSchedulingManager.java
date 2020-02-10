@@ -8,7 +8,7 @@ package de.wacodis.coreengine.scheduling.manage;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionContext;
 import de.wacodis.coreengine.scheduling.job.JobContext;
-import de.wacodis.coreengine.scheduling.job.RetryJobContextFactory;
+import de.wacodis.coreengine.scheduling.job.SingleExecutionJobContextFactory;
 import java.util.Date;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
@@ -22,15 +22,15 @@ import org.springframework.stereotype.Component;
  * @author Arne
  */
 @Component
-public class QuartzRetrySchedulingManager implements RetrySchedulingManager {
+public class QuartSingleExecutionSchedulingManager implements SingleExecutionSchedulingManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(QuartzRetrySchedulingManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(QuartSingleExecutionSchedulingManager.class);
 
     @Autowired
     private SchedulerFactoryBean schedulerFactoryBean;
 
     @Autowired
-    private RetryJobContextFactory jCFactory;
+    private SingleExecutionJobContextFactory jCFactory;
 
     /**
      * schedule single retry, scheduler will fire immediately
@@ -39,9 +39,9 @@ public class QuartzRetrySchedulingManager implements RetrySchedulingManager {
      * @return firing time, null if scheduling failed
      */
     @Override
-    public Date scheduleRetryImmediately(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
+    public Date scheduleSingleExecutionImmediately(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
         Date firstFiringTime = null;
-        JobContext quartzJobContext = jCFactory.createRetryJobContextStartNow(jobDefinition, context);
+        JobContext quartzJobContext = jCFactory.createSingleExecutionJobContextStartNow(jobDefinition, context);
 
         try {
             firstFiringTime = schedulerFactoryBean.getScheduler().scheduleJob(quartzJobContext.getJobDetails(), quartzJobContext.getTrigger());	//runs QuartzJob's execute()
@@ -62,9 +62,9 @@ public class QuartzRetrySchedulingManager implements RetrySchedulingManager {
      * @return firing time, null if scheduling failed
      */
     @Override
-    public Date scheduleRetryDelayed(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
+    public Date scheduleSingleExecutionDelayed(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
         Date firstFiringTime = null;
-        JobContext quartzJobContext = jCFactory.createRetryJobContextStartDelayed(jobDefinition, context); //respect delay for schedule
+        JobContext quartzJobContext = jCFactory.createdSingleExecutionContextStartDelayed(jobDefinition, context); //respect delay for schedule
 
         try {
             firstFiringTime = schedulerFactoryBean.getScheduler().scheduleJob(quartzJobContext.getJobDetails(), quartzJobContext.getTrigger());	//runs QuartzJob's execute()
