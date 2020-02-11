@@ -6,29 +6,49 @@
 package de.wacodis.coreengine.scheduling.manage;
 
 import de.wacodis.core.models.WacodisJobDefinition;
-import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionContext;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * schedule single wacodis job excution
+ *
  * @author Arne
  */
 public interface SingleExecutionSchedulingManager {
-    
+
     /**
      * schedule single wacodis job execution that starts as soon as possible
+     *
      * @param jobDefinition
-     * @param context
      * @return date of scheduled job execution event
      */
-    Date scheduleSingleExecutionImmediately(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context);
-    
+    Date scheduleSingleJobExecutionImmediately(WacodisJobDefinition jobDefinition);
+
     /**
-     * schedule single wacodis job execution that starts delayed, delay is calculated from jobDefiontion.retrySettings
+     * schedule single wacodis job execution that starts delayed, delay is
+     * calculated from jobDefiontion.retrySettings
+     *
      * @param jobDefinition
-     * @param context
      * @return date of scheduled job execution event
      */
-    Date scheduleSingleExecutionDelayed(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context);
-    
+    Date scheduleSingleJobExecutionDelayed(WacodisJobDefinition jobDefinition);
+
+    /**
+     * schedule single wacodis job execution that starts as soon as possible
+     *
+     * @param jobDefinition
+     * @param jobData additional parameters used for job execution
+     * @return date of scheduled job execution event
+     */
+    Date scheduleSingleJobExecutionImmediately(WacodisJobDefinition jobDefinition, Map<String, Object> jobData);
+
+    /**
+     * schedule single wacodis job execution that starts delayed, delay is
+     * calculated from jobDefiontion.retrySettings
+     *
+     * @param jobDefinition
+     * @param jobData additional parameters used for job execution
+     * @return date of scheduled job execution event
+     */
+    Date scheduleSingleJobExecutionDelayed(WacodisJobDefinition jobDefinition, Map<String, Object> jobData);
 }

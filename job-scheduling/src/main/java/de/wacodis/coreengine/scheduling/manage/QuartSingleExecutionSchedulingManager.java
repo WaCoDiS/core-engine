@@ -6,10 +6,11 @@
 package de.wacodis.coreengine.scheduling.manage;
 
 import de.wacodis.core.models.WacodisJobDefinition;
-import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionContext;
 import de.wacodis.coreengine.scheduling.job.JobContext;
 import de.wacodis.coreengine.scheduling.job.SingleExecutionJobContextFactory;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * schedule single wacodis job excution
+ *
  * @author Arne
  */
 @Component
@@ -34,14 +36,15 @@ public class QuartSingleExecutionSchedulingManager implements SingleExecutionSch
 
     /**
      * schedule single retry, scheduler will fire immediately
+     *
      * @param jobDefinition
-     * @param context
+     * @param jobData additional parameters used for job execution
      * @return firing time, null if scheduling failed
      */
     @Override
-    public Date scheduleSingleExecutionImmediately(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
+    public Date scheduleSingleJobExecutionImmediately(WacodisJobDefinition jobDefinition, Map<String, Object> jobData) {
         Date firstFiringTime = null;
-        JobContext quartzJobContext = jCFactory.createSingleExecutionJobContextStartNow(jobDefinition, context);
+        JobContext quartzJobContext = jCFactory.createSingleExecutionJobContextStartNow(jobDefinition, jobData);
 
         try {
             firstFiringTime = schedulerFactoryBean.getScheduler().scheduleJob(quartzJobContext.getJobDetails(), quartzJobContext.getTrigger());	//runs QuartzJob's execute()
@@ -56,15 +59,17 @@ public class QuartSingleExecutionSchedulingManager implements SingleExecutionSch
     }
 
     /**
-     * schedule single retry, scheduler will fire delayed, firing time is calculate considering jobDefinition.retrySettings.retryDelaysMillies
+     * schedule single retry, scheduler will fire delayed, firing time is
+     * calculate considering jobDefinition.retrySettings.retryDelaysMillies
+     *
      * @param jobDefinition
-     * @param context
+     * @param jobData additional parameters used for job execution
      * @return firing time, null if scheduling failed
      */
     @Override
-    public Date scheduleSingleExecutionDelayed(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
+    public Date scheduleSingleJobExecutionDelayed(WacodisJobDefinition jobDefinition, Map<String, Object> jobData) {
         Date firstFiringTime = null;
-        JobContext quartzJobContext = jCFactory.createdSingleExecutionContextStartDelayed(jobDefinition, context); //respect delay for schedule
+        JobContext quartzJobContext = jCFactory.createSingleExecutionContextStartDelayed(jobDefinition, jobData); //respect delay for schedule
 
         try {
             firstFiringTime = schedulerFactoryBean.getScheduler().scheduleJob(quartzJobContext.getJobDetails(), quartzJobContext.getTrigger());	//runs QuartzJob's execute()
@@ -77,4 +82,26 @@ public class QuartSingleExecutionSchedulingManager implements SingleExecutionSch
         return firstFiringTime;
     }
 
+    /**
+     * schedule single retry, scheduler will fire immediately
+     *
+     * @param jobDefinition
+     * @return firing time, null if scheduling failed
+     */
+    @Override
+    public Date scheduleSingleJobExecutionImmediately(WacodisJobDefinition jobDefinition) {
+        return this.scheduleSingleJobExecutionDelayed(jobDefinition, new HashMap<>()); //empty list of additional params
+    }
+
+    /**
+     * schedule single retry, scheduler will fire delayed, firing time is
+     * calculate considering jobDefinition.retrySettings.retryDelaysMillies
+     *
+     * @param jobDefinition
+     * @return firing time, null if scheduling failed
+     */
+    @Override
+    public Date scheduleSingleJobExecutionDelayed(WacodisJobDefinition jobDefinition) {
+        return this.scheduleSingleJobExecutionImmediately(jobDefinition, new HashMap<>()); //empty list of additional params
+    }
 }

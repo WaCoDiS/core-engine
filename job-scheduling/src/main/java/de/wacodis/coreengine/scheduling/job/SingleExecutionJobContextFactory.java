@@ -7,11 +7,9 @@ package de.wacodis.coreengine.scheduling.job;
 
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionRetrySettings;
-import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionContext;
-import static de.wacodis.coreengine.scheduling.configuration.WacodisSchedulingConstants.EXECUTION_ID_KEY;
 import static de.wacodis.coreengine.scheduling.configuration.WacodisSchedulingConstants.GROUP_NAME;
-import static de.wacodis.coreengine.scheduling.configuration.WacodisSchedulingConstants.RETRY_COUNT_KEY;
 import java.util.Date;
+import java.util.Map;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.SimpleTrigger;
@@ -28,7 +26,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SingleExecutionJobContextFactory {
     
-    private final static int DEFAULTMAXRETRIES = 3;
+    private final static int DEFAULTMAXRETRIES = 1;
     private final static long DEFAULTRETRYDELAY = 600000l; //10 min
 
     @Autowired
@@ -40,12 +38,12 @@ public class SingleExecutionJobContextFactory {
     /**
      * create job context with trigger that fires once immediately
      * @param jobDefinition
-     * @param context
+     * @param jobData provide additional data to be stored in the job data map
      * @return 
      */
-    public JobContext createSingleExecutionJobContextStartNow(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
+    public JobContext createSingleExecutionJobContextStartNow(WacodisJobDefinition jobDefinition, Map<String, Object> jobData) {
         JobContext jobContext = new JobContext();
-        jobContext.setJobDetails(createJobDetail(jobDefinition, context));
+        jobContext.setJobDetails(createJobDetail(jobDefinition, jobData));
         jobContext.setTrigger(createFireOnceTriggerNow(jobDefinition));
         return jobContext;
     }
@@ -54,14 +52,14 @@ public class SingleExecutionJobContextFactory {
      * create job context with trigger that fires once with a delay specified in jobDefiontion.retrySettings,
      * if retrySettings are not available default delay of 10 minutes is applied
      * @param jobDefinition
-     * @param context
+     * @param jobData provide additional data to be stored in the job data map
      * @return 
      */
-    public JobContext createdSingleExecutionContextStartDelayed(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
+    public JobContext createSingleExecutionContextStartDelayed(WacodisJobDefinition jobDefinition, Map<String, Object> jobData) {
         WacodisJobDefinitionRetrySettings retrySettings = (jobDefinition.getRetrySettings() != null) ? jobDefinition.getRetrySettings() : getDefaultRetrySettings();
         
         JobContext jobContext = new JobContext();
-        jobContext.setJobDetails(createJobDetail(jobDefinition, context));
+        jobContext.setJobDetails(createJobDetail(jobDefinition, jobData));
         jobContext.setTrigger(createFireOnceTriggerAt(jobDefinition, getDelayedFireTime(retrySettings)));
         return jobContext;
     }
@@ -84,17 +82,16 @@ public class SingleExecutionJobContextFactory {
         return trigger;
     }
 
-    private JobDetail createJobDetail(WacodisJobDefinition jobDefinition, WacodisJobExecutionContext context) {
+    private JobDetail createJobDetail(WacodisJobDefinition jobDefinition, Map<String, Object> jobData) {
         return jobDetailFactory.createJob(WacodisJob.class, false, false,
-                jobDefinition.getId().toString(), GROUP_NAME, createJobDataMap(jobDefinition, context));
+                jobDefinition.getId().toString(), GROUP_NAME, createJobDataMap(jobDefinition, jobData));
     }
 
-    private JobDataMap createJobDataMap(WacodisJobDefinition jobDefiotnion, WacodisJobExecutionContext context) {
-        JobDataMap jobData = jobContextFactory.createJobDataMap(jobDefiotnion);
-        jobData.put(EXECUTION_ID_KEY, context.getExecutionID().toString());
-        jobData.put(RETRY_COUNT_KEY, context.getRetryCount());
+    private JobDataMap createJobDataMap(WacodisJobDefinition jobDefinition, Map<String, Object> jobData) {
+        JobDataMap jdm = jobContextFactory.createJobDataMap(jobDefinition);
+        jdm.putAll(jobData);
 
-        return jobData;
+        return jdm;
     }
 
     private Date getDelayedFireTime(WacodisJobDefinitionRetrySettings retrySettings) {

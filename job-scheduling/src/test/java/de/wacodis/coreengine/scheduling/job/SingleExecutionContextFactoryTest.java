@@ -7,11 +7,11 @@ package de.wacodis.coreengine.scheduling.job;
 
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionRetrySettings;
-import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionContext;
 import de.wacodis.coreengine.scheduling.configuration.WacodisSchedulingConstants;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
-import org.joda.time.DateTime;
 import static org.junit.Assert.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,16 +30,15 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
  */
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {JobContextFactory.class, JobDetailFactory.class, SingleExecutionJobContextFactory.class})
-public class RetryJobContextFactoryTest {
+public class SingleExecutionContextFactoryTest {
 
-    private static final String GROUP_NAME = "de.hsbo.wacodis";
     private static final UUID JOB_KEY = UUID.randomUUID();
 
     @Autowired
     private SingleExecutionJobContextFactory jobContextFactory;
 
     private WacodisJobDefinition jobDefinition;
-    private WacodisJobExecutionContext execContext;
+    private Map<String, Object> execParams;
     private UUID executionID;
     private int retryCount;
 
@@ -54,13 +53,15 @@ public class RetryJobContextFactoryTest {
 
         executionID = UUID.randomUUID();
         retryCount = 3;
-        execContext = new WacodisJobExecutionContext(executionID, new DateTime(), retryCount);
+        execParams = new HashMap<>();
+        execParams.put(WacodisSchedulingConstants.RETRY_COUNT_KEY, retryCount);
+        execParams.put(WacodisSchedulingConstants.EXECUTION_ID_KEY, executionID.toString());
     }
 
     @Test
     @DisplayName("test create job context for immediate retry")
     public void testCreateRetryJobContext() {
-        JobContext jc = jobContextFactory.createSingleExecutionJobContextStartNow(jobDefinition, execContext);
+        JobContext jc = jobContextFactory.createSingleExecutionJobContextStartNow(jobDefinition, execParams);
 
         JobDetail jd = jc.getJobDetails();
         JobDataMap jdm = jd.getJobDataMap();
@@ -76,7 +77,7 @@ public class RetryJobContextFactoryTest {
     @DisplayName("test create job context for delayed retry")
     public void testCreateRetryJobContextDelayed() {
         long earliestTriggerTime = System.currentTimeMillis() + jobDefinition.getRetrySettings().getRetryDelayMillies();
-        JobContext jc = jobContextFactory.createdSingleExecutionContextStartDelayed(jobDefinition, execContext);
+        JobContext jc = jobContextFactory.createSingleExecutionContextStartDelayed(jobDefinition, execParams);
 
         JobDetail jd = jc.getJobDetails();
         JobDataMap jdm = jd.getJobDataMap();
@@ -92,6 +93,9 @@ public class RetryJobContextFactoryTest {
     @Test
     @DisplayName("test delayed trigger is after immediate trigger")
     public void testCompareRetryDelayedRetryNow() {
-        assertTrue(jobContextFactory.createdSingleExecutionContextStartDelayed(jobDefinition, execContext).getTrigger().getFinalFireTime().after(jobContextFactory.createSingleExecutionJobContextStartNow(jobDefinition, execContext).getTrigger().getFinalFireTime()));
+        Date immediateTrigger = jobContextFactory.createSingleExecutionJobContextStartNow(jobDefinition, execParams).getTrigger().getFinalFireTime();
+        Date delayedTrigger = jobContextFactory.createSingleExecutionContextStartDelayed(jobDefinition, execParams).getTrigger().getFinalFireTime();
+        
+        assertTrue(delayedTrigger.after(immediateTrigger));
     }
 }
