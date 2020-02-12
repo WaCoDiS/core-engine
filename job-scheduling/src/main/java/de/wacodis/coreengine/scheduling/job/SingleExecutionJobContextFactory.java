@@ -20,12 +20,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * factory class for job context information for single (retry) wacodis job execution
+ * factory class for job context information for single (retry) wacodis job
+ * execution
+ *
  * @author Arne
  */
 @Component
 public class SingleExecutionJobContextFactory {
-    
+
     private final static int DEFAULTMAXRETRIES = 1;
     private final static long DEFAULTRETRYDELAY = 600000l; //10 min
 
@@ -37,9 +39,10 @@ public class SingleExecutionJobContextFactory {
 
     /**
      * create job context with trigger that fires once immediately
+     *
      * @param jobDefinition
      * @param jobData provide additional data to be stored in the job data map
-     * @return 
+     * @return
      */
     public JobContext createSingleExecutionJobContextStartNow(WacodisJobDefinition jobDefinition, Map<String, Object> jobData) {
         JobContext jobContext = new JobContext();
@@ -49,18 +52,32 @@ public class SingleExecutionJobContextFactory {
     }
 
     /**
-     * create job context with trigger that fires once with a delay specified in jobDefiontion.retrySettings,
-     * if retrySettings are not available default delay of 10 minutes is applied
+     * create job context with trigger that fires once with a delay specified in
+     * jobDefiontion.retrySettings, if retrySettings are not available default
+     * delay of 10 minutes is applied
+     *
      * @param jobDefinition
      * @param jobData provide additional data to be stored in the job data map
-     * @return 
+     * @return
      */
     public JobContext createSingleExecutionContextStartDelayed(WacodisJobDefinition jobDefinition, Map<String, Object> jobData) {
         WacodisJobDefinitionRetrySettings retrySettings = (jobDefinition.getRetrySettings() != null) ? jobDefinition.getRetrySettings() : getDefaultRetrySettings();
-        
+        Date fireAt = getDelayedFireTime(retrySettings);
+
+        return createSingleExecutionContextStartAt(jobDefinition, jobData, fireAt);
+    }
+
+    /**
+     * create job context with trigger that fires at the specified data
+     * @param jobDefinition
+     * @param jobData
+     * @param fireAt date when the trigger fires
+     * @return 
+     */
+    public JobContext createSingleExecutionContextStartAt(WacodisJobDefinition jobDefinition, Map<String, Object> jobData, Date fireAt) {
         JobContext jobContext = new JobContext();
         jobContext.setJobDetails(createJobDetail(jobDefinition, jobData));
-        jobContext.setTrigger(createFireOnceTriggerAt(jobDefinition, getDelayedFireTime(retrySettings)));
+        jobContext.setTrigger(createFireOnceTriggerAt(jobDefinition, fireAt));
         return jobContext;
     }
 
@@ -100,13 +117,12 @@ public class SingleExecutionJobContextFactory {
 
         return new Date(now + delay);
     }
-    
-    
-    private WacodisJobDefinitionRetrySettings getDefaultRetrySettings(){
+
+    private WacodisJobDefinitionRetrySettings getDefaultRetrySettings() {
         WacodisJobDefinitionRetrySettings retrySettings = new WacodisJobDefinitionRetrySettings();
         retrySettings.setMaxRetries(DEFAULTMAXRETRIES);
         retrySettings.setRetryDelayMillies(DEFAULTRETRYDELAY);
-        
+
         return retrySettings;
     }
 }

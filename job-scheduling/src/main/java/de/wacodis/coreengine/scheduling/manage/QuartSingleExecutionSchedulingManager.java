@@ -35,7 +35,7 @@ public class QuartSingleExecutionSchedulingManager implements SingleExecutionSch
     private SingleExecutionJobContextFactory jCFactory;
 
     /**
-     * schedule single retry, scheduler will fire immediately
+     * schedule single job execution, scheduler will fire immediately
      *
      * @param jobDefinition
      * @param jobData additional parameters used for job execution
@@ -48,7 +48,7 @@ public class QuartSingleExecutionSchedulingManager implements SingleExecutionSch
 
         try {
             firstFiringTime = schedulerFactoryBean.getScheduler().scheduleJob(quartzJobContext.getJobDetails(), quartzJobContext.getTrigger());	//runs QuartzJob's execute()
-            LOGGER.info("Scheduling retry attempt for job {} was successful. Retry fire time: {}", quartzJobContext.getJobDetails().getKey(), firstFiringTime);
+            LOGGER.info("Scheduling single execution for job {} was successful. Execution is triggerd at {} {}", quartzJobContext.getJobDetails().getKey(), firstFiringTime);
 
         } catch (SchedulerException ex) {
             LOGGER.error(ex.getMessage());
@@ -59,8 +59,8 @@ public class QuartSingleExecutionSchedulingManager implements SingleExecutionSch
     }
 
     /**
-     * schedule single retry, scheduler will fire delayed, firing time is
-     * calculate considering jobDefinition.retrySettings.retryDelaysMillies
+     * schedule single job execution, scheduler will fire delayed, firing time
+     * is calculate considering jobDefinition.retrySettings.retryDelaysMillies
      *
      * @param jobDefinition
      * @param jobData additional parameters used for job execution
@@ -73,17 +73,40 @@ public class QuartSingleExecutionSchedulingManager implements SingleExecutionSch
 
         try {
             firstFiringTime = schedulerFactoryBean.getScheduler().scheduleJob(quartzJobContext.getJobDetails(), quartzJobContext.getTrigger());	//runs QuartzJob's execute()
-            LOGGER.info("Scheduling retry attempt for job {} was successful. Retry fire time: {}", quartzJobContext.getJobDetails().getKey(), firstFiringTime);
+            LOGGER.info("Scheduling single execution for job {} was successful. Execution is triggerd at {}", quartzJobContext.getJobDetails().getKey(), firstFiringTime);
         } catch (SchedulerException ex) {
             LOGGER.error(ex.getMessage());
-            LOGGER.debug("Error while trying to schedule retry attempt for  job " + quartzJobContext.getJobDetails().getKey(), ex);
+            LOGGER.debug("Error while trying to schedule single execution for  job " + quartzJobContext.getJobDetails().getKey(), ex);
         }
 
         return firstFiringTime;
     }
 
     /**
-     * schedule single retry, scheduler will fire immediately
+     * schedule single job execution, scheduler will fire on specified date
+     *
+     * @param jobDefinition
+     * @param jobData additional parameters used for job execution
+     * @return firing time, null if scheduling failed
+     */
+    @Override
+    public Date scheduleSingleJobExecutionAt(WacodisJobDefinition jobDefinition, Map<String, Object> jobData, Date startAt) {
+        Date firstFiringTime = null;
+        JobContext quartzJobContext = jCFactory.createSingleExecutionContextStartAt(jobDefinition, jobData, startAt); //fire on specified date
+
+        try {
+            firstFiringTime = schedulerFactoryBean.getScheduler().scheduleJob(quartzJobContext.getJobDetails(), quartzJobContext.getTrigger());	//runs QuartzJob's execute()
+            LOGGER.info("Scheduling single execution for job {} was successful. Execution is trifered at {}", quartzJobContext.getJobDetails().getKey(), firstFiringTime);
+        } catch (SchedulerException ex) {
+            LOGGER.error(ex.getMessage());
+            LOGGER.debug("Error while trying to schedule single execution for  job " + quartzJobContext.getJobDetails().getKey(), ex);
+        }
+
+        return firstFiringTime;
+    }
+
+    /**
+     * schedule single job execution, scheduler will fire immediately
      *
      * @param jobDefinition
      * @return firing time, null if scheduling failed
@@ -94,8 +117,8 @@ public class QuartSingleExecutionSchedulingManager implements SingleExecutionSch
     }
 
     /**
-     * schedule single retry, scheduler will fire delayed, firing time is
-     * calculate considering jobDefinition.retrySettings.retryDelaysMillies
+     * schedule single job execution, scheduler will fire delayed, firing time
+     * is calculate considering jobDefinition.retrySettings.retryDelaysMillies
      *
      * @param jobDefinition
      * @return firing time, null if scheduling failed
@@ -103,5 +126,17 @@ public class QuartSingleExecutionSchedulingManager implements SingleExecutionSch
     @Override
     public Date scheduleSingleJobExecutionDelayed(WacodisJobDefinition jobDefinition) {
         return this.scheduleSingleJobExecutionImmediately(jobDefinition, new HashMap<>()); //empty list of additional params
+    }
+
+    /**
+     * schedule single job execution, scheduler will fire on specified date
+     *
+     * @param jobDefinition
+     * @param startAt 
+     * @return firing time, null if scheduling failed
+     */
+    @Override
+    public Date scheduleSingleJobExecutionAt(WacodisJobDefinition jobDefinition, Date startAt) {
+        return scheduleSingleJobExecutionAt(jobDefinition, new HashMap<>(), startAt); //empty list of additional params
     }
 }

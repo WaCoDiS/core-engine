@@ -34,6 +34,16 @@ public interface SingleExecutionSchedulingManager {
     Date scheduleSingleJobExecutionDelayed(WacodisJobDefinition jobDefinition);
 
     /**
+     * schedule single wacodis job execution that starts delayed, delay is
+     * calculated from jobDefiontion.retrySettings
+     *
+     * @param jobDefinition
+     * @param startAt
+     * @return date of scheduled job execution event
+     */
+    Date scheduleSingleJobExecutionAt(WacodisJobDefinition jobDefinition, Date startAt);
+
+    /**
      * schedule single wacodis job execution that starts as soon as possible
      *
      * @param jobDefinition
@@ -51,4 +61,16 @@ public interface SingleExecutionSchedulingManager {
      * @return date of scheduled job execution event
      */
     Date scheduleSingleJobExecutionDelayed(WacodisJobDefinition jobDefinition, Map<String, Object> jobData);
+
+    /**
+     * schedule single wacodis job execution that starts delayed, delay is
+     * calculated from jobDefiontion.retrySettings
+     *
+     * @param jobDefinition
+     * @param jobData additional parameters used for job execution
+     * @param startAt
+     * @return date of scheduled job execution event
+     */
+    Date scheduleSingleJobExecutionAt(WacodisJobDefinition jobDefinition, Map<String, Object> jobData, Date startAt);
+
 }

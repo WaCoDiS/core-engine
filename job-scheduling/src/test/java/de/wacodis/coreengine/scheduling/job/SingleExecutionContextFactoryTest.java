@@ -59,8 +59,8 @@ public class SingleExecutionContextFactoryTest {
     }
 
     @Test
-    @DisplayName("test create job context for immediate retry")
-    public void testCreateRetryJobContext() {
+    @DisplayName("test create job context for immediate execution")
+    public void testCreateSingleExecutionJobContext() {
         JobContext jc = jobContextFactory.createSingleExecutionJobContextStartNow(jobDefinition, execParams);
 
         JobDetail jd = jc.getJobDetails();
@@ -74,8 +74,8 @@ public class SingleExecutionContextFactoryTest {
     }
 
     @Test
-    @DisplayName("test create job context for delayed retry")
-    public void testCreateRetryJobContextDelayed() {
+    @DisplayName("test create job context for delayed execution")
+    public void testCreateSingleExecutionJobContextDelayed() {
         long earliestTriggerTime = System.currentTimeMillis() + jobDefinition.getRetrySettings().getRetryDelayMillies();
         JobContext jc = jobContextFactory.createSingleExecutionContextStartDelayed(jobDefinition, execParams);
 
@@ -89,10 +89,26 @@ public class SingleExecutionContextFactoryTest {
         assertTrue(t.getFinalFireTime().equals(t.getFireTimeAfter(new Date(System.currentTimeMillis() - 10000))));
         assertTrue(t.getFinalFireTime().getTime() >= earliestTriggerTime);
     }
+    
+        @Test
+    @DisplayName("test create job context for delayed execution")
+    public void testCreateSingleExecutionJobContextStartAt() {
+        Date startAt = new Date(System.currentTimeMillis() + 600000l); //now + 10 min
+        JobContext jc = jobContextFactory.createSingleExecutionContextStartAt(jobDefinition, execParams, startAt);
+
+        JobDetail jd = jc.getJobDetails();
+        JobDataMap jdm = jd.getJobDataMap();
+        Trigger t = jc.getTrigger();
+
+        assertEquals(retryCount, jdm.getInt(WacodisSchedulingConstants.RETRY_COUNT_KEY));
+        assertEquals(executionID, UUID.fromString(jdm.getString(WacodisSchedulingConstants.EXECUTION_ID_KEY)));
+        assertTrue(t.getFinalFireTime().equals(t.getStartTime())); //only fire once at start time
+        assertTrue(t.getFinalFireTime().equals(startAt)); //check if trigger fires on specified date
+    }
 
     @Test
-    @DisplayName("test delayed trigger is after immediate trigger")
-    public void testCompareRetryDelayedRetryNow() {
+    @DisplayName("test delayed trigger fires after immediate trigger")
+    public void testCompareSingleExecutionDelayedRetryNow() {
         Date immediateTrigger = jobContextFactory.createSingleExecutionJobContextStartNow(jobDefinition, execParams).getTrigger().getFinalFireTime();
         Date delayedTrigger = jobContextFactory.createSingleExecutionContextStartDelayed(jobDefinition, execParams).getTrigger().getFinalFireTime();
         
