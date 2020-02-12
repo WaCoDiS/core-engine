@@ -5,8 +5,12 @@
  */
 package de.wacodis.coreengine.scheduling.listener;
 
+import de.wacodis.core.models.SingleJobExecutionEvent;
 import de.wacodis.core.models.WacodisJobDefinition;
+import de.wacodis.core.models.WacodisJobDefinitionExecution;
+import de.wacodis.coreengine.scheduling.manage.QuartSingleExecutionSchedulingManager;
 import de.wacodis.coreengine.scheduling.manage.QuartzSchedulingManager;
+import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,11 +23,38 @@ import org.springframework.stereotype.Component;
 public class JobMessageScheduleHandler implements JobMessageHandler {
 
     @Autowired
-    private QuartzSchedulingManager schedulingManager;
+    private QuartzSchedulingManager regularExecutionschedulingManager;
+    
+    @Autowired
+    private QuartSingleExecutionSchedulingManager singleExecutionSchedulingManger;
 
     @Override
     public void handleNewJob(WacodisJobDefinition jobDefinition) {
-        schedulingManager.scheduleNewJob(jobDefinition);
+        WacodisJobDefinitionExecution exec = jobDefinition.getExecution();
+        
+        if(exec.getPattern() != null && !exec.getPattern().isEmpty()){ //schedule job regularly if cron pattern is provided
+            regularExecutionschedulingManager.scheduleNewJob(jobDefinition);
+        }else if(exec.getEvent() != null){
+            handleEventbasedExecution(jobDefinition);
+        }else{
+            throw new UnsupportedOperationException("unnable to schedule wacodis job " + jobDefinition.getId() + " because neither excution cron pattern nor execution event is provided");
+        }
+        
+        
     }
+    
+    
+    private void handleEventbasedExecution(WacodisJobDefinition jobDefinition){
+        Object execEvent = jobDefinition.getExecution().getEvent();
+        
+        if(execEvent instanceof SingleJobExecutionEvent){
+            SingleJobExecutionEvent singleExecEvent = (SingleJobExecutionEvent) execEvent;
+            Date execAt = singleExecEvent.getStartAt().toDate();
+            
+            singleExecutionSchedulingManger.scheduleSingleJobExecutionAt(jobDefinition, execAt); //execute wacodis job once on specified date
+        }
+    }
+    
+   
 
 }
