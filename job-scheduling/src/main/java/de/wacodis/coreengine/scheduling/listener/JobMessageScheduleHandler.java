@@ -33,14 +33,12 @@ public class JobMessageScheduleHandler implements JobMessageHandler {
         WacodisJobDefinitionExecution exec = jobDefinition.getExecution();
         
         if(exec.getPattern() != null && !exec.getPattern().isEmpty()){ //schedule job regularly if cron pattern is provided
-            regularExecutionschedulingManager.scheduleNewJob(jobDefinition);
+            handleRegularExecution(jobDefinition);
         }else if(exec.getEvent() != null){
             handleEventbasedExecution(jobDefinition);
         }else{
             throw new UnsupportedOperationException("unnable to schedule wacodis job " + jobDefinition.getId() + " because neither excution cron pattern nor execution event is provided");
         }
-        
-        
     }
     
     
@@ -49,12 +47,19 @@ public class JobMessageScheduleHandler implements JobMessageHandler {
         
         if(execEvent instanceof SingleJobExecutionEvent){
             SingleJobExecutionEvent singleExecEvent = (SingleJobExecutionEvent) execEvent;
-            Date execAt = singleExecEvent.getStartAt().toDate();
+
+            if(singleExecEvent.getStartAt() != null){
+                Date execAt = singleExecEvent.getStartAt().toDate();
+                singleExecutionSchedulingManger.scheduleSingleJobExecutionAt(jobDefinition, execAt); //execute wacodis job once on specified date
+            }else{
+                singleExecutionSchedulingManger.scheduleSingleJobExecutionImmediately(jobDefinition); //execute immediately if no start date provided
+            }
             
-            singleExecutionSchedulingManger.scheduleSingleJobExecutionAt(jobDefinition, execAt); //execute wacodis job once on specified date
         }
     }
     
-   
+    private void handleRegularExecution(WacodisJobDefinition jobDefinition){
+        regularExecutionschedulingManager.scheduleNewJob(jobDefinition);
+    }
 
 }
