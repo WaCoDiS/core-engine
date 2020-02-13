@@ -24,9 +24,9 @@ import org.springframework.stereotype.Component;
  * @author Arne
  */
 @Component
-public class QuartSingleExecutionSchedulingManager implements SingleExecutionSchedulingManager {
+public class QuartzSingleExecutionSchedulingManager implements SingleExecutionSchedulingManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(QuartSingleExecutionSchedulingManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(QuartzSingleExecutionSchedulingManager.class);
 
     @Autowired
     private SchedulerFactoryBean schedulerFactoryBean;

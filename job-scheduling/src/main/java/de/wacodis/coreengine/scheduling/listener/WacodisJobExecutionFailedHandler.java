@@ -11,7 +11,7 @@ import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionC
 import de.wacodis.coreengine.executor.events.WacodisJobExecutionFailedEvent;
 import static de.wacodis.coreengine.scheduling.configuration.WacodisSchedulingConstants.EXECUTION_ID_KEY;
 import static de.wacodis.coreengine.scheduling.configuration.WacodisSchedulingConstants.RETRY_COUNT_KEY;
-import de.wacodis.coreengine.scheduling.manage.QuartSingleExecutionSchedulingManager;
+import de.wacodis.coreengine.scheduling.manage.QuartzSingleExecutionSchedulingManager;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +32,7 @@ public class WacodisJobExecutionFailedHandler implements ApplicationListener<Wac
     private static final Logger LOGGER = LoggerFactory.getLogger(WacodisJobExecutionFailedHandler.class);
 
     @Autowired
-    private QuartSingleExecutionSchedulingManager schedulingManager;
+    private QuartzSingleExecutionSchedulingManager schedulingManager;
 
     /**
      * schedule retry for previously failed wacodis job execution

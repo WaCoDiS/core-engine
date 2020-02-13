@@ -8,7 +8,7 @@ package de.wacodis.coreengine.scheduling.listener;
 import de.wacodis.core.models.SingleJobExecutionEvent;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionExecution;
-import de.wacodis.coreengine.scheduling.manage.QuartSingleExecutionSchedulingManager;
+import de.wacodis.coreengine.scheduling.manage.QuartzSingleExecutionSchedulingManager;
 import de.wacodis.coreengine.scheduling.manage.QuartzSchedulingManager;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class JobMessageScheduleHandler implements JobMessageHandler {
     private QuartzSchedulingManager regularExecutionschedulingManager;
     
     @Autowired
-    private QuartSingleExecutionSchedulingManager singleExecutionSchedulingManger;
+    private QuartzSingleExecutionSchedulingManager singleExecutionSchedulingManger;
 
     @Override
     public void handleNewJob(WacodisJobDefinition jobDefinition) {
