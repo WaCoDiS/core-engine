@@ -42,7 +42,7 @@ public class QuartzSingleExecutionSchedulingManager implements SingleExecutionSc
      * @return firing time, null if scheduling failed
      */
     @Override
-    public Date scheduleSingleJobExecutionImmediately(WacodisJobDefinition jobDefinition, Map<String, Object> jobData) {
+    public Date scheduleSingleJobExecutionImmediately(WacodisJobDefinition jobDefinition, Map<String, String> jobData) {
         Date firstFiringTime = null;
         JobContext quartzJobContext = jCFactory.createSingleExecutionJobContextStartNow(jobDefinition, jobData);
 
@@ -67,7 +67,7 @@ public class QuartzSingleExecutionSchedulingManager implements SingleExecutionSc
      * @return firing time, null if scheduling failed
      */
     @Override
-    public Date scheduleSingleJobExecutionDelayed(WacodisJobDefinition jobDefinition, Map<String, Object> jobData) {
+    public Date scheduleSingleJobExecutionDelayed(WacodisJobDefinition jobDefinition, Map<String, String> jobData) {
         Date firstFiringTime = null;
         JobContext quartzJobContext = jCFactory.createSingleExecutionContextStartDelayed(jobDefinition, jobData); //respect delay for schedule
 
@@ -90,7 +90,7 @@ public class QuartzSingleExecutionSchedulingManager implements SingleExecutionSc
      * @return firing time, null if scheduling failed
      */
     @Override
-    public Date scheduleSingleJobExecutionAt(WacodisJobDefinition jobDefinition, Map<String, Object> jobData, Date startAt) {
+    public Date scheduleSingleJobExecutionAt(WacodisJobDefinition jobDefinition, Map<String, String> jobData, Date startAt) {
         Date firstFiringTime = null;
         JobContext quartzJobContext = jCFactory.createSingleExecutionContextStartAt(jobDefinition, jobData, startAt); //fire on specified date
 

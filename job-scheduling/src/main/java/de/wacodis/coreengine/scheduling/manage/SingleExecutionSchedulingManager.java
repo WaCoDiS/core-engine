@@ -50,7 +50,7 @@ public interface SingleExecutionSchedulingManager {
      * @param jobData additional parameters used for job execution
      * @return date of scheduled job execution event
      */
-    Date scheduleSingleJobExecutionImmediately(WacodisJobDefinition jobDefinition, Map<String, Object> jobData);
+    Date scheduleSingleJobExecutionImmediately(WacodisJobDefinition jobDefinition, Map<String, String> jobData);
 
     /**
      * schedule single wacodis job execution that starts delayed, delay is
@@ -60,7 +60,7 @@ public interface SingleExecutionSchedulingManager {
      * @param jobData additional parameters used for job execution
      * @return date of scheduled job execution event
      */
-    Date scheduleSingleJobExecutionDelayed(WacodisJobDefinition jobDefinition, Map<String, Object> jobData);
+    Date scheduleSingleJobExecutionDelayed(WacodisJobDefinition jobDefinition, Map<String, String> jobData);
 
     /**
      * schedule single wacodis job execution that starts delayed, delay is
@@ -71,6 +71,6 @@ public interface SingleExecutionSchedulingManager {
      * @param startAt
      * @return date of scheduled job execution event
      */
-    Date scheduleSingleJobExecutionAt(WacodisJobDefinition jobDefinition, Map<String, Object> jobData, Date startAt);
+    Date scheduleSingleJobExecutionAt(WacodisJobDefinition jobDefinition, Map<String, String> jobData, Date startAt);
 
 }

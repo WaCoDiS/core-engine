@@ -38,7 +38,7 @@ public class SingleExecutionContextFactoryTest {
     private SingleExecutionJobContextFactory jobContextFactory;
 
     private WacodisJobDefinition jobDefinition;
-    private Map<String, Object> execParams;
+    private Map<String, String> execParams;
     private UUID executionID;
     private int retryCount;
 
@@ -54,7 +54,7 @@ public class SingleExecutionContextFactoryTest {
         executionID = UUID.randomUUID();
         retryCount = 3;
         execParams = new HashMap<>();
-        execParams.put(WacodisSchedulingConstants.RETRY_COUNT_KEY, retryCount);
+        execParams.put(WacodisSchedulingConstants.RETRY_COUNT_KEY, String.valueOf(retryCount));
         execParams.put(WacodisSchedulingConstants.EXECUTION_ID_KEY, executionID.toString());
     }
 

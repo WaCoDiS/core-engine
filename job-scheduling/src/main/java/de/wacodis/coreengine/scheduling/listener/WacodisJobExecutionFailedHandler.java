@@ -61,10 +61,10 @@ public class WacodisJobExecutionFailedHandler implements ApplicationListener<Wac
         }
     }
 
-    private Map<String, Object> getJobDataMapFromExecutionContext(WacodisJobExecutionContext context) {
-        Map<String, Object> jobData = new HashMap<>();
+    private Map<String, String> getJobDataMapFromExecutionContext(WacodisJobExecutionContext context) {
+        Map<String, String> jobData = new HashMap<>();
         jobData.put(EXECUTION_ID_KEY, context.getExecutionID().toString());
-        jobData.put(RETRY_COUNT_KEY, context.getRetryCount());
+        jobData.put(RETRY_COUNT_KEY, String.valueOf(context.getRetryCount()));
 
         return jobData;
     }

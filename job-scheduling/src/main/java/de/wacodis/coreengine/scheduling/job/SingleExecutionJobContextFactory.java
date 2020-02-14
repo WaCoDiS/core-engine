@@ -44,7 +44,7 @@ public class SingleExecutionJobContextFactory {
      * @param jobData provide additional data to be stored in the job data map
      * @return
      */
-    public JobContext createSingleExecutionJobContextStartNow(WacodisJobDefinition jobDefinition, Map<String, Object> jobData) {
+    public JobContext createSingleExecutionJobContextStartNow(WacodisJobDefinition jobDefinition, Map<String, String> jobData) {
         JobContext jobContext = new JobContext();
         jobContext.setJobDetails(createJobDetail(jobDefinition, jobData));
         jobContext.setTrigger(createFireOnceTriggerNow(jobDefinition));
@@ -60,7 +60,7 @@ public class SingleExecutionJobContextFactory {
      * @param jobData provide additional data to be stored in the job data map
      * @return
      */
-    public JobContext createSingleExecutionContextStartDelayed(WacodisJobDefinition jobDefinition, Map<String, Object> jobData) {
+    public JobContext createSingleExecutionContextStartDelayed(WacodisJobDefinition jobDefinition, Map<String, String> jobData) {
         WacodisJobDefinitionRetrySettings retrySettings = (jobDefinition.getRetrySettings() != null) ? jobDefinition.getRetrySettings() : getDefaultRetrySettings();
         Date fireAt = getDelayedFireTime(retrySettings);
 
@@ -74,7 +74,7 @@ public class SingleExecutionJobContextFactory {
      * @param fireAt date when the trigger fires
      * @return 
      */
-    public JobContext createSingleExecutionContextStartAt(WacodisJobDefinition jobDefinition, Map<String, Object> jobData, Date fireAt) {
+    public JobContext createSingleExecutionContextStartAt(WacodisJobDefinition jobDefinition, Map<String, String> jobData, Date fireAt) {
         JobContext jobContext = new JobContext();
         jobContext.setJobDetails(createJobDetail(jobDefinition, jobData));
         jobContext.setTrigger(createFireOnceTriggerAt(jobDefinition, fireAt));
@@ -99,12 +99,12 @@ public class SingleExecutionJobContextFactory {
         return trigger;
     }
 
-    private JobDetail createJobDetail(WacodisJobDefinition jobDefinition, Map<String, Object> jobData) {
+    private JobDetail createJobDetail(WacodisJobDefinition jobDefinition, Map<String, String> jobData) {
         return jobDetailFactory.createJob(WacodisJob.class, false, false,
                 jobDefinition.getId().toString(), GROUP_NAME, createJobDataMap(jobDefinition, jobData));
     }
 
-    private JobDataMap createJobDataMap(WacodisJobDefinition jobDefinition, Map<String, Object> jobData) {
+    private JobDataMap createJobDataMap(WacodisJobDefinition jobDefinition, Map<String, String> jobData) {
         JobDataMap jdm = jobContextFactory.createJobDataMap(jobDefinition);
         jdm.putAll(jobData);
 
