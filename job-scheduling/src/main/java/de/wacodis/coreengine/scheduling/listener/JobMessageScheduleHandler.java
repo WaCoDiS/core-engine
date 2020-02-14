@@ -5,6 +5,7 @@
  */
 package de.wacodis.coreengine.scheduling.listener;
 
+import de.wacodis.core.models.AbstractWacodisJobExecutionEvent;
 import de.wacodis.core.models.SingleJobExecutionEvent;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionExecution;
@@ -43,7 +44,7 @@ public class JobMessageScheduleHandler implements JobMessageHandler {
     
     
     private void handleEventbasedExecution(WacodisJobDefinition jobDefinition){
-        Object execEvent = jobDefinition.getExecution().getEvent();
+        AbstractWacodisJobExecutionEvent execEvent = jobDefinition.getExecution().getEvent(); 
         
         if(execEvent instanceof SingleJobExecutionEvent){
             SingleJobExecutionEvent singleExecEvent = (SingleJobExecutionEvent) execEvent;

@@ -3,6 +3,7 @@ package de.wacodis.core.models;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import de.wacodis.core.models.AbstractWacodisJobExecutionEvent;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
@@ -13,7 +14,7 @@ import javax.validation.constraints.*;
  * if present, this describe the execution pattern of a WacodisJobDefinition. if not present, the WacodisJobDefinition is treated as a one-time execution. Only one of the properties shall be provided. 
  */
 @ApiModel(description = "if present, this describe the execution pattern of a WacodisJobDefinition. if not present, the WacodisJobDefinition is treated as a one-time execution. Only one of the properties shall be provided. ")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-02-12T16:14:17.964+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-02-14T16:07:01.784+01:00[Europe/Berlin]")
 
 public class WacodisJobDefinitionExecution  implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -22,7 +23,7 @@ public class WacodisJobDefinitionExecution  implements Serializable {
   private String pattern = null;
 
   @JsonProperty("event")
-  private Object event = null;
+  private AbstractWacodisJobExecutionEvent event = null;
 
   public WacodisJobDefinitionExecution pattern(String pattern) {
     this.pattern = pattern;
@@ -44,23 +45,24 @@ public class WacodisJobDefinitionExecution  implements Serializable {
     this.pattern = pattern;
   }
 
-  public WacodisJobDefinitionExecution event(Object event) {
+  public WacodisJobDefinitionExecution event(AbstractWacodisJobExecutionEvent event) {
     this.event = event;
     return this;
   }
 
   /**
-   * the execution is scheduled by the occurence of an event (e.g. new data available); WIP - format to be defined. 
+   * Get event
    * @return event
   **/
-  @ApiModelProperty(value = "the execution is scheduled by the occurence of an event (e.g. new data available); WIP - format to be defined. ")
+  @ApiModelProperty(value = "")
 
+  @Valid
 
-  public Object getEvent() {
+  public AbstractWacodisJobExecutionEvent getEvent() {
     return event;
   }
 
-  public void setEvent(Object event) {
+  public void setEvent(AbstractWacodisJobExecutionEvent event) {
     this.event = event;
   }
 

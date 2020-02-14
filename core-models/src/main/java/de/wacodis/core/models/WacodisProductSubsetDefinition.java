@@ -16,7 +16,7 @@ import javax.validation.constraints.*;
  * contains information for defining a subset definition for WaCoDiS product process inputs
  */
 @ApiModel(description = "contains information for defining a subset definition for WaCoDiS product process inputs")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-02-12T16:14:17.964+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-02-14T16:07:01.784+01:00[Europe/Berlin]")
 
 public class WacodisProductSubsetDefinition extends AbstractSubsetDefinition implements Serializable {
   private static final long serialVersionUID = 1L;
