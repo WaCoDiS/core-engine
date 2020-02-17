@@ -42,6 +42,7 @@ public class WacodisJob extends QuartzJobBean {
         LOGGER.info("Executing job: {}", context.getJobDetail().getKey());
         JobDataMap jobData = context.getMergedJobDataMap();
         String id = jobData.getString(JOB_KEY_ID);
+        int retryCount = (jobData.containsKey(RETRY_COUNT_KEY)) ? jobData.getIntFromString(RETRY_COUNT_KEY) : 0; //zero retries happened if not present
         
         try {
             UUID executionID;
@@ -53,7 +54,7 @@ public class WacodisJob extends QuartzJobBean {
             }
 
             WacodisJobDefinition job = jobRepositoryProvider.getJobDefinitionForId(id);
-            WacodisJobExecutionContext execContext = new WacodisJobExecutionContext(executionID, new DateTime(context.getFireTime()), jobData.getIntValue(RETRY_COUNT_KEY));
+            WacodisJobExecutionContext execContext = new WacodisJobExecutionContext(executionID, new DateTime(context.getFireTime()), retryCount);
             WacodisJobWrapper jobWrapper = new WacodisJobWrapper(execContext, job);
             evaluator.evaluateJob(jobWrapper, true);
         } catch (JobRepositoryRequestException ex) {
