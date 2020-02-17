@@ -21,7 +21,7 @@ import javax.validation.constraints.*;
  * describes specific metadata information about a product dataset created from the WaCoDiS System
  */
 @ApiModel(description = "describes specific metadata information about a product dataset created from the WaCoDiS System")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-01-24T15:11:15.577+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-02-17T12:42:38.843+01:00[Europe/Berlin]")
 
 public class WacodisProductDataEnvelope extends AbstractDataEnvelope implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -32,6 +32,9 @@ public class WacodisProductDataEnvelope extends AbstractDataEnvelope implements 
   @JsonProperty("dataEnvelopeReferences")
   @Valid
   private List<String> dataEnvelopeReferences = new ArrayList<String>();
+
+  @JsonProperty("dataEnvelopeServiceEndpoint")
+  private String dataEnvelopeServiceEndpoint = null;
 
   @JsonProperty("process")
   private String process = null;
@@ -71,10 +74,10 @@ public class WacodisProductDataEnvelope extends AbstractDataEnvelope implements 
   }
 
   /**
-   * array of identfiers that reference data envelopes the WaCoDiS product results from 
+   * array of identifiers that reference data envelopes the WaCoDiS product results from 
    * @return dataEnvelopeReferences
   **/
-  @ApiModelProperty(required = true, value = "array of identfiers that reference data envelopes the WaCoDiS product results from ")
+  @ApiModelProperty(required = true, value = "array of identifiers that reference data envelopes the WaCoDiS product results from ")
   @NotNull
 
 
@@ -84,6 +87,26 @@ public class WacodisProductDataEnvelope extends AbstractDataEnvelope implements 
 
   public void setDataEnvelopeReferences(List<String> dataEnvelopeReferences) {
     this.dataEnvelopeReferences = dataEnvelopeReferences;
+  }
+
+  public WacodisProductDataEnvelope dataEnvelopeServiceEndpoint(String dataEnvelopeServiceEndpoint) {
+    this.dataEnvelopeServiceEndpoint = dataEnvelopeServiceEndpoint;
+    return this;
+  }
+
+  /**
+   * contains the url of the service endpoint to retrieve DataEnvelopes that are included in the dataEnvelopeReferences attribute, for example http://localhost:8080/dataenvelopes/ (without the id) 
+   * @return dataEnvelopeServiceEndpoint
+  **/
+  @ApiModelProperty(value = "contains the url of the service endpoint to retrieve DataEnvelopes that are included in the dataEnvelopeReferences attribute, for example http://localhost:8080/dataenvelopes/ (without the id) ")
+
+
+  public String getDataEnvelopeServiceEndpoint() {
+    return dataEnvelopeServiceEndpoint;
+  }
+
+  public void setDataEnvelopeServiceEndpoint(String dataEnvelopeServiceEndpoint) {
+    this.dataEnvelopeServiceEndpoint = dataEnvelopeServiceEndpoint;
   }
 
   public WacodisProductDataEnvelope process(String process) {
@@ -141,6 +164,7 @@ public class WacodisProductDataEnvelope extends AbstractDataEnvelope implements 
     WacodisProductDataEnvelope wacodisProductDataEnvelope = (WacodisProductDataEnvelope) o;
     return Objects.equals(this.productType, wacodisProductDataEnvelope.productType) &&
         Objects.equals(this.dataEnvelopeReferences, wacodisProductDataEnvelope.dataEnvelopeReferences) &&
+        Objects.equals(this.dataEnvelopeServiceEndpoint, wacodisProductDataEnvelope.dataEnvelopeServiceEndpoint) &&
         Objects.equals(this.process, wacodisProductDataEnvelope.process) &&
         Objects.equals(this.serviceDefinition, wacodisProductDataEnvelope.serviceDefinition) &&
         super.equals(o);
@@ -148,7 +172,7 @@ public class WacodisProductDataEnvelope extends AbstractDataEnvelope implements 
 
   @Override
   public int hashCode() {
-    return Objects.hash(productType, dataEnvelopeReferences, process, serviceDefinition, super.hashCode());
+    return Objects.hash(productType, dataEnvelopeReferences, dataEnvelopeServiceEndpoint, process, serviceDefinition, super.hashCode());
   }
 
   @Override
@@ -158,6 +182,7 @@ public class WacodisProductDataEnvelope extends AbstractDataEnvelope implements 
     sb.append("    ").append(toIndentedString(super.toString())).append("\n");
     sb.append("    productType: ").append(toIndentedString(productType)).append("\n");
     sb.append("    dataEnvelopeReferences: ").append(toIndentedString(dataEnvelopeReferences)).append("\n");
+    sb.append("    dataEnvelopeServiceEndpoint: ").append(toIndentedString(dataEnvelopeServiceEndpoint)).append("\n");
     sb.append("    process: ").append(toIndentedString(process)).append("\n");
     sb.append("    serviceDefinition: ").append(toIndentedString(serviceDefinition)).append("\n");
     sb.append("}");
