@@ -7,26 +7,19 @@ package de.wacodis.coreengine.executor.process.wps;
 
 import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ProcessContext;
-import java.net.URL;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.n52.geoprocessing.wps.client.model.Process;
+import org.n52.geoprocessing.wps.client.model.*;
+import org.n52.geoprocessing.wps.client.model.execution.Data;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
-import javafx.scene.chart.PieChart;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.DisplayName;
-import org.n52.geoprocessing.wps.client.model.Format;
-import org.n52.geoprocessing.wps.client.model.InputDescription;
-import org.n52.geoprocessing.wps.client.model.LiteralInputDescription;
-import org.n52.geoprocessing.wps.client.model.LiteralOutputDescription;
-import org.n52.geoprocessing.wps.client.model.OutputDescription;
-import org.n52.geoprocessing.wps.client.model.Process;
-import org.n52.geoprocessing.wps.client.model.Result;
-import org.n52.geoprocessing.wps.client.model.execution.Data;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  *
