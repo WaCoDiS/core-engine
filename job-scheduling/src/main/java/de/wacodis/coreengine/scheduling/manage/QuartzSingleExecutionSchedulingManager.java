@@ -113,7 +113,7 @@ public class QuartzSingleExecutionSchedulingManager implements SingleExecutionSc
      */
     @Override
     public Date scheduleSingleJobExecutionImmediately(WacodisJobDefinition jobDefinition) {
-        return this.scheduleSingleJobExecutionDelayed(jobDefinition, new HashMap<>()); //empty list of additional params
+        return this.scheduleSingleJobExecutionImmediately(jobDefinition, new HashMap<>()); //empty list of additional params
     }
 
     /**
@@ -125,7 +125,7 @@ public class QuartzSingleExecutionSchedulingManager implements SingleExecutionSc
      */
     @Override
     public Date scheduleSingleJobExecutionDelayed(WacodisJobDefinition jobDefinition) {
-        return this.scheduleSingleJobExecutionImmediately(jobDefinition, new HashMap<>()); //empty list of additional params
+        return this.scheduleSingleJobExecutionDelayed(jobDefinition, new HashMap<>()); //empty list of additional params
     }
 
     /**
