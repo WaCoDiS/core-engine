@@ -27,7 +27,7 @@ RUN mvn -f ./wps-client-lib/pom.xml clean install -DskipTests \
 	&& mvn -f ./core-engine/pom.xml clean install -DskipTests
 
 # RUn core-engine
-FROM openjdk:alpine
+FROM adoptopenjdk/openjdk8:alpine
 WORKDIR /app
 
 COPY --from=build app/core-engine/core-engine-app/target/core-engine-app-0.0.1-SNAPSHOT.jar /app/core-engine-app.jar
