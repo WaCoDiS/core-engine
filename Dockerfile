@@ -3,7 +3,7 @@ FROM alpine/git as clone
 WORKDIR /app
 
 RUN git clone https://github.com/WaCoDiS/wps-client-lib.git wps-client-lib \
-	&& git -C ./wps-client-lib checkout feature/includeJobId
+	&& git -C ./wps-client-lib checkout 1.0.4-wacodis
 
 # Build core-engine
 FROM maven:3.5-jdk-8-alpine as build 
@@ -19,16 +19,17 @@ COPY ./job-definition-executor/pom.xml /app/core-engine/job-definition-executor/
 COPY ./core-models/pom.xml /app/core-engine/core-models/
 COPY ./core-engine-app/pom.xml /app/core-engine/core-engine-app/
 COPY ./core-engine-utils/pom.xml /app/core-engine/core-engine-utils/
-RUN mvn -f /app/core-engine/pom.xml dependency:go-offline --non-recursive && mvn -f /app/wps-client-lib/pom.xml dependency:go-offline
+RUN mvn -f /app/core-engine/pom.xml dependency:go-offline --non-recursive
+RUN mvn -f /app/wps-client-lib/pom.xml dependency:go-offline
 
 COPY . /app/core-engine/
 
 RUN mvn -f ./wps-client-lib/pom.xml clean install -DskipTests \
-	&& mvn -f ./core-engine/pom.xml clean install -DskipTests
+	&& mvn -f ./core-engine/pom.xml clean install -DskipTests -Dapp.finalName=core-engine-app
 
 # RUn core-engine
 FROM adoptopenjdk/openjdk8:alpine
 WORKDIR /app
 
-COPY --from=build app/core-engine/core-engine-app/target/core-engine-app-0.0.1-SNAPSHOT.jar /app/core-engine-app.jar
+COPY --from=build app/core-engine/core-engine-app/target/core-engine-app.jar /app/core-engine-app.jar
 CMD ["java", "-jar", "/app/core-engine-app.jar"]

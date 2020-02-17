@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>de.wacodis</groupId>
@@ -9,7 +10,12 @@
     <artifactId>core-engine-app</artifactId>
     <packaging>jar</packaging>
     <name>WaCoDiS Core Engine App</name>
-    
+
+
+    <properties>
+        <app.finalName>${project.artifactId}-${project.version}</app.finalName>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>de.wacodis</groupId>
@@ -47,10 +53,11 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-config</artifactId>
         </dependency>
-        
+
     </dependencies>
-    
+
     <build>
+        <finalName>${app.finalName}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -65,5 +72,5 @@
                 </executions>
             </plugin>
         </plugins>
-    </build>    
+    </build>
 </project>

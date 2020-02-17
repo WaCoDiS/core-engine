@@ -29,9 +29,16 @@
         <quartz.version>2.3.0</quartz.version>
         <cron-utils.version>8.0.0</cron-utils.version>
         <h2.version>1.4.196</h2.version>
-        <wps-client-lib.version>1.0.4-SNAPSHOT</wps-client-lib.version>
+        <wps-client-lib.version>1.0.4</wps-client-lib.version>
         <maven.javadocplugin.version>3.1.1</maven.javadocplugin.version>
     </properties>
+
+    <scm>
+		<url>https://github.com/WaCoDiS/core-engine/</url>
+		<connection>scm:git:git://github.com/WaCoDiS/core-engine.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/WaCoDiS/core-engine.git</developerConnection>
+		<tag>HEAD</tag>
+	</scm>
     
     <dependencyManagement>
         <dependencies>
@@ -112,7 +119,7 @@
             </dependency>
             <dependency>
                 <groupId>org.n52.geoprocessing</groupId>
-                <artifactId>wps-client-lib</artifactId>
+                <artifactId>wps-client-lib-wacodis</artifactId>
                 <version>${wps-client-lib.version}</version>
             </dependency>
 		
