@@ -47,20 +47,20 @@ public interface SingleExecutionSchedulingManager {
      * schedule single wacodis job execution that starts as soon as possible
      *
      * @param jobDefinition
-     * @param triggerKey
+     * @param customIdentifier
      * @return date of scheduled job execution event
      */
-    Date scheduleSingleJobExecutionImmediately(WacodisJobDefinition jobDefinition, String triggerKey);
+    Date scheduleSingleJobExecutionImmediately(WacodisJobDefinition jobDefinition, String customIdentifier);
 
     /**
      * schedule single wacodis job execution that starts delayed, delay is
      * calculated from jobDefiontion.retrySettings
      *
      * @param jobDefinition
-     * @param triggerKey
+     * @param customIdentifier
      * @return date of scheduled job execution event
      */
-    Date scheduleSingleJobExecutionDelayed(WacodisJobDefinition jobDefinition, String triggerKey);
+    Date scheduleSingleJobExecutionDelayed(WacodisJobDefinition jobDefinition, String customIdentifier);
 
     /**
      * schedule single wacodis job execution that starts delayed, delay is
@@ -68,10 +68,10 @@ public interface SingleExecutionSchedulingManager {
      *
      * @param jobDefinition
      * @param startAt
-     * @param triggerKey
+     * @param customIdentifier
      * @return date of scheduled job execution event
      */
-    Date scheduleSingleJobExecutionAt(WacodisJobDefinition jobDefinition, Date startAt, String triggerKey);
+    Date scheduleSingleJobExecutionAt(WacodisJobDefinition jobDefinition, Date startAt, String customIdentifier);
 
     /**
      * schedule single wacodis job execution that starts as soon as possible
@@ -108,10 +108,10 @@ public interface SingleExecutionSchedulingManager {
      *
      * @param jobDefinition
      * @param jobData additional parameters used for job execution
-     * @param triggerKey
+     * @param customIdentifier
      * @return date of scheduled job execution event
      */
-    Date scheduleSingleJobExecutionImmediately(WacodisJobDefinition jobDefinition, Map<String, String> jobData, String triggerKey);
+    Date scheduleSingleJobExecutionImmediately(WacodisJobDefinition jobDefinition, Map<String, String> jobData, String customIdentifier);
 
     /**
      * schedule single wacodis job execution that starts delayed, delay is
@@ -119,10 +119,10 @@ public interface SingleExecutionSchedulingManager {
      *
      * @param jobDefinition
      * @param jobData additional parameters used for job execution
-     * @param triggerKey
+     * @param customIdentifier
      * @return date of scheduled job execution event
      */
-    Date scheduleSingleJobExecutionDelayed(WacodisJobDefinition jobDefinition, Map<String, String> jobData, String triggerKey);
+    Date scheduleSingleJobExecutionDelayed(WacodisJobDefinition jobDefinition, Map<String, String> jobData, String customIdentifier);
 
     /**
      * schedule single wacodis job execution that starts delayed, delay is
@@ -131,9 +131,9 @@ public interface SingleExecutionSchedulingManager {
      * @param jobDefinition
      * @param jobData additional parameters used for job execution
      * @param startAt
-     * @param triggerKey
+     * @param customIdentifier
      * @return date of scheduled job execution event
      */
-    Date scheduleSingleJobExecutionAt(WacodisJobDefinition jobDefinition, Map<String, String> jobData, Date startAt, String triggerKey);
+    Date scheduleSingleJobExecutionAt(WacodisJobDefinition jobDefinition, Map<String, String> jobData, Date startAt, String customIdentifier);
 
 }

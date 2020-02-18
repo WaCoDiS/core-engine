@@ -45,13 +45,14 @@ public class WacodisJobExecutionFailedHandler implements ApplicationListener<Wac
         WacodisJobDefinition jobDef = e.getWacodisJob().getJobDefinition();
         WacodisJobExecutionContext execContex = e.getWacodisJob().getExecutionContext();
         WacodisJobDefinitionRetrySettings retrySettings = jobDef.getRetrySettings();
+        String triggerKey = jobDef.getId().toString()+ "_execId_" + execContex.getExecutionID().toString()+ "_retry_" + execContex.getRetryCount();
 
         LOGGER.debug("handle failed execution of wacodis job {}, retry attempt: {}, executionID: {}", jobDef.getId(), execContex.getRetryCount(), execContex.getExecutionID());
 
         if (retrySettings.getRetryDelayMillies() <= 0) {
-            scheduledRetry = schedulingManager.scheduleSingleJobExecutionImmediately(jobDef, getJobDataMapFromExecutionContext(execContex));
+            scheduledRetry = schedulingManager.scheduleSingleJobExecutionImmediately(jobDef, getJobDataMapFromExecutionContext(execContex), triggerKey);
         } else {
-            scheduledRetry = schedulingManager.scheduleSingleJobExecutionDelayed(jobDef, getJobDataMapFromExecutionContext(execContex));
+            scheduledRetry = schedulingManager.scheduleSingleJobExecutionDelayed(jobDef, getJobDataMapFromExecutionContext(execContex), triggerKey);
         }
 
         if (scheduledRetry != null) {

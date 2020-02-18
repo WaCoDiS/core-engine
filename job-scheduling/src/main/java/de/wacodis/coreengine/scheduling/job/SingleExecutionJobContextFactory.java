@@ -42,13 +42,13 @@ public class SingleExecutionJobContextFactory {
      *
      * @param jobDefinition
      * @param jobData provide additional data to be stored in the job data map
-     * @param triggerKey
+     * @param customIdentifier
      * @return
      */
-    public JobContext createSingleExecutionJobContextStartNow(WacodisJobDefinition jobDefinition, Map<String, String> jobData, String triggerKey) {
+    public JobContext createSingleExecutionJobContextStartNow(WacodisJobDefinition jobDefinition, Map<String, String> jobData, String customIdentifier) {
         JobContext jobContext = new JobContext();
-        jobContext.setJobDetails(createJobDetail(jobDefinition, jobData));
-        jobContext.setTrigger(createFireOnceTriggerNow(triggerKey));
+        jobContext.setJobDetails(createJobDetail(jobDefinition, jobData, customIdentifier));
+        jobContext.setTrigger(createFireOnceTriggerNow(customIdentifier));
         return jobContext;
     }
 
@@ -59,14 +59,14 @@ public class SingleExecutionJobContextFactory {
      *
      * @param jobDefinition
      * @param jobData provide additional data to be stored in the job data map
-     * @param triggerKey
+     * @param customIdentifier
      * @return
      */
-    public JobContext createSingleExecutionContextStartDelayed(WacodisJobDefinition jobDefinition, Map<String, String> jobData, String triggerKey) {
+    public JobContext createSingleExecutionContextStartDelayed(WacodisJobDefinition jobDefinition, Map<String, String> jobData, String customIdentifier) {
         WacodisJobDefinitionRetrySettings retrySettings = (jobDefinition.getRetrySettings() != null) ? jobDefinition.getRetrySettings() : getDefaultRetrySettings();
         Date fireAt = getDelayedFireTime(retrySettings);
 
-        return createSingleExecutionContextStartAt(jobDefinition, jobData, fireAt, triggerKey);
+        return createSingleExecutionContextStartAt(jobDefinition, jobData, fireAt, customIdentifier);
     }
 
     /**
@@ -75,19 +75,19 @@ public class SingleExecutionJobContextFactory {
      * @param jobDefinition
      * @param jobData
      * @param fireAt date when the trigger fires
-     * @param triggerKey
+     * @param customIdentifier
      * @return
      */
-    public JobContext createSingleExecutionContextStartAt(WacodisJobDefinition jobDefinition, Map<String, String> jobData, Date fireAt, String triggerKey) {
+    public JobContext createSingleExecutionContextStartAt(WacodisJobDefinition jobDefinition, Map<String, String> jobData, Date fireAt, String customIdentifier) {
         JobContext jobContext = new JobContext();
-        jobContext.setJobDetails(createJobDetail(jobDefinition, jobData));
-        jobContext.setTrigger(createFireOnceTriggerAt(fireAt, triggerKey));
+        jobContext.setJobDetails(createJobDetail(jobDefinition, jobData, customIdentifier));
+        jobContext.setTrigger(createFireOnceTriggerAt(fireAt, customIdentifier));
         return jobContext;
     }
 
     /**
      * create job context with trigger that fires once immediately,
-     * jobDefinition.id is used as triggerKey
+     * jobDefinition.id is used as triggerKey and jobName
      *
      * @param jobDefinition
      * @param jobData provide additional data to be stored in the job data map
@@ -100,7 +100,7 @@ public class SingleExecutionJobContextFactory {
     /**
      * create job context with trigger that fires once with a delay specified in
      * jobDefiontion.retrySettings, if retrySettings are not available default
-     * delay of 10 minutes is applied, jobDefinition.id is used as triggerKey
+     * delay of 10 minutes is applied, jobDefinition.id is used as triggerKey and jobName
      *
      * @param jobDefinition
      * @param jobData provide additional data to be stored in the job data map
@@ -112,7 +112,7 @@ public class SingleExecutionJobContextFactory {
 
     /**
      * create job context with trigger that fires at the specified data,
-     * jobDefinition.id is used as triggerKey
+     * jobDefinition.id is used as triggerKey and jobName
      *
      * @param jobDefinition
      * @param jobData
@@ -137,13 +137,13 @@ public class SingleExecutionJobContextFactory {
                 .withIdentity(jobContextFactory.createTriggerKey(triggerKey))
                 .startAt(at)
                 .build();
-
+        
         return trigger;
     }
 
-    private JobDetail createJobDetail(WacodisJobDefinition jobDefinition, Map<String, String> jobData) {
+    private JobDetail createJobDetail(WacodisJobDefinition jobDefinition, Map<String, String> jobData, String jobName) {
         return jobDetailFactory.createJob(WacodisJob.class, false, false,
-                jobDefinition.getId().toString(), GROUP_NAME, createJobDataMap(jobDefinition, jobData));
+                jobName, GROUP_NAME, createJobDataMap(jobDefinition, jobData));
     }
 
     private JobDataMap createJobDataMap(WacodisJobDefinition jobDefinition, Map<String, String> jobData) {
