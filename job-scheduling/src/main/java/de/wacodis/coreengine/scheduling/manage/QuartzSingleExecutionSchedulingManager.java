@@ -39,12 +39,13 @@ public class QuartzSingleExecutionSchedulingManager implements SingleExecutionSc
      *
      * @param jobDefinition
      * @param jobData additional parameters used for job execution
+     * @param triggerKey
      * @return firing time, null if scheduling failed
      */
     @Override
-    public Date scheduleSingleJobExecutionImmediately(WacodisJobDefinition jobDefinition, Map<String, String> jobData) {
+    public Date scheduleSingleJobExecutionImmediately(WacodisJobDefinition jobDefinition, Map<String, String> jobData, String triggerKey) {
         Date firstFiringTime = null;
-        JobContext quartzJobContext = jCFactory.createSingleExecutionJobContextStartNow(jobDefinition, jobData);
+        JobContext quartzJobContext = jCFactory.createSingleExecutionJobContextStartNow(jobDefinition, jobData, triggerKey);
 
         try {
             firstFiringTime = schedulerFactoryBean.getScheduler().scheduleJob(quartzJobContext.getJobDetails(), quartzJobContext.getTrigger());	//runs QuartzJob's execute()
@@ -64,12 +65,13 @@ public class QuartzSingleExecutionSchedulingManager implements SingleExecutionSc
      *
      * @param jobDefinition
      * @param jobData additional parameters used for job execution
+     * @param triggerKey
      * @return firing time, null if scheduling failed
      */
     @Override
-    public Date scheduleSingleJobExecutionDelayed(WacodisJobDefinition jobDefinition, Map<String, String> jobData) {
+    public Date scheduleSingleJobExecutionDelayed(WacodisJobDefinition jobDefinition, Map<String, String> jobData, String triggerKey) {
         Date firstFiringTime = null;
-        JobContext quartzJobContext = jCFactory.createSingleExecutionContextStartDelayed(jobDefinition, jobData); //respect delay for schedule
+        JobContext quartzJobContext = jCFactory.createSingleExecutionContextStartDelayed(jobDefinition, jobData, triggerKey); //respect delay for schedule
 
         try {
             firstFiringTime = schedulerFactoryBean.getScheduler().scheduleJob(quartzJobContext.getJobDetails(), quartzJobContext.getTrigger());	//runs QuartzJob's execute()
@@ -87,12 +89,14 @@ public class QuartzSingleExecutionSchedulingManager implements SingleExecutionSc
      *
      * @param jobDefinition
      * @param jobData additional parameters used for job execution
+     * @param startAt
+     * @param triggerKey
      * @return firing time, null if scheduling failed
      */
     @Override
-    public Date scheduleSingleJobExecutionAt(WacodisJobDefinition jobDefinition, Map<String, String> jobData, Date startAt) {
+    public Date scheduleSingleJobExecutionAt(WacodisJobDefinition jobDefinition, Map<String, String> jobData, Date startAt, String triggerKey) {
         Date firstFiringTime = null;
-        JobContext quartzJobContext = jCFactory.createSingleExecutionContextStartAt(jobDefinition, jobData, startAt); //fire on specified date
+        JobContext quartzJobContext = jCFactory.createSingleExecutionContextStartAt(jobDefinition, jobData, startAt, triggerKey); //fire on specified date
 
         try {
             firstFiringTime = schedulerFactoryBean.getScheduler().scheduleJob(quartzJobContext.getJobDetails(), quartzJobContext.getTrigger());	//runs QuartzJob's execute()
@@ -106,7 +110,49 @@ public class QuartzSingleExecutionSchedulingManager implements SingleExecutionSc
     }
 
     /**
-     * schedule single job execution, scheduler will fire immediately
+     * schedule single job execution, scheduler will fire immediately,
+     * jobDefinition.id is used as triggerKey
+     *
+     * @param jobDefinition
+     * @param jobData additional parameters used for job execution
+     * @return firing time, null if scheduling failed
+     */
+    @Override
+    public Date scheduleSingleJobExecutionImmediately(WacodisJobDefinition jobDefinition, Map<String, String> jobData) {
+        return scheduleSingleJobExecutionImmediately(jobDefinition, jobData, jobDefinition.getId().toString());
+    }
+
+    /**
+     * schedule single job execution, scheduler will fire delayed, firing time
+     * is calculate considering jobDefinition.retrySettings.retryDelaysMillies,
+     * jobDefinition.id is used as triggerKey
+     *
+     * @param jobDefinition
+     * @param jobData additional parameters used for job execution
+     * @return firing time, null if scheduling failed
+     */
+    @Override
+    public Date scheduleSingleJobExecutionDelayed(WacodisJobDefinition jobDefinition, Map<String, String> jobData) {
+        return scheduleSingleJobExecutionDelayed(jobDefinition, jobData, jobDefinition.getId().toString());
+    }
+
+    /**
+     * schedule single job execution, scheduler will fire on specified date,
+     * jobDefinition.id is used as triggerKey
+     *
+     * @param jobDefinition
+     * @param jobData additional parameters used for job execution
+     * @param startAt
+     * @return firing time, null if scheduling failed
+     */
+    @Override
+    public Date scheduleSingleJobExecutionAt(WacodisJobDefinition jobDefinition, Map<String, String> jobData, Date startAt) {
+        return scheduleSingleJobExecutionAt(jobDefinition, jobData, startAt, jobDefinition.getId().toString());
+    }
+
+    /**
+     * schedule single job execution, scheduler will fire immediately,
+     * jobDefinition.id is used as triggerKey
      *
      * @param jobDefinition
      * @return firing time, null if scheduling failed
@@ -118,7 +164,8 @@ public class QuartzSingleExecutionSchedulingManager implements SingleExecutionSc
 
     /**
      * schedule single job execution, scheduler will fire delayed, firing time
-     * is calculate considering jobDefinition.retrySettings.retryDelaysMillies
+     * is calculate considering jobDefinition.retrySettings.retryDelaysMillies,
+     * jobDefinition.id is used as triggerKey
      *
      * @param jobDefinition
      * @return firing time, null if scheduling failed
@@ -129,14 +176,53 @@ public class QuartzSingleExecutionSchedulingManager implements SingleExecutionSc
     }
 
     /**
-     * schedule single job execution, scheduler will fire on specified date
+     * schedule single job execution, scheduler will fire on specified date,
+     * jobDefinition.id is used as triggerKey
      *
      * @param jobDefinition
-     * @param startAt 
+     * @param startAt
      * @return firing time, null if scheduling failed
      */
     @Override
     public Date scheduleSingleJobExecutionAt(WacodisJobDefinition jobDefinition, Date startAt) {
         return scheduleSingleJobExecutionAt(jobDefinition, new HashMap<>(), startAt); //empty list of additional params
+    }
+
+    /**
+     * schedule single job execution, scheduler will fire immediately
+     *
+     * @param jobDefinition
+     * @param triggerKey
+     * @return firing time, null if scheduling failed
+     */
+    @Override
+    public Date scheduleSingleJobExecutionImmediately(WacodisJobDefinition jobDefinition, String triggerKey) {
+        return this.scheduleSingleJobExecutionImmediately(jobDefinition, new HashMap<>(), triggerKey); //empty list of additional params
+    }
+
+    /**
+     * schedule single job execution, scheduler will fire delayed, firing time
+     * is calculate considering jobDefinition.retrySettings.retryDelaysMillies
+     *
+     * @param jobDefinition
+     * @param triggerKey
+     * @return firing time, null if scheduling failed
+     */
+    @Override
+    public Date scheduleSingleJobExecutionDelayed(WacodisJobDefinition jobDefinition, String triggerKey) {
+        return this.scheduleSingleJobExecutionDelayed(jobDefinition, new HashMap<>(), triggerKey); //empty list of additional params
+    }
+
+    /**
+     * schedule single job execution, scheduler will fire on specified date
+     *
+     * @param jobDefinition
+     * @param startAt
+     * @param triggerKey
+     * @return firing time, null if scheduling failed
+     */
+    @Override
+    public Date scheduleSingleJobExecutionAt(WacodisJobDefinition jobDefinition, Date startAt, String triggerKey) {
+        return scheduleSingleJobExecutionAt(jobDefinition, new HashMap<>(), startAt, triggerKey); //empty list of additional params
     }
 }

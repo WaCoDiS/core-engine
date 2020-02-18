@@ -134,6 +134,16 @@ public class JobContextFactory {
     }
 
     /**
+     * Creates a trigger key with the specified identfier
+     *
+     * @param identifer
+     * @return the trigger key
+     */
+    public TriggerKey createTriggerKey(String identifer) {
+        return new TriggerKey(identifer, GROUP_NAME);
+    }
+
+    /**
      * Creates job data from a job definition
      *
      * @param jobDefinition contains defintions for the job
