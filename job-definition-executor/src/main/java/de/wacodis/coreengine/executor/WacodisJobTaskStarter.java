@@ -117,7 +117,7 @@ public class WacodisJobTaskStarter {
             LOGGER.error("execution of wacodis job failed, WacodisJobID: " + wacodisJobID + ",toolID: " + toolProcessID + ", retry attempt: " + job.getExecutionContext().getRetryCount() + " of " + job.getJobDefinition().getRetrySettings().getMaxRetries(), t.getCause());
             //trigger job execution failed event
 
-            if (job.getExecutionContext().getRetryCount() <= job.getJobDefinition().getRetrySettings().getMaxRetries()) { //check if retry
+            if (job.getExecutionContext().getRetryCount() < job.getJobDefinition().getRetrySettings().getMaxRetries()) { //check if retry
                 //fire event to schedule retry attempt
                 int retries = job.incrementRetryCount();
                 LOGGER.info("publish jobExecutionFailedEvent to schedule retry attempt {} of {}, WacodisJobID {}, toolID: {}", retries, job.getJobDefinition().getRetrySettings().getMaxRetries(), wacodisJobID, toolProcessID);
