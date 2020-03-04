@@ -15,7 +15,7 @@ import javax.validation.constraints.*;
  * message to indicate a finished wps job 
  */
 @ApiModel(description = "message to indicate a finished wps job ")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-02-14T16:07:01.784+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-03-04T15:22:22.969+01:00[Europe/Berlin]")
 
 public class ProductDescription  implements Serializable {
   private static final long serialVersionUID = 1L;
