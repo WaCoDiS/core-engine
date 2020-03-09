@@ -1,0 +1,21 @@
+version: "3"
+services:
+  core-engine:
+    build: .
+    depends_on:
+      - rabbitmq
+    image: wacodis/core-engine
+    volumes:
+      - ./persistence:/usr/share/wacodis/data
+    environment:
+        spring.rabbitmq.host: "rabbitmq"
+        spring.rabbitmq.username: "rabbitmq"
+        spring.rabbitmq.password: "rabbitmq"
+  rabbitmq:
+    image: rabbitmq:3.7-management-alpine
+    environment:
+        RABBITMQ_DEFAULT_USER: "rabbitmq"
+        RABBITMQ_DEFAULT_PASS: "rabbitmq"
+    ports:
+      - 5672:5672
+      - 15672:15672
