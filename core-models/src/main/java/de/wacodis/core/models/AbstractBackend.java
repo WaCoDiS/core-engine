@@ -16,11 +16,12 @@ import javax.validation.constraints.*;
  * abstract type for a backend that provides WaCoDiS products 
  */
 @ApiModel(description = "abstract type for a backend that provides WaCoDiS products ")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-03-04T15:22:22.969+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-03-10T18:50:31.615+01:00[Europe/Berlin]")
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "backendType", visible = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "backendType", visible = true)
 @JsonSubTypes({
   @JsonSubTypes.Type(value = ArcGISImageServerBackend.class, name = "ArcGISImageServerBackend"),
+  @JsonSubTypes.Type(value = GeoServerBackend.class, name = "GeoServerBackend"),
 })
 
 public class AbstractBackend  implements Serializable {
