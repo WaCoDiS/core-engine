@@ -3,7 +3,7 @@ services:
   core-engine:
     build:
       context: .
-    image: registry.wacodis.demo.52north.org/core-engine:1.0.0
+    image: registry.wacodis.demo.52north.org/core-engine:1.0.1
     ports:
       - 8080:8080
     environment: 
