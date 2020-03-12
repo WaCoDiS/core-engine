@@ -14,6 +14,7 @@ public class ExpectedProcessOutput {
     private String identifier;
     private String mimeType;
     private boolean publishedOutput = true;  //true by default
+    private boolean byReference = true;  //true by default
 
     /**
      * no args constructor (needed for configuration)
@@ -40,6 +41,16 @@ public class ExpectedProcessOutput {
         this(identifier, mimeType);
         this.publishedOutput = publishedOutput;
     }
+
+    /**
+     * @param identifier
+     * @param mimeType
+     * @param publishedOutput
+     */
+    public ExpectedProcessOutput(String identifier, String mimeType, boolean publishedOutput, boolean byReference) {
+        this(identifier, mimeType, publishedOutput);
+        this.byReference = byReference;
+    }
     
     public boolean isPublishedOutput() {
         return publishedOutput;
@@ -65,8 +76,21 @@ public class ExpectedProcessOutput {
         this.mimeType = mimeType;
     }
 
+    public boolean isByReference() {
+        return byReference;
+    }
+
+    public void setByReference(boolean byReference) {
+        this.byReference = byReference;
+    }
+
     @Override
     public String toString() {
-        return "ExpectedProcessOutput{" + "identifier=" + identifier + ", mimeType=" + mimeType + ", publishedOutput=" + publishedOutput + '}';
+        return "ExpectedProcessOutput{" +
+                "identifier='" + identifier + '\'' +
+                ", mimeType='" + mimeType + '\'' +
+                ", publishedOutput=" + publishedOutput +
+                ", byReference=" + byReference +
+                '}';
     }
 }

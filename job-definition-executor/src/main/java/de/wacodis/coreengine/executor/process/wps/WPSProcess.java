@@ -254,7 +254,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
     private void setExpectedWPSOutputs(List<ExpectedProcessOutput> expectedOutputs, ExecuteRequestBuilder executeRequestBuilder) {
         for (ExpectedProcessOutput expectedOutput : expectedOutputs) {
             executeRequestBuilder.setResponseDocument(expectedOutput.getIdentifier(), "", "", expectedOutput.getMimeType() /*mime type*/);
-            executeRequestBuilder.setAsReference(expectedOutput.getIdentifier(), true);
+            executeRequestBuilder.setAsReference(expectedOutput.getIdentifier(), expectedOutput.isByReference());
         }
     }
 

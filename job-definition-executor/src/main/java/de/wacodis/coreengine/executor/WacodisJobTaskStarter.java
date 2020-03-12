@@ -45,7 +45,7 @@ public class WacodisJobTaskStarter {
 
     //default expected outputs
     private static final ExpectedProcessOutput PRODUCTOUTPUT = new ExpectedProcessOutput("PRODUCT", "image/geotiff");
-    private static final ExpectedProcessOutput METADATAOUTPUT = new ExpectedProcessOutput("METADATA", "text/json", false); //no published output
+    private static final ExpectedProcessOutput METADATAOUTPUT = new ExpectedProcessOutput("METADATA", "text/json", false, false); //no published output
     //default retry settings
     private static final int DEFAULT_MAXRETRIES = 0;
     private static final long DEFAULT_RETRIEDELAY_MILLIES = 0l;
