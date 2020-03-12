@@ -110,6 +110,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         WPSProcessInput processInput = buildExecuteRequest(context);
         Execute executeRequest = processInput.getExecute();
         //submit execute request
+        LOGGER.info("Executing WPS: {}", ToStringHelper.executeToString(executeRequest));
 
         try {
             //exeute wps process
