@@ -37,7 +37,7 @@
                                         <artifactItem>
                                             <groupId>de.wacodis</groupId>
                                             <artifactId>openapi</artifactId>
-                                            <version>1.0.1</version>
+                                            <version>1.1.0</version>
                                             <type>jar</type>
                                             <includes>definitions/wacodis-schemas.yml</includes>
                                             <outputDirectory>${project.basedir}/src/main/resources</outputDirectory>
@@ -81,7 +81,7 @@
                 <dependency>
                     <groupId>de.wacodis</groupId>
                     <artifactId>openapi</artifactId>
-                    <version>1.0.1</version>
+                    <version>1.1.0</version>
                 </dependency>
             </dependencies>
         </profile>
