@@ -7,6 +7,7 @@ package de.wacodis.coreengine.evaluator.wacodisjobevaluation;
 
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
+import de.wacodis.core.models.GetResource;
 import de.wacodis.core.models.StaticSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionTemporalCoverage;
@@ -123,11 +124,23 @@ public class WacodisJobWrapper {
     private List<AbstractResource> createStaticDummyResource(StaticSubsetDefinition subset) {
         List<AbstractResource> resourceList = new ArrayList<>();
 
-        StaticDummyResource resource = new StaticDummyResource();
-        resource.setDataType(subset.getDataType());
-        resource.setValue(subset.getValue());
+        String value = subset.getValue();
+        if (value.startsWith("http://") || value.startsWith("https://")) {
+            // lets assume a GET Resource for the time being
+            // TODO this is a workaround for static inputs which provide remote resources
+            GetResource resource = new GetResource();
+            resource.setUrl(value);
+            resource.setMethod(AbstractResource.MethodEnum.GETRESOURCE);
 
-        resourceList.add(resource);
+            resourceList.add(resource);
+        } else {
+            StaticDummyResource resource = new StaticDummyResource();
+            resource.setDataType(subset.getDataType());
+            resource.setValue(subset.getValue());
+
+            resourceList.add(resource);
+        }
+
         return resourceList;
     }
 }
