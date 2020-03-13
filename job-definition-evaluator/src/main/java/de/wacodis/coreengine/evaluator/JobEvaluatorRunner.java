@@ -7,7 +7,9 @@ package de.wacodis.coreengine.evaluator;
 
 import de.wacodis.core.models.AbstractDataEnvelopeTimeFrame;
 import de.wacodis.core.models.AbstractResource;
+import de.wacodis.core.models.AbstractSubsetDefinition;
 import de.wacodis.core.models.DataAccessResourceSearchBody;
+import de.wacodis.core.models.StaticSubsetDefinition;
 import de.wacodis.coreengine.evaluator.http.dataaccess.DataAccessResourceProvider;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.JobIsExecutableChangeListener;
@@ -17,6 +19,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
@@ -124,7 +127,9 @@ public class JobEvaluatorRunner {
     private DataAccessResourceSearchBody generateDataAccessQuery(WacodisJobWrapper job) {
         DataAccessResourceSearchBody query = new DataAccessResourceSearchBody();
         query.setAreaOfInterest(job.getJobDefinition().getAreaOfInterest());
-        query.setInputs(job.getJobDefinition().getInputs());
+        //exclude static inputs from data access query
+        List<AbstractSubsetDefinition> nonStaticInputs = job.getJobDefinition().getInputs().stream().filter( input -> !StaticSubsetDefinition.class.isAssignableFrom(input.getClass())).collect(Collectors.toList());
+        query.setInputs(nonStaticInputs);
         query.setTimeFrame(calculateTimeFrame(job));
 
         return query;
