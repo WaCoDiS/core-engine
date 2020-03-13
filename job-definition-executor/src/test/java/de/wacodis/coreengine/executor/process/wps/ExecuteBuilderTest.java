@@ -1,6 +1,8 @@
 package de.wacodis.coreengine.executor.process.wps;
 
 import com.google.common.collect.Collections2;
+import de.wacodis.core.models.CopernicusSubsetDefinition;
+import de.wacodis.core.models.GetResource;
 import de.wacodis.core.models.StaticSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionContext;
@@ -19,6 +21,7 @@ import org.n52.geoprocessing.wps.client.model.InputDescription;
 import org.n52.geoprocessing.wps.client.model.LiteralInputDescription;
 import org.n52.geoprocessing.wps.client.model.Process;
 import org.n52.geoprocessing.wps.client.model.execution.ComplexData;
+import org.n52.geoprocessing.wps.client.model.execution.Data;
 import org.n52.geoprocessing.wps.client.model.execution.LiteralData;
 
 import java.util.Arrays;
@@ -45,7 +48,14 @@ public class ExecuteBuilderTest {
         input2.setValue("[6.9315, 50.9854, 7.6071, 51.3190]");
         jobDef.addInputsItem(input2);
 
+        CopernicusSubsetDefinition input3 = new CopernicusSubsetDefinition();
+        input3.setIdentifier("OPTICAL_IMAGES_SOURCES");
+        input3.setMaximumCloudCoverage(15.0f);
+        input3.setSatellite(CopernicusSubsetDefinition.SatelliteEnum._2);
+        jobDef.addInputsItem(input3);
+
         WacodisJobWrapper jobWrapper = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), DateTime.now(), 0), jobDef);
+        jobWrapper.getInputs().get(2).setResource(Lists.list(new GetResource().url("https://sentinel.hub/abcd")));
 
         WPSProcessContextBuilder contextBuilder = new WPSProcessContextBuilder(getWPSConfig());
         ProcessContext context = contextBuilder.buildProcessContext(jobWrapper);
@@ -53,9 +63,17 @@ public class ExecuteBuilderTest {
         ExecuteBuilder builder = new ExecuteBuilder(getProcessDescription());
 
         WPSProcessInput result = builder.buildExecuteRequest(context);
-        Assert.assertThat(result.getExecute().getInputs().size(), CoreMatchers.is(2));
+        Assert.assertThat(result.getExecute().getInputs().size(), CoreMatchers.is(3));
         Assert.assertThat(result.getExecute().getInputs().get(0), CoreMatchers.instanceOf(ComplexData.class));
         Assert.assertThat(result.getExecute().getInputs().get(1), CoreMatchers.instanceOf(LiteralData.class));
+        Assert.assertThat(result.getExecute().getInputs().get(2), CoreMatchers.instanceOf(LiteralData.class));
+
+        ComplexData one = (ComplexData) result.getExecute().getInputs().get(0);
+        Assert.assertThat(one.isReference(), CoreMatchers.is(true));
+        Assert.assertThat(one.getReference().getHref().toString(), CoreMatchers.equalTo("http://online-resource.url"));
+
+        LiteralData three = (LiteralData) result.getExecute().getInputs().get(2);
+        Assert.assertThat(three.getValue().toString(), CoreMatchers.equalTo("https://sentinel.hub/abcd"));
     }
 
     private Process getProcessDescription() {
@@ -67,7 +85,11 @@ public class ExecuteBuilderTest {
         InputDescription id2 = new LiteralInputDescription();
         id2.setId("AREA_OF_INTEREST");
         id2.setMaxOccurs(1);
-        p.setInputs(Lists.list(id, id2));
+        InputDescription id3 = new LiteralInputDescription();
+        id3.setId("OPTICAL_IMAGES_SOURCES");
+        id3.setMaxOccurs(1);
+        p.setInputs(Lists.list(id, id2, id3));
+
         return p;
     }
 

@@ -109,6 +109,7 @@ public class WacodisJobWrapper {
     }
 
     private void initInputs() {
+        LOGGER.info("initializing possible static inputs");
         for (AbstractSubsetDefinition subset : this.jobDefinition.getInputs()) {
             InputHelper input = new InputHelper(subset);
 
@@ -117,6 +118,7 @@ public class WacodisJobWrapper {
                 input.setResource(createStaticDummyResource(((StaticSubsetDefinition) subset)));
             }
 
+            LOGGER.info("Created static input '{}': {}", subset.getIdentifier(), input.getResource());
             this.inputs.add(input);
         }
     }
