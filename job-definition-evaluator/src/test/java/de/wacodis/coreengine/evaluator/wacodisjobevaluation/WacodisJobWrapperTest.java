@@ -8,6 +8,7 @@ package de.wacodis.coreengine.evaluator.wacodisjobevaluation;
 import de.wacodis.core.models.AbstractSubsetDefinition;
 import de.wacodis.core.models.CatalogueSubsetDefinition;
 import de.wacodis.core.models.CopernicusSubsetDefinition;
+import de.wacodis.core.models.StaticSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionExecution;
 import de.wacodis.core.models.WacodisJobDefinitionTemporalCoverage;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.joda.time.DateTime;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
@@ -36,7 +38,9 @@ public class WacodisJobWrapperTest {
         WacodisJobDefinition jobDef = getJobDefinition();
         WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(),new DateTime(), 0), jobDef);
 
-        assertEquals(2, job.getInputs().size());
+        assertEquals(3, job.getInputs().size());
+        InputHelper staticInput = job.getInputs().get(2);
+        assertTrue(staticInput.getSubsetDefinition().getSourceType().equals(AbstractSubsetDefinition.SourceTypeEnum.STATICSUBSETDEFINITION));
     }
 
     @Test
@@ -80,9 +84,9 @@ public class WacodisJobWrapperTest {
     public void testSubsetsInitialized() {
         WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(),new DateTime(), 0), getJobDefinition());
 
-        for (InputHelper pair : job.getInputs()) {
-            assertFalse(pair.hasResource());
-        }
+        job.getInputs().stream()
+                .filter(i -> i.getSubsetDefinition().getSourceType() != AbstractSubsetDefinition.SourceTypeEnum.STATICSUBSETDEFINITION)
+                .map(InputHelper::hasResource).forEach(Assertions::assertFalse);
     }
 
     @Test
@@ -128,9 +132,15 @@ public class WacodisJobWrapperTest {
         subset1.setSourceType(AbstractSubsetDefinition.SourceTypeEnum.CATALOGUESUBSETDEFINITION);
         AbstractSubsetDefinition subset2 = new CopernicusSubsetDefinition();
         subset2.setSourceType(AbstractSubsetDefinition.SourceTypeEnum.COPERNICUSSUBSETDEFINITION);
+        StaticSubsetDefinition subset3 = new StaticSubsetDefinition();
+        subset3.setSourceType(AbstractSubsetDefinition.SourceTypeEnum.STATICSUBSETDEFINITION);
+        subset3.setDataType(StaticSubsetDefinition.DataTypeEnum.TEXT);
+        subset3.setValue("http://remote-resource.url");
+
         List<AbstractSubsetDefinition> subsets = new ArrayList<>();
         subsets.add(subset1);
         subsets.add(subset2);
+        subsets.add(subset3);
 
         WacodisJobDefinition jobDefinition = new WacodisJobDefinition();
         jobDefinition.setInputs(subsets);

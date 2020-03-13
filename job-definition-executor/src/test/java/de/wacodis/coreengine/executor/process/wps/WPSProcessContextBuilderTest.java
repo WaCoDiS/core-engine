@@ -7,6 +7,7 @@ package de.wacodis.coreengine.executor.process.wps;
 
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
+import de.wacodis.core.models.StaticSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionContext;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
@@ -58,6 +59,29 @@ public class WPSProcessContextBuilderTest {
         Set<String> contextInputs = context.getInputResources().keySet();
         List<String> jobWrapperInputs = jobWrapper.getInputs().stream().map(helper -> helper.getSubsetDefinitionIdentifier()).collect(Collectors.toList());
         assertTrue(context.getInputResources().keySet().containsAll(jobWrapperInputs));
+    }
+
+    @Test
+    @DisplayName("assert static inputs are prepared correctly")
+    public void testBuildProcessContext_Static_Inputs_Prepared() {
+        WacodisJobDefinition jobDef = new WacodisJobDefinition();
+        UUID processID = UUID.randomUUID();
+        jobDef.setId(processID);
+        StaticSubsetDefinition input = new StaticSubsetDefinition();
+        input.setIdentifier("REFERENCE_DATA");
+        input.setDataType(StaticSubsetDefinition.DataTypeEnum.TEXT);
+        input.setValue("http://online-resource.url");
+        jobDef.addInputsItem(input);
+
+        WacodisJobWrapper jobWrapper = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), DateTime.now(), 0), jobDef);
+
+        WPSProcessContextBuilder contextBuilder = new WPSProcessContextBuilder(getWPSConfig());
+        ProcessContext context = contextBuilder.buildProcessContext(jobWrapper);
+
+        Set<String> contextInputs = context.getInputResources().keySet();
+        List<String> jobWrapperInputs = jobWrapper.getInputs().stream().map(helper -> helper.getSubsetDefinitionIdentifier()).collect(Collectors.toList());
+        assertTrue(contextInputs.containsAll(jobWrapperInputs));
+
     }
 
     @Test

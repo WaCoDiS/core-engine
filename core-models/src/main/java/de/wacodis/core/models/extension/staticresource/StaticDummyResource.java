@@ -49,5 +49,12 @@ public class StaticDummyResource extends AbstractResource {
     public void setDataType(StaticSubsetDefinition.DataTypeEnum dataType) {
         this.dataType = dataType;
     }
-   
+
+    @Override
+    public String toString() {
+        return "StaticDummyResource{" +
+                "value='" + value + '\'' +
+                ", dataType=" + dataType +
+                '}';
+    }
 }
