@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -32,14 +33,15 @@ import org.springframework.web.client.RestTemplate;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Configuration
-@EnableConfigurationProperties
-@ConfigurationProperties("spring.scheduler.jobrepository")
+//@EnableConfigurationProperties
+//@ConfigurationProperties("spring.scheduler.jobrepository")
 public class JobDefinitionServiceConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JobDefinitionServiceConfiguration.class);
 
     private RestTemplateBuilder builder;
 
+    @Value("${spring.scheduler.jobrepository.uri}")
     private String uri;
 
     @Autowired
@@ -49,11 +51,6 @@ public class JobDefinitionServiceConfiguration {
 
     public String getUri() {
         return uri;
-    }
-
-    public void setUri(String uri) {
-        this.uri = uri;
-        LOGGER.info("JobRepository URI set to: {}", this.uri);
     }
 
     @Bean
