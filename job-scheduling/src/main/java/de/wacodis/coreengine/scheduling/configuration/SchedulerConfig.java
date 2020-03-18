@@ -9,6 +9,7 @@ import de.wacodis.coreengine.scheduling.job.JobFactory;
 import java.util.Properties;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.quartz.QuartzProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -30,9 +31,6 @@ public class SchedulerConfig {
 
     @Autowired
     private QuartzProperties quartzProperties;
-
-//    @Autowired
-//    private DataSource dataSource;
 
     /**
      * Creates a configured scheduler factory

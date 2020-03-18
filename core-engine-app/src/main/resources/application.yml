@@ -39,6 +39,7 @@ spring:
     username: rabbitmq
     password: rabbitmq
   scheduler:
+     timezone: Europe/Berlin
      jobrepository:
         uri: http://localhost:8081
   evaluator:
@@ -67,8 +68,7 @@ spring:
   datasource.core.quartz-data-source:
     name: quartzDataSource
     driverClassName: org.h2.Driver
-    # jdbc-url: jdbc:h2:file:./src/main/resources/h2_Jobstore
-    jdbc-url: jdbc:h2:file:.\src\main\resources\hs_Jobstore
+    jdbc-url: jdbc:h2:file:./job-scheduling/src/main/resources/h2_Jobstore
     username: sa
     password:
   quartz:

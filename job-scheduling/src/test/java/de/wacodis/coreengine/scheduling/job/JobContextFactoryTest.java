@@ -88,10 +88,11 @@ public class JobContextFactoryTest {
         sdf.setTimeZone(TimeZone.getTimeZone(timeZoneId));
 
         CronExpression expr = jobContextFactory.createCronSchedule(jobDefinition.getExecution().getPattern());
+        expr.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         assertThat(expr.getCronExpression(), is(equalTo(QUARTZ_CRON_EXPRESSION)));
-        assertThat(sdf.format(expr.getNextValidTimeAfter(new DateTime("2022-01-01T00:00:00").toDate())),
-                is(equalTo(sdf.format(new DateTime("2022-02-01T00:00:00").toDate()))));
+        assertThat(sdf.format(expr.getNextValidTimeAfter(new DateTime("2022-01-01T00:00:00Z").toDate())),
+                is(equalTo(sdf.format(new DateTime("2022-02-01T00:00:00Z").toDate()))));
     }
 
     @Test
@@ -122,8 +123,8 @@ public class JobContextFactoryTest {
     }
 
     @Test
-    @DisplayName("Test creation of a trigger based in the default timezon from a job definition")
-    public void testCreateTriggerbasedInDefaultTimezone() throws ParseException {
+    @DisplayName("Test creation of a trigger based in the default timezone from a job definition")
+    public void testCreateTriggerBasedInDefaultTimezone() throws ParseException {
         Trigger trigger = jobContextFactory.createTrigger(jobDefinition);
         String timeZoneId = "UTC";
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");

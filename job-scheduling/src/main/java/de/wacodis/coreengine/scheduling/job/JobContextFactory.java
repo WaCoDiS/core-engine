@@ -15,6 +15,8 @@ import static de.wacodis.coreengine.scheduling.configuration.WacodisSchedulingCo
 import java.text.ParseException;
 import java.time.ZoneId;
 import java.util.TimeZone;
+
+import de.wacodis.coreengine.scheduling.configuration.SchedulerConfig;
 import org.quartz.CronExpression;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import org.quartz.JobDataMap;
@@ -24,6 +26,7 @@ import org.quartz.Trigger;
 import static org.quartz.TriggerBuilder.newTrigger;
 import org.quartz.TriggerKey;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -36,6 +39,13 @@ public class JobContextFactory {
 
     @Autowired
     private JobDetailFactory jobDetailFactory;
+
+    @Value("${spring.scheduler.timezone}")
+    private String timeZone;
+
+    public String getTimeZone() {
+        return timeZone;
+    }
 
     /**
      * Creates a job context with default timezone trigger from a job definition
@@ -56,7 +66,7 @@ public class JobContextFactory {
      * a job definition
      *
      * @param jobDefinition contains defintions for the job
-     * @param timeZoneId
+     * @param timeZoneId the ID of the time zone that will be used for scheduling
      * @return
      * @throws ParseException
      */
@@ -68,8 +78,7 @@ public class JobContextFactory {
     }
 
     /**
-     * Creates a trigger that will be per default scheduled based in timezone
-     * Europe/Berlin
+     * Creates a trigger that will be scheduled based in the configured default timezone
      *
      * @param jobDefinition contains defintions for the job
      * @return a job trigger that is based in the default timezone
@@ -79,7 +88,7 @@ public class JobContextFactory {
         Trigger trigger = newTrigger()
                 .withIdentity(createTriggerKey(jobDefinition))
                 .withSchedule(cronSchedule(createCronSchedule(jobDefinition.getExecution().getPattern()))
-                        .inTimeZone(TimeZone.getTimeZone(checkTimeZone(DEFAULT_TIMEZONE))))
+                        .inTimeZone(TimeZone.getTimeZone(checkTimeZone(timeZone))))
                 .build();
         return trigger;
     }
@@ -156,7 +165,7 @@ public class JobContextFactory {
     }
 
     /**
-     * Creates a Quartz cron expression from a unix UNIX cron expression pattern
+     * Creates a Quartz cron expression from a unix UNIX cron expression pattern in the default system timezone
      *
      * @param executionPattern the UNIX cron expression
      * @return cron expression for Quartz that matches the UNIX cron expression
