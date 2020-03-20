@@ -186,7 +186,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         }
         
         
-        return removeDuplicates(originDataEnvelopes);
+        return removeDuplicates(removeNullorEmpty(originDataEnvelopes));
     }
 
     /**
@@ -400,7 +400,14 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         return list.stream().distinct().collect(Collectors.toList());
     }
     
-    
+    /**
+     * @param list
+     * @return list of string without null references or empty strings
+     */
+    private List<String> removeNullorEmpty(List<String> list){
+        return list.stream().filter( str -> str != null && !str.isEmpty()).collect(Collectors.toList());
+    }
+      
     /**
      * helper class to wrap execute request and origin data envelopes
      */
