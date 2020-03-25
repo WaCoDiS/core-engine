@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import de.wacodis.core.models.AbstractWacodisJobExecutionEvent;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.joda.time.DateTime;
 import java.io.Serializable;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -14,7 +15,7 @@ import javax.validation.constraints.*;
  * if present, this describe the execution pattern of a WacodisJobDefinition. if not present, the WacodisJobDefinition is treated as a one-time execution. Only one of the properties shall be provided. 
  */
 @ApiModel(description = "if present, this describe the execution pattern of a WacodisJobDefinition. if not present, the WacodisJobDefinition is treated as a one-time execution. Only one of the properties shall be provided. ")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-03-04T15:22:22.969+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-03-25T18:17:14.646+01:00[Europe/Berlin]")
 
 public class WacodisJobDefinitionExecution  implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -24,6 +25,9 @@ public class WacodisJobDefinitionExecution  implements Serializable {
 
   @JsonProperty("event")
   private AbstractWacodisJobExecutionEvent event = null;
+
+  @JsonProperty("startAt")
+  private DateTime startAt = null;
 
   public WacodisJobDefinitionExecution pattern(String pattern) {
     this.pattern = pattern;
@@ -66,6 +70,27 @@ public class WacodisJobDefinitionExecution  implements Serializable {
     this.event = event;
   }
 
+  public WacodisJobDefinitionExecution startAt(DateTime startAt) {
+    this.startAt = startAt;
+    return this;
+  }
+
+  /**
+   * date on which the wacodis job should be executed for the first time, null if wacodis job should be executed immediately 
+   * @return startAt
+  **/
+  @ApiModelProperty(value = "date on which the wacodis job should be executed for the first time, null if wacodis job should be executed immediately ")
+
+  @Valid
+
+  public DateTime getStartAt() {
+    return startAt;
+  }
+
+  public void setStartAt(DateTime startAt) {
+    this.startAt = startAt;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -77,12 +102,13 @@ public class WacodisJobDefinitionExecution  implements Serializable {
     }
     WacodisJobDefinitionExecution wacodisJobDefinitionExecution = (WacodisJobDefinitionExecution) o;
     return Objects.equals(this.pattern, wacodisJobDefinitionExecution.pattern) &&
-        Objects.equals(this.event, wacodisJobDefinitionExecution.event);
+        Objects.equals(this.event, wacodisJobDefinitionExecution.event) &&
+        Objects.equals(this.startAt, wacodisJobDefinitionExecution.startAt);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(pattern, event);
+    return Objects.hash(pattern, event, startAt);
   }
 
   @Override
@@ -92,6 +118,7 @@ public class WacodisJobDefinitionExecution  implements Serializable {
     
     sb.append("    pattern: ").append(toIndentedString(pattern)).append("\n");
     sb.append("    event: ").append(toIndentedString(event)).append("\n");
+    sb.append("    startAt: ").append(toIndentedString(startAt)).append("\n");
     sb.append("}");
     return sb.toString();
   }

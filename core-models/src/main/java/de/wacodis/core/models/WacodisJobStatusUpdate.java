@@ -15,7 +15,7 @@ import javax.validation.constraints.*;
 /**
  * WacodisJobStatusUpdate
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-03-10T18:50:31.615+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-03-25T18:17:14.646+01:00[Europe/Berlin]")
 
 public class WacodisJobStatusUpdate  implements Serializable {
   private static final long serialVersionUID = 1L;
