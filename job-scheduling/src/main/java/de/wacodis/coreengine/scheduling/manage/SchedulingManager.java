@@ -8,6 +8,7 @@ package de.wacodis.coreengine.scheduling.manage;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.coreengine.scheduling.job.JobContext;
 import java.util.Date;
+import org.joda.time.DateTime;
 
 /**
  *
@@ -30,6 +31,24 @@ public interface SchedulingManager {
      * @return first firing time
      */
     public Date scheduleNewJob(WacodisJobDefinition jobDefinition, String timeZoneId);
+
+    /**
+     * Schedules a new job in the default timezone Europe/Berlin
+     *
+     * @param jobDefinition defintion for the job to be scheduled
+     * @param startAt
+     * @return first firing time
+     */
+    public Date scheduleNewJob(WacodisJobDefinition jobDefinition, DateTime startAt);
+
+    /**
+     *
+     * @param jobDefinition defintion for the job to be scheduled
+     * @param startAt
+     * @param timeZoneId id for the timezone in which the scheduling is based
+     * @return first firing time
+     */
+    public Date scheduleNewJob(WacodisJobDefinition jobDefinition, DateTime startAt, String timeZoneId);
 
     /**
      * Pauses the scheduling of a specified job
