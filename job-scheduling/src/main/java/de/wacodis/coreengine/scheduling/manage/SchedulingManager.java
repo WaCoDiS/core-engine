@@ -39,7 +39,7 @@ public interface SchedulingManager {
      * @param startAt
      * @return first firing time
      */
-    public Date scheduleNewJob(WacodisJobDefinition jobDefinition, DateTime startAt);
+    public Date scheduleNewJob(WacodisJobDefinition jobDefinition, Date startAt);
 
     /**
      *
@@ -48,7 +48,7 @@ public interface SchedulingManager {
      * @param timeZoneId id for the timezone in which the scheduling is based
      * @return first firing time
      */
-    public Date scheduleNewJob(WacodisJobDefinition jobDefinition, DateTime startAt, String timeZoneId);
+    public Date scheduleNewJob(WacodisJobDefinition jobDefinition, Date startAt, String timeZoneId);
 
     /**
      * Pauses the scheduling of a specified job

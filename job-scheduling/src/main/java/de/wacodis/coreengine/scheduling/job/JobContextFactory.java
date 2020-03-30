@@ -14,10 +14,8 @@ import de.wacodis.core.models.WacodisJobDefinition;
 import static de.wacodis.coreengine.scheduling.configuration.WacodisSchedulingConstants.*;
 import java.text.ParseException;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.TimeZone;
-
-import de.wacodis.coreengine.scheduling.configuration.SchedulerConfig;
-import org.joda.time.DateTime;
 import org.quartz.CronExpression;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import org.quartz.CronTrigger;
@@ -90,7 +88,7 @@ public class JobContextFactory {
      * @return a job context with specified timezone trigger
      * @throws ParseException
      */
-    public JobContext createJobContext(WacodisJobDefinition jobDefinition, DateTime startAt) throws ParseException {
+    public JobContext createJobContext(WacodisJobDefinition jobDefinition, Date startAt) throws ParseException {
         JobContext jobContext = new JobContext();
         jobContext.setJobDetails(createJobDetail(jobDefinition));
         jobContext.setTrigger(createTrigger(jobDefinition, startAt));
@@ -108,7 +106,7 @@ public class JobContextFactory {
      * @return
      * @throws ParseException
      */
-    public JobContext createJobContext(WacodisJobDefinition jobDefinition, DateTime startAt, String timeZoneId) throws ParseException {
+    public JobContext createJobContext(WacodisJobDefinition jobDefinition, Date startAt, String timeZoneId) throws ParseException {
         JobContext jobContext = new JobContext();
         jobContext.setJobDetails(createJobDetail(jobDefinition));
         jobContext.setTrigger(createTrigger(jobDefinition, startAt, timeZoneId));
@@ -150,8 +148,8 @@ public class JobContextFactory {
      * @return a job trigger that is based in the default timezone
      * @throws ParseException
      */
-    public Trigger createTrigger(WacodisJobDefinition jobDefinition, DateTime startAt) throws ParseException {
-        return createBaseTrigger(jobDefinition).startAt(startAt.toDate()).build();
+    public Trigger createTrigger(WacodisJobDefinition jobDefinition, Date startAt) throws ParseException {
+        return createBaseTrigger(jobDefinition).startAt(startAt).build();
     }
 
     /**
@@ -164,8 +162,8 @@ public class JobContextFactory {
      * @return a job trigger that is based in the specified timezone
      * @throws ParseException
      */
-    public Trigger createTrigger(WacodisJobDefinition jobDefinition, DateTime startAt, String timeZoneId) throws ParseException {
-        return createBaseTrigger(jobDefinition, timeZoneId).startAt(startAt.toDate()).build();
+    public Trigger createTrigger(WacodisJobDefinition jobDefinition, Date startAt, String timeZoneId) throws ParseException {
+        return createBaseTrigger(jobDefinition, timeZoneId).startAt(startAt).build();
     }
 
     private TriggerBuilder<CronTrigger> createBaseTrigger(WacodisJobDefinition jobDefinition) throws ParseException {

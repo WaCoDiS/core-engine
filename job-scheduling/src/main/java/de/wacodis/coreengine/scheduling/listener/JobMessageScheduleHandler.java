@@ -11,6 +11,7 @@ import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionExecution;
 import de.wacodis.coreengine.scheduling.manage.QuartzSingleExecutionSchedulingManager;
 import de.wacodis.coreengine.scheduling.manage.QuartzSchedulingManager;
+import java.util.Date;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -62,7 +63,8 @@ public class JobMessageScheduleHandler implements JobMessageHandler {
         WacodisJobDefinitionExecution exec = jobDefinition.getExecution();
 
         if (exec.getStartAt() != null) {
-            regularExecutionschedulingManager.scheduleNewJob(jobDefinition, exec.getStartAt());
+            Date startAtDate = exec.getStartAt().toDate();
+            regularExecutionschedulingManager.scheduleNewJob(jobDefinition, startAtDate);
         } else {
             regularExecutionschedulingManager.scheduleNewJob(jobDefinition);
         }

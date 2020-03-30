@@ -65,7 +65,7 @@ public class QuartzSchedulingManager implements SchedulingManager {
     }
 
     @Override
-    public Date scheduleNewJob(WacodisJobDefinition jobDefinition, DateTime startAt) {
+    public Date scheduleNewJob(WacodisJobDefinition jobDefinition, Date startAt) {
         Date firstFiringTime = null;
         try {
             JobContext jobContext = jCFactory.createJobContext(jobDefinition, startAt);
@@ -78,7 +78,7 @@ public class QuartzSchedulingManager implements SchedulingManager {
     }
 
     @Override
-    public Date scheduleNewJob(WacodisJobDefinition jobDefinition, DateTime startAt, String timeZoneId) {
+    public Date scheduleNewJob(WacodisJobDefinition jobDefinition, Date startAt, String timeZoneId) {
         Date firstFiringTime = null;
         try {
             JobContext jobContext = jCFactory.createJobContext(jobDefinition, startAt, timeZoneId);
