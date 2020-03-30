@@ -13,11 +13,13 @@ import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.time.ZoneId;
 import java.time.zone.ZoneRulesException;
+import java.util.Date;
 import java.util.TimeZone;
 import java.util.UUID;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import org.joda.time.DateTime;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
@@ -151,6 +153,21 @@ public class JobContextFactoryTest {
         assertThat(jobContext.getJobDetails().getKey().getName(), is(equalTo(JOB_KEY.toString())));
         assertThat(jobContext.getJobDetails().getKey().getGroup(), is(equalTo(GROUP_NAME)));
         assertThat(jobContext.getJobDetails().getJobDataMap().getString(JOB_KEY_ID), is(equalTo(JOB_KEY.toString())));
+    }
+    
+    @Test
+    @DisplayName("Test creation of a trigger with specific start date")
+    public void testCreateTriggerWithStartAtDate() throws ParseException {
+        Date startAt = new DateTime("2022-01-31T00:00:00").toDate();
+        jobDefinition.getExecution().setStartAt(new DateTime(startAt));
+        Trigger trigger = jobContextFactory.createTrigger(jobDefinition);
+
+
+        Date expectedFirstFiringTime = new DateTime("2022-02-01T00:00:00").toDate();
+
+        assertEquals(startAt, trigger.getStartTime());
+        assertEquals(jobDefinition.getExecution().getStartAt(), new DateTime(trigger.getStartTime()));
+        assertEquals(expectedFirstFiringTime, trigger.getFireTimeAfter(startAt));
     }
 
 }
