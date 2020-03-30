@@ -11,6 +11,7 @@ import com.cronutils.model.CronType;
 import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.parser.CronParser;
 import de.wacodis.core.models.WacodisJobDefinition;
+import de.wacodis.core.models.WacodisJobDefinitionExecution;
 import static de.wacodis.coreengine.scheduling.configuration.WacodisSchedulingConstants.*;
 import java.text.ParseException;
 import java.time.ZoneId;
@@ -48,7 +49,8 @@ public class JobContextFactory {
         return timeZone;
     }
 
-    /**
+    
+        /**
      * Creates a job context with default timezone trigger from a job definition
      *
      * @param jobDefinition contains defintions for the job
@@ -78,42 +80,8 @@ public class JobContextFactory {
         jobContext.setTrigger(createTrigger(jobDefinition, timeZoneId));
         return jobContext;
     }
-    
-    
+
         /**
-     * Creates a job context with default timezone trigger from a job definition
-     *
-     * @param jobDefinition contains defintions for the job
-     * @param startAt
-     * @return a job context with specified timezone trigger
-     * @throws ParseException
-     */
-    public JobContext createJobContext(WacodisJobDefinition jobDefinition, Date startAt) throws ParseException {
-        JobContext jobContext = new JobContext();
-        jobContext.setJobDetails(createJobDetail(jobDefinition));
-        jobContext.setTrigger(createTrigger(jobDefinition, startAt));
-        return jobContext;
-    }
-
-    /**
-     * Creates a job context with a trigger based in the specified timezone from
-     * a job definition
-     *
-     * @param jobDefinition contains defintions for the job
-     * @param startAt
-     * @param timeZoneId the ID of the time zone that will be used for
-     * scheduling
-     * @return
-     * @throws ParseException
-     */
-    public JobContext createJobContext(WacodisJobDefinition jobDefinition, Date startAt, String timeZoneId) throws ParseException {
-        JobContext jobContext = new JobContext();
-        jobContext.setJobDetails(createJobDetail(jobDefinition));
-        jobContext.setTrigger(createTrigger(jobDefinition, startAt, timeZoneId));
-        return jobContext;
-    }
-
-    /**
      * Creates a trigger that will be scheduled based in the configured default
      * timezone
      *
@@ -122,7 +90,7 @@ public class JobContextFactory {
      * @throws ParseException
      */
     public Trigger createTrigger(WacodisJobDefinition jobDefinition) throws ParseException {
-        return createBaseTrigger(jobDefinition).build();
+        return createTrigger(jobDefinition, timeZone);
     }
 
     /**
@@ -135,53 +103,28 @@ public class JobContextFactory {
      * @throws ParseException
      */
     public Trigger createTrigger(WacodisJobDefinition jobDefinition, String timeZoneId) throws ParseException {
-        return createBaseTrigger(jobDefinition, timeZoneId).build();
-    }
-    
-    
-        /**
-     * Creates a trigger that will be scheduled based in the configured default
-     * timezone
-     *
-     * @param jobDefinition contains defintions for the job
-     * @param startAt
-     * @return a job trigger that is based in the default timezone
-     * @throws ParseException
-     */
-    public Trigger createTrigger(WacodisJobDefinition jobDefinition, Date startAt) throws ParseException {
-        return createBaseTrigger(jobDefinition).startAt(startAt).build();
-    }
-
-    /**
-     * * Creates a trigger that will be scheduled based in the specified
-     * timezone
-     *
-     * @param jobDefinition contains defintions for the job
-     * @param startAt
-     * @param timeZoneId timezone the trigger is based in
-     * @return a job trigger that is based in the specified timezone
-     * @throws ParseException
-     */
-    public Trigger createTrigger(WacodisJobDefinition jobDefinition, Date startAt, String timeZoneId) throws ParseException {
-        return createBaseTrigger(jobDefinition, timeZoneId).startAt(startAt).build();
-    }
-
-    private TriggerBuilder<CronTrigger> createBaseTrigger(WacodisJobDefinition jobDefinition) throws ParseException {
-        TriggerBuilder<CronTrigger> triggerBuilder = newTrigger()
-                .withIdentity(createTriggerKey(jobDefinition))
-                .withSchedule(cronSchedule(createCronSchedule(jobDefinition.getExecution().getPattern()))
-                        .inTimeZone(TimeZone.getTimeZone(checkTimeZone(timeZone))));
-        
-        return triggerBuilder;
-    }
-    
-        private TriggerBuilder<CronTrigger> createBaseTrigger(WacodisJobDefinition jobDefinition, String timeZoneId) throws ParseException {
-        TriggerBuilder<CronTrigger> triggerBuilder = newTrigger()
+                TriggerBuilder<CronTrigger> triggerBuilder = newTrigger()
                 .withIdentity(createTriggerKey(jobDefinition))
                 .withSchedule(cronSchedule(createCronSchedule(jobDefinition.getExecution().getPattern()))
                         .inTimeZone(TimeZone.getTimeZone(checkTimeZone(timeZoneId))));
+                
+                handleStartDate(jobDefinition, triggerBuilder);
 
-        return triggerBuilder;
+        return triggerBuilder.build();
+    }
+
+
+        
+    
+    private void handleStartDate(WacodisJobDefinition jobDefinition, TriggerBuilder<CronTrigger> triggerBuilder){
+        WacodisJobDefinitionExecution exec = jobDefinition.getExecution();
+        
+        if(exec.getStartAt() != null){
+            Date startAtDate = exec.getStartAt().toDate();
+            triggerBuilder.startAt(startAtDate);
+        }else{
+            triggerBuilder.startNow();
+        }
     }
 
     /**

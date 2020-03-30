@@ -68,7 +68,7 @@ public class QuartzSchedulingManager implements SchedulingManager {
     public Date scheduleNewJob(WacodisJobDefinition jobDefinition, Date startAt) {
         Date firstFiringTime = null;
         try {
-            JobContext jobContext = jCFactory.createJobContext(jobDefinition, startAt);
+            JobContext jobContext = jCFactory.createJobContext(jobDefinition);
             firstFiringTime = scheduleNewJob(jobContext.getJobDetails(), jobContext.getTrigger());
         } catch (ParseException ex) {
             LOGGER.error(ex.getMessage());
@@ -81,7 +81,7 @@ public class QuartzSchedulingManager implements SchedulingManager {
     public Date scheduleNewJob(WacodisJobDefinition jobDefinition, Date startAt, String timeZoneId) {
         Date firstFiringTime = null;
         try {
-            JobContext jobContext = jCFactory.createJobContext(jobDefinition, startAt, timeZoneId);
+            JobContext jobContext = jCFactory.createJobContext(jobDefinition, timeZoneId);
             firstFiringTime = scheduleNewJob(jobContext.getJobDetails(), jobContext.getTrigger());
         } catch (ParseException ex) {
             LOGGER.error(ex.getMessage());
