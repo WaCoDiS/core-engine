@@ -7,6 +7,7 @@ import de.wacodis.core.models.AbstractBackend;
 import de.wacodis.core.models.ProductBackend;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
 import java.util.List;
 import java.io.Serializable;
 import javax.validation.Valid;
@@ -16,7 +17,7 @@ import javax.validation.constraints.*;
  * contains specific information about a GeoServer product backend 
  */
 @ApiModel(description = "contains specific information about a GeoServer product backend ")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-03-10T18:50:31.615+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-04-14T19:17:24.707+02:00[Europe/Berlin]")
 
 public class GeoServerBackend extends AbstractBackend implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -28,7 +29,8 @@ public class GeoServerBackend extends AbstractBackend implements Serializable {
   private String productCollection = null;
 
   @JsonProperty("serviceTypes")
-  private List serviceTypes = null;
+  @Valid
+  private List<String> serviceTypes = new ArrayList<String>();
 
   public GeoServerBackend baseUrl(String baseUrl) {
     this.baseUrl = baseUrl;
@@ -72,8 +74,13 @@ public class GeoServerBackend extends AbstractBackend implements Serializable {
     this.productCollection = productCollection;
   }
 
-  public GeoServerBackend serviceTypes(List serviceTypes) {
+  public GeoServerBackend serviceTypes(List<String> serviceTypes) {
     this.serviceTypes = serviceTypes;
+    return this;
+  }
+
+  public GeoServerBackend addServiceTypesItem(String serviceTypesItem) {
+    this.serviceTypes.add(serviceTypesItem);
     return this;
   }
 
@@ -84,13 +91,12 @@ public class GeoServerBackend extends AbstractBackend implements Serializable {
   @ApiModelProperty(required = true, value = "the supported GeoServer services (e.g. WMS, WFS) ")
   @NotNull
 
-  @Valid
 
-  public List getServiceTypes() {
+  public List<String> getServiceTypes() {
     return serviceTypes;
   }
 
-  public void setServiceTypes(List serviceTypes) {
+  public void setServiceTypes(List<String> serviceTypes) {
     this.serviceTypes = serviceTypes;
   }
 
