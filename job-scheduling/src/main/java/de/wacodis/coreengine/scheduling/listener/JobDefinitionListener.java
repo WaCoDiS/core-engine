@@ -6,6 +6,8 @@
 package de.wacodis.coreengine.scheduling.listener;
 
 import de.wacodis.core.models.WacodisJobDefinition;
+import de.wacodis.core.models.WacodisJobStatus;
+import de.wacodis.core.models.WacodisJobStatusUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,14 @@ public class JobDefinitionListener {
     public void jobDefinitionCreated(WacodisJobDefinition jobDefinition) {
         LOGGER.info("Received new job: {}", jobDefinition.toString());
         messageHandler.handleNewJob(jobDefinition);
+    }
+
+    @StreamListener(target = JobDefinitionListenerChannel.JOB_STATUS_UPDATE_INPUT)
+    public void jobDefinitionDeleted(WacodisJobStatusUpdate jobStatusUpdate) {
+        if (jobStatusUpdate.getNewStatus().equals(WacodisJobStatus.DELETED)) {
+            LOGGER.info("Received deleted job status update: {}", jobStatusUpdate.getWacodisJobIdentifier().toString());
+            messageHandler.handleJobDeletion(jobStatusUpdate);
+        }
     }
 
 }

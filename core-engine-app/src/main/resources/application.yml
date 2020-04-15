@@ -17,6 +17,10 @@ spring:
           destination: wacodis.test.jobs.new
           binder: wacodis_rabbit
           content-type: application/json
+        job-status-update:
+          destination: wacodis.test.jobs.status-update
+          binder: wacodis_rabbit
+          content-type: application/json
         toolFinished:
           destination: wacodis.test.tools.finished
           binder: wacodis_rabbit
