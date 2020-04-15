@@ -61,7 +61,6 @@ public class WacodisJobStatusUpdate  implements Serializable {
    * @return executionFinished
   **/
   @ApiModelProperty(required = true, value = "point in time when job execution finished successfully, only needed for updates after succesful job execution ")
-  @NotNull
 
   @Valid
 
