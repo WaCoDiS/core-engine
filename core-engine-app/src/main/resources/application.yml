@@ -69,6 +69,7 @@ spring:
         #defaultResourceSchema:
       #   name: GML3
       #   schemaLocation: http://schemas.opengis.net/gml/3.1.1/base/feature.xsd
+      callWPSPerInput: true
   datasource.core.quartz-data-source:
     name: quartzDataSource
     driverClassName: org.h2.Driver

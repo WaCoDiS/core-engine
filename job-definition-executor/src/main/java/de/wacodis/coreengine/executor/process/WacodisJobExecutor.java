@@ -17,8 +17,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -68,28 +71,40 @@ public class WacodisJobExecutor {
     public ProcessOutputDescription execute() throws Exception {
         LOGGER.debug("start execution of process " + toolContext.getWacodisProcessID() + ", toolProcess: " + toolProcess);
 
+        List<ProcessContext> processContexts;
+
+        //split context per input if attribute is set in total context
+        if (this.toolContext.getSplitInput().isPresent()) {
+            processContexts = buildContextForEachInput(this.toolContext);
+        } else { //otherwise only choose total context 
+            processContexts = Arrays.asList(new ProcessContext[]{this.toolContext});
+        }
+
         //publish message for execution start
         ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolExecution(), buildToolExecutionStartedMessage(), this.messagePublishingTimeout_Millis);
 
         //execute processing tool
-        ProcessOutputDescription processOutput;
-        try {
-            processOutput = this.toolProcess.execute(this.toolContext);
-            LOGGER.debug("Process: " + toolContext.getWacodisProcessID() + ",executed toolProcess " + toolProcess);
-        } catch (ExecutionException e) {
-            LOGGER.error("Process execution failed", e.getMessage());
-            LOGGER.warn(e.getMessage(), e);
+        ProcessOutputDescription processOutput = null;
 
-            //publish message with the failure
-            ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFailure(), buildToolFailureMessage(e.getMessage()), this.messagePublishingTimeout_Millis);
+        for (ProcessContext pc : processContexts) {
+            try {
+                processOutput = this.toolProcess.execute(this.toolContext);
+                LOGGER.debug("Process: " + toolContext.getWacodisProcessID() + ",executed toolProcess " + toolProcess);
+            } catch (ExecutionException e) {
+                LOGGER.error("Process execution failed", e.getMessage());
+                LOGGER.warn(e.getMessage(), e);
 
-            throw e;
+                //publish message with the failure
+                ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFailure(), buildToolFailureMessage(e.getMessage()), this.messagePublishingTimeout_Millis);
+
+                throw e;
+            }
+
+            //publish toolFinished message
+            ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFinished(), buildToolFinishedMessage(processOutput), this.messagePublishingTimeout_Millis);
+
+            LOGGER.info("Process: " + toolContext.getWacodisProcessID() + ",finished execution");
         }
-
-        //publish toolFinished message
-        ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFinished(), buildToolFinishedMessage(processOutput), this.messagePublishingTimeout_Millis);
-
-        LOGGER.info("Process: " + toolContext.getWacodisProcessID() + ",finished execution");
 
         return processOutput;
     }
@@ -97,7 +112,7 @@ public class WacodisJobExecutor {
     private Message<WacodisJobFinished> buildToolFinishedMessage(ProcessOutputDescription processOuput) {
         WacodisJobFinished msg = new WacodisJobFinished();
         ProductDescription pd = new ProductDescription();
-        
+
         pd.setWpsJobIdentifier(processOuput.getProcessIdentifier());
         pd.setProductCollection(this.jobDefinition.getProductCollection());
         pd.setProcessingTool(this.jobDefinition.getProcessingTool());
@@ -105,7 +120,7 @@ public class WacodisJobExecutor {
         pd.setDataEnvelopeReferences(processOuput.getOriginDataEnvelopes());
         // do not include outputs which should no be published (e.g. Metadata output)
         pd.setOutputIdentifiers(getPublishableExpectedOutputIdentifiers());
-        
+
         msg.setExecutionFinished(DateTime.now()); //set to time of tool finished message publication
         msg.setWacodisJobIdentifier(this.jobDefinition.getId());
         msg.setProductDescription(pd);
@@ -148,6 +163,34 @@ public class WacodisJobExecutor {
                     .map(expectedOuputIdentifier -> expectedOuputIdentifier.getIdentifier())
                     .collect(Collectors.toList());
         }
+    }
+
+    private List<ProcessContext> buildContextForEachInput(ProcessContext totalContext) {
+        List<ProcessContext> contexts = new ArrayList<>();
+
+        List<ResourceDescription> rds = totalContext.getInputResource(totalContext.getSplitInput().get());
+
+        if (rds == null) {
+            throw new IllegalArgumentException("cannot split process context, process context does not contain input with identifier " + totalContext.getSplitInput().get());
+        }
+
+        ProcessContext splitContext;
+        for (ResourceDescription rd : rds) {
+            splitContext = new ProcessContext();
+            //copy common attributes
+            splitContext.setExpectedOutputs(totalContext.getExpectedOutputs());
+            splitContext.setWacodisProcessID(totalContext.getWacodisProcessID());
+            //copy input resources excluding split input
+            Map<String, List<ResourceDescription>> commonInputs = totalContext.getInputResources();
+            commonInputs.remove(totalContext.getSplitInput().get());
+            splitContext.setInputResources(commonInputs);
+            //add split input to resources
+            splitContext.addInputResource(totalContext.getSplitInput().get(), rd);
+
+            contexts.add(splitContext);
+        }
+
+        return contexts;
     }
 
 }

@@ -5,8 +5,10 @@
  */
 package de.wacodis.coreengine.executor;
 
+import de.wacodis.core.models.CopernicusSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionRetrySettings;
+import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
 import de.wacodis.coreengine.executor.events.WacodisJobExecutionFailedEvent;
@@ -54,6 +56,7 @@ public class WacodisJobTaskStarter {
     private final ExecutorService wacodisJobExecutionService;
     private final ProcessContextBuilder contextBuilder;
     private List<ExpectedProcessOutput> expectedProcessOutputs;
+    private boolean splitContextPerInput = true;
 
     @Autowired
     ToolMessagePublisherChannel newProductPublisher;
@@ -91,6 +94,10 @@ public class WacodisJobTaskStarter {
         String wacodisJobID = job.getJobDefinition().getId().toString();
         ProcessContext toolContext = this.contextBuilder.buildProcessContext(job, this.expectedProcessOutputs.toArray(new ExpectedProcessOutput[this.expectedProcessOutputs.size()]));
 
+        if(this.wpsConfig.isCallWPSPerInput()){
+            toolContext.setSplitInput(getSplitInputIdentifier(job));
+        }
+        
         Process toolProcess = new WPSProcess(this.wpsClient, this.wpsConfig.getUri(), this.wpsConfig.getVersion(), toolProcessID);
 
         LOGGER.info("execute Wacodis Job " + wacodisJobID + " using processing tool " + toolProcessID);
@@ -161,5 +168,25 @@ public class WacodisJobTaskStarter {
             
             jobDef.setRetrySettings(defaultRetrySettings);
         }
+    }
+    
+    
+    /**
+     * assume first found CopernicusSubsetDefinition as input to split context
+     * @param job
+     * @return 
+     */
+    private String getSplitInputIdentifier(WacodisJobWrapper job){
+        List<InputHelper> inputs = job.getInputs();
+        String splitInputIdentifier = null;
+        
+        for(InputHelper input : inputs){
+            if(input.getSubsetDefinition() instanceof CopernicusSubsetDefinition){
+                splitInputIdentifier = input.getSubsetDefinitionIdentifier();
+                break;
+            }
+        }
+        
+        return splitInputIdentifier;
     }
 }

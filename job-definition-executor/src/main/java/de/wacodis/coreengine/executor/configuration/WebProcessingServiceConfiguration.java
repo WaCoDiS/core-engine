@@ -26,6 +26,8 @@ public class WebProcessingServiceConfiguration {
     private List<ExpectedProcessOutput> expectedProcessOutputs;
     private String defaultResourceMimeType;
     private Schema defaultResourceSchema;
+    private boolean callWPSPerInput;
+
 
     public WebProcessingServiceConfiguration() {
     }
@@ -69,5 +71,13 @@ public class WebProcessingServiceConfiguration {
 
     public void setDefaultResourceSchema(Schema defaultResourceSchema) {
         this.defaultResourceSchema = defaultResourceSchema;
+    }
+
+    public boolean isCallWPSPerInput() {
+        return callWPSPerInput;
+    }
+
+    public void setCallWPSPerInput(boolean callWPSPerInput) {
+        this.callWPSPerInput = callWPSPerInput;
     }
 }
