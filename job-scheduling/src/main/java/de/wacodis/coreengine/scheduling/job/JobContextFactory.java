@@ -11,19 +11,26 @@ import com.cronutils.model.CronType;
 import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.parser.CronParser;
 import de.wacodis.core.models.WacodisJobDefinition;
+
 import static de.wacodis.coreengine.scheduling.configuration.WacodisSchedulingConstants.*;
+
 import java.text.ParseException;
 import java.time.ZoneId;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import de.wacodis.coreengine.scheduling.configuration.SchedulerConfig;
 import org.quartz.CronExpression;
+
 import static org.quartz.CronScheduleBuilder.cronSchedule;
+
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Trigger;
+
 import static org.quartz.TriggerBuilder.newTrigger;
+
 import org.quartz.TriggerKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -66,7 +73,7 @@ public class JobContextFactory {
      * a job definition
      *
      * @param jobDefinition contains defintions for the job
-     * @param timeZoneId the ID of the time zone that will be used for scheduling
+     * @param timeZoneId    the ID of the time zone that will be used for scheduling
      * @return
      * @throws ParseException
      */
@@ -98,7 +105,7 @@ public class JobContextFactory {
      * timezone
      *
      * @param jobDefinition contains defintions for the job
-     * @param timeZoneId timezone the trigger is based in
+     * @param timeZoneId    timezone the trigger is based in
      * @return a job trigger that is based in the specified timezone
      * @throws ParseException
      */
@@ -133,6 +140,16 @@ public class JobContextFactory {
     }
 
     /**
+     * Creates a job key from an identifier
+     *
+     * @param identifier job identifier
+     * @return the job key
+     */
+    public JobKey createJobKey(String identifier) {
+        return new JobKey(identifier, GROUP_NAME);
+    }
+
+    /**
      * Creates a trigger key from a job definition
      *
      * @param jobDefinition contains defintions for the job
@@ -143,13 +160,13 @@ public class JobContextFactory {
     }
 
     /**
-     * Creates a trigger key with the specified identfier
+     * Creates a trigger key with the specified identifier
      *
-     * @param identifer
+     * @param identifier job identifier
      * @return the trigger key
      */
-    public TriggerKey createTriggerKey(String identifer) {
-        return new TriggerKey(identifer, GROUP_NAME);
+    public TriggerKey createTriggerKey(String identifier) {
+        return new TriggerKey(identifier, GROUP_NAME);
     }
 
     /**
