@@ -25,7 +25,8 @@
         <spring-boot.version>2.1.0.RELEASE</spring-boot.version>
         <spring-cloud.version>Greenwich.SR3</spring-cloud.version>   
         <wacodis-core-engine.version>1.1.1-SNAPSHOT</wacodis-core-engine.version>
-        <surefire-plugin.version>2.22.1</surefire-plugin.version>
+        <surefire-plugin.version>3.0.0-M4</surefire-plugin.version>
+        <failsafe-plugin.version>3.0.0-M4</failsafe-plugin.version>
         <quartz.version>2.3.0</quartz.version>
         <cron-utils.version>8.0.0</cron-utils.version>
         <h2.version>1.4.196</h2.version>
@@ -136,8 +137,22 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire-plugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${failsafe-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

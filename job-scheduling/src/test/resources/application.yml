@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: core-engine
+  scheduler:
+    timezone: Europe/Berlin
+    jobrepository:
+      uri: http://localhost:8081
+  datasource.core.quartz-data-source:
+    name: quartzDataSource
+    driverClassName: org.h2.Driver
+    jdbc-url: jdbc:h2:mem:quartzDB
+    username: sa
+    password:
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: always
+    properties:
+      org.quartz.jobStore:
+        dataSource: quartzDataSource
+        class: org.quartz.impl.jdbcjobstore.JobStoreTX
+        driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+        useProperties: true
+        misfireThreshold: 60000
+        tablePrefix: QRTZ_
+        isClustered: true
