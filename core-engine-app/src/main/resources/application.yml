@@ -7,7 +7,7 @@ spring:
     config:
       url: http://localhost:8888
     stream:
-    #InputChannel
+      #InputChannel
       bindings:
         input-data-envelope:
           destination: wacodis.test.data.available
@@ -43,32 +43,32 @@ spring:
     username: rabbitmq
     password: rabbitmq
   scheduler:
-     timezone: Europe/Berlin
-     jobrepository:
-        uri: http://localhost:8081
+    timezone: Europe/Berlin
+    jobrepository:
+      uri: http://localhost:8081
   evaluator:
     matching:
-        minimumOverlapPercentage: 50.0
+      minimumOverlapPercentage: 50.0
     dataaccess:
-        uri: http://localhost:8082
+      uri: http://localhost:8082
   executor:
     wps:
-        uri: http://localhost:8083/wps
-        version: 2.0.0
+      uri: http://localhost:8083/wps
+      version: 2.0.0
         #define expected process outputs, otherwise defaults (PRODUCT, METADATA) are used
         #expectedProcessOutputs:
-         #   - identifier: PRODUCT
-         #     mimeType: image/geotiff
-         #     publishedOutput: TRUE
-         #   - identifier: METADATA
-         #     mimeType: text/json        
-         #     publishedOutput: FALSE
-         #define mime type for every input resource, otherwise defaults to text/xml
-         #defaultResourceMimeType: text/xml
-         #define schema for every input resource, otherwise defaults to GML3
-         #defaultResourceSchema:
-         #   name: GML3
-         #   schemaLocation: http://schemas.opengis.net/gml/3.1.1/base/feature.xsd
+        #   - identifier: PRODUCT
+        #     mimeType: image/geotiff
+        #     publishedOutput: TRUE
+        #   - identifier: METADATA
+        #     mimeType: text/json
+        #     publishedOutput: FALSE
+        #define mime type for every input resource, otherwise defaults to text/xml
+        #defaultResourceMimeType: text/xml
+        #define schema for every input resource, otherwise defaults to GML3
+        #defaultResourceSchema:
+      #   name: GML3
+      #   schemaLocation: http://schemas.opengis.net/gml/3.1.1/base/feature.xsd
   datasource.core.quartz-data-source:
     name: quartzDataSource
     driverClassName: org.h2.Driver
