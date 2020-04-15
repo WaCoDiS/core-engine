@@ -46,8 +46,16 @@ public interface SchedulingManager {
     /**
      * Deletes an existing job
      *
+     * @param identifier job identifier to be deleted
+     * @return true if deletion was successful
+     */
+    public boolean deleteJob(String identifier);
+
+    /**
+     * Deletes an existing job
+     *
      * @param jobDefinition definition of the job to be deleted
-     * @return true if deletion was succesful
+     * @return true if deletion was successful
      */
     public boolean deleteJob(WacodisJobDefinition jobDefinition);
 
@@ -63,6 +71,14 @@ public interface SchedulingManager {
      * @param jobDefinition job definition of the job to be scheduled
      */
     public void rescheduleJob(WacodisJobDefinition jobDefinition);
+
+    /**
+     * Checks if a job that corresponds to the identifiers exists
+     *
+     * @param identifier identifier of the job to be checked
+     * @return true if a job that corresponds to the job identifier exists
+     */
+    public boolean existsJob(String identifier);
 
     /**
      * Checks if a job that corresponds to the identifiers from the job

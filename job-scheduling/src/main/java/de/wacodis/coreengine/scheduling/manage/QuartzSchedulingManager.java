@@ -5,22 +5,18 @@
  */
 package de.wacodis.coreengine.scheduling.manage;
 
+import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.coreengine.scheduling.job.JobContext;
 import de.wacodis.coreengine.scheduling.job.JobContextFactory;
-import de.wacodis.core.models.WacodisJobDefinition;
-import java.text.ParseException;
-import java.util.Date;
-import java.util.logging.Level;
-import org.quartz.JobDetail;
-import org.quartz.JobKey;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
-import org.quartz.TriggerKey;
+import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Component;
+
+import java.text.ParseException;
+import java.util.Date;
 
 /**
  * Manages the scheduling of jobs
@@ -67,7 +63,7 @@ public class QuartzSchedulingManager implements SchedulingManager {
     private Date scheduleNewJob(JobDetail jobDetail, Trigger trigger) {
         Date firstFiringTime = null;
         try {
-            firstFiringTime = schedulerFactoryBean.getScheduler().scheduleJob(jobDetail, trigger);	//runs QuartzJob's execute()
+            firstFiringTime = schedulerFactoryBean.getScheduler().scheduleJob(jobDetail, trigger);    //runs QuartzJob's execute()
             LOGGER.info("Scheduling for job {} was successful. First fire time: {}", jobDetail.getKey(), firstFiringTime);
         } catch (SchedulerException ex) {
             LOGGER.error(ex.getMessage());
@@ -98,9 +94,9 @@ public class QuartzSchedulingManager implements SchedulingManager {
     }
 
     @Override
-    public boolean deleteJob(WacodisJobDefinition jobDefinition) {
+    public boolean deleteJob(String identifier) {
         boolean deleted = false;
-        JobKey key = jCFactory.createJobKey(jobDefinition);
+        JobKey key = jCFactory.createJobKey(identifier);
         try {
             deleted = schedulerFactoryBean.getScheduler().deleteJob(key);
         } catch (SchedulerException ex) {
@@ -108,6 +104,11 @@ public class QuartzSchedulingManager implements SchedulingManager {
             LOGGER.debug(String.format("Error while trying to delete job with key %s.%s", key.getGroup(), key.getName()), ex);
         }
         return deleted;
+    }
+
+    @Override
+    public boolean deleteJob(WacodisJobDefinition jobDefinition) {
+        return deleteJob(jobDefinition.getId().toString());
     }
 
     @Override
@@ -124,7 +125,7 @@ public class QuartzSchedulingManager implements SchedulingManager {
     public void rescheduleJob(WacodisJobDefinition jobDefinition) {
         JobKey jobKey = jCFactory.createJobKey(jobDefinition);
         TriggerKey triggerKey = jCFactory.createTriggerKey(jobDefinition);
-        Trigger trigger = null;
+        Trigger trigger;
         try {
             trigger = jCFactory.createTrigger(jobDefinition);
             schedulerFactoryBean.getScheduler().rescheduleJob(triggerKey, trigger);
@@ -138,9 +139,9 @@ public class QuartzSchedulingManager implements SchedulingManager {
     }
 
     @Override
-    public boolean existsJob(WacodisJobDefinition jobDefinition) {
+    public boolean existsJob(String identifier) {
         boolean exists = false;
-        JobKey key = jCFactory.createJobKey(jobDefinition);
+        JobKey key = jCFactory.createJobKey(identifier);
         try {
             exists = schedulerFactoryBean.getScheduler().checkExists(key);
         } catch (SchedulerException ex) {
@@ -151,19 +152,26 @@ public class QuartzSchedulingManager implements SchedulingManager {
     }
 
     @Override
+    public boolean existsJob(WacodisJobDefinition jobDefinition) {
+        return existsJob(jobDefinition.getId().toString());
+    }
+
+    @Override
     public JobContext getJob(WacodisJobDefinition jobDefinition) {
         JobContext context = null;
-        JobKey jobKey = jCFactory.createJobKey(jobDefinition);
-        TriggerKey triggerKey = jCFactory.createTriggerKey(jobDefinition);
-        try {
-            JobDetail detail = schedulerFactoryBean.getScheduler().getJobDetail(jobKey);
-            Trigger trigger = schedulerFactoryBean.getScheduler().getTrigger(triggerKey);
-            context = new JobContext();
-            context.setJobDetails(detail);
-            context.setTrigger(trigger);
-        } catch (SchedulerException ex) {
-            LOGGER.error(ex.getMessage());
-            LOGGER.debug(String.format("Error while retrieving job with key %s.%s", jobKey.getGroup(), jobKey.getName()), ex);
+        if (existsJob(jobDefinition)) {
+            JobKey jobKey = jCFactory.createJobKey(jobDefinition);
+            TriggerKey triggerKey = jCFactory.createTriggerKey(jobDefinition);
+            try {
+                JobDetail detail = schedulerFactoryBean.getScheduler().getJobDetail(jobKey);
+                Trigger trigger = schedulerFactoryBean.getScheduler().getTrigger(triggerKey);
+                context = new JobContext();
+                context.setJobDetails(detail);
+                context.setTrigger(trigger);
+            } catch (SchedulerException ex) {
+                LOGGER.error(ex.getMessage());
+                LOGGER.debug(String.format("Error while retrieving job with key %s.%s", jobKey.getGroup(), jobKey.getName()), ex);
+            }
         }
         return context;
     }
