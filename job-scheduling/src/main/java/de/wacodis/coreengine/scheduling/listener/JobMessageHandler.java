@@ -6,6 +6,7 @@
 package de.wacodis.coreengine.scheduling.listener;
 
 import de.wacodis.core.models.WacodisJobDefinition;
+import de.wacodis.core.models.WacodisJobStatusUpdate;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,5 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 public interface JobMessageHandler {
 
-    public abstract void handleNewJob(WacodisJobDefinition jobDefinition);
+    void handleNewJob(WacodisJobDefinition jobDefinition);
+
+    void handleJobDeletion(WacodisJobStatusUpdate jobStatusUpdate);
 }
