@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * helper class to provide execution information for a process (inputs, expected
@@ -22,12 +21,10 @@ public class ProcessContext {
     private Map<String, List<ResourceDescription>> inputResources;
     private List<ExpectedProcessOutput> expectedOutputs;
     private String wacodisProcessID;
-    private Optional<String> splitInput;
 
     public ProcessContext() {
         this.inputResources = new HashMap<>();
         this.expectedOutputs = new ArrayList<>();
-        this.splitInput = Optional.empty();
     }
 
     public String getWacodisProcessID() {
@@ -79,13 +76,5 @@ public class ProcessContext {
 
     public void removeExpectedOutput(ExpectedProcessOutput expectedOutput) {
         this.expectedOutputs.remove(expectedOutput);
-    }
-
-    public Optional<String> getSplitInput() {
-        return splitInput;
-    }
-
-    public void setSplitInput(String splitInput) {
-        this.splitInput = Optional.of(splitInput);
     }
 }

@@ -71,40 +71,29 @@ public class WacodisJobExecutor {
     public ProcessOutputDescription execute() throws Exception {
         LOGGER.debug("start execution of process " + toolContext.getWacodisProcessID() + ", toolProcess: " + toolProcess);
 
-        List<ProcessContext> processContexts;
-
-        //split context per input if attribute is set in total context
-        if (this.toolContext.getSplitInput().isPresent()) {
-            processContexts = buildContextForEachInput(this.toolContext);
-        } else { //otherwise only choose total context 
-            processContexts = Arrays.asList(new ProcessContext[]{this.toolContext});
-        }
-
         //publish message for execution start
         ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolExecution(), buildToolExecutionStartedMessage(), this.messagePublishingTimeout_Millis);
 
         //execute processing tool
         ProcessOutputDescription processOutput = null;
 
-        for (ProcessContext pc : processContexts) {
-            try {
-                processOutput = this.toolProcess.execute(this.toolContext);
-                LOGGER.debug("Process: " + toolContext.getWacodisProcessID() + ",executed toolProcess " + toolProcess);
-            } catch (ExecutionException e) {
-                LOGGER.error("Process execution failed", e.getMessage());
-                LOGGER.warn(e.getMessage(), e);
+        try {
+            processOutput = this.toolProcess.execute(this.toolContext);
+            LOGGER.debug("Process: " + toolContext.getWacodisProcessID() + ",executed toolProcess " + toolProcess);
+        } catch (ExecutionException e) {
+            LOGGER.error("Process execution failed", e.getMessage());
+            LOGGER.warn(e.getMessage(), e);
 
-                //publish message with the failure
-                ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFailure(), buildToolFailureMessage(e.getMessage()), this.messagePublishingTimeout_Millis);
+            //publish message with the failure
+            ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFailure(), buildToolFailureMessage(e.getMessage()), this.messagePublishingTimeout_Millis);
 
-                throw e;
-            }
-
-            //publish toolFinished message
-            ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFinished(), buildToolFinishedMessage(processOutput), this.messagePublishingTimeout_Millis);
-
-            LOGGER.info("Process: " + toolContext.getWacodisProcessID() + ",finished execution");
+            throw e;
         }
+
+        //publish toolFinished message
+        ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFinished(), buildToolFinishedMessage(processOutput), this.messagePublishingTimeout_Millis);
+
+        LOGGER.info("Process: " + toolContext.getWacodisProcessID() + ",finished execution");
 
         return processOutput;
     }
@@ -164,33 +153,4 @@ public class WacodisJobExecutor {
                     .collect(Collectors.toList());
         }
     }
-
-    private List<ProcessContext> buildContextForEachInput(ProcessContext totalContext) {
-        List<ProcessContext> contexts = new ArrayList<>();
-
-        List<ResourceDescription> rds = totalContext.getInputResource(totalContext.getSplitInput().get());
-
-        if (rds == null) {
-            throw new IllegalArgumentException("cannot split process context, process context does not contain input with identifier " + totalContext.getSplitInput().get());
-        }
-
-        ProcessContext splitContext;
-        for (ResourceDescription rd : rds) {
-            splitContext = new ProcessContext();
-            //copy common attributes
-            splitContext.setExpectedOutputs(totalContext.getExpectedOutputs());
-            splitContext.setWacodisProcessID(totalContext.getWacodisProcessID());
-            //copy input resources excluding split input
-            Map<String, List<ResourceDescription>> commonInputs = totalContext.getInputResources();
-            commonInputs.remove(totalContext.getSplitInput().get());
-            splitContext.setInputResources(commonInputs);
-            //add split input to resources
-            splitContext.addInputResource(totalContext.getSplitInput().get(), rd);
-
-            contexts.add(splitContext);
-        }
-
-        return contexts;
-    }
-
 }

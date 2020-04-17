@@ -28,8 +28,11 @@ import de.wacodis.coreengine.executor.process.wps.WPSProcessContextBuilder;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
 import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ProcessOutputDescription;
+import de.wacodis.coreengine.executor.process.ResourceDescription;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import javax.annotation.PostConstruct;
@@ -56,7 +59,6 @@ public class WacodisJobTaskStarter {
     private final ExecutorService wacodisJobExecutionService;
     private final ProcessContextBuilder contextBuilder;
     private List<ExpectedProcessOutput> expectedProcessOutputs;
-    private boolean splitContextPerInput = true;
 
     @Autowired
     ToolMessagePublisherChannel newProductPublisher;
@@ -92,18 +94,64 @@ public class WacodisJobTaskStarter {
     public void executeWacodisJob(WacodisJobWrapper job) {
         String toolProcessID = job.getJobDefinition().getProcessingTool();
         String wacodisJobID = job.getJobDefinition().getId().toString();
-        ProcessContext toolContext = this.contextBuilder.buildProcessContext(job, this.expectedProcessOutputs.toArray(new ExpectedProcessOutput[this.expectedProcessOutputs.size()]));
+        ProcessContext totalToolContext = this.contextBuilder.buildProcessContext(job, this.expectedProcessOutputs.toArray(new ExpectedProcessOutput[this.expectedProcessOutputs.size()]));
+        
+        
+        LOGGER.info("execute Wacodis Job " + wacodisJobID + " using processing tool " + toolProcessID);
+        
+        List<ProcessContext> wpsCallContexts;
 
-        if(this.wpsConfig.isCallWPSPerInput()){
-            toolContext.setSplitInput(getSplitInputIdentifier(job));
+        if (this.wpsConfig.isCallWPSPerInput()) { //call wps proess for each copernicus input
+            //create seperate input for each copernicus input
+            String splitInputID = getSplitInputIdentifier(job);
+            wpsCallContexts = buildContextForEachInput(totalToolContext, splitInputID);
+            LOGGER.debug("split context of wacodis job {} by input {}, created {} sub contexts", wacodisJobID, splitInputID, wpsCallContexts.size());
+        }else{ //call wps process only once with all inputs
+            wpsCallContexts = new ArrayList<>();
+            wpsCallContexts.add(totalToolContext);
+            LOGGER.debug("retain complete context of wacodis job {}", wacodisJobID);
         }
         
+        int contextCount = wpsCallContexts.size();
+        int executeCounter = 0;
+        while(!wpsCallContexts.isEmpty()){
+            //submit job async
+            ++executeCounter;
+            LOGGER.info("execute part " + executeCounter + " of " + contextCount + " of Wacodis Job " + wacodisJobID + " using processing tool " + toolProcessID);
+            ProcessContext context = wpsCallContexts.remove(0); //pop
+            executeWPSProcess(job, context);
+        }
+
+    }
+
+    @PostConstruct
+    private void initExpectedProcessOutputs() {
+        List<ExpectedProcessOutput> selectedOutputs;
+
+        if (this.expectedProcessOutputs != null) {
+            selectedOutputs = this.expectedProcessOutputs;
+        } else if (this.wpsConfig.getExpectedProcessOutputs() != null) {
+            selectedOutputs = this.wpsConfig.getExpectedProcessOutputs();
+        } else {
+            selectedOutputs = Arrays.asList(new ExpectedProcessOutput[]{PRODUCTOUTPUT, METADATAOUTPUT});
+        }
+
+        this.expectedProcessOutputs = selectedOutputs;
+        LOGGER.debug("set expected process outputs to: " + selectedOutputs.toString());
+    }
+
+    @PreDestroy
+    private void shutdownJobExecutionService() {
+        this.wacodisJobExecutionService.shutdown();
+        LOGGER.info("shutdown wacodis job executor service");
+    }
+
+    private void executeWPSProcess(WacodisJobWrapper job, ProcessContext toolContext) {
+        String toolProcessID = job.getJobDefinition().getProcessingTool();
+        String wacodisJobID = job.getJobDefinition().getId().toString();
+
         Process toolProcess = new WPSProcess(this.wpsClient, this.wpsConfig.getUri(), this.wpsConfig.getVersion(), toolProcessID);
-
-        LOGGER.info("execute Wacodis Job " + wacodisJobID + " using processing tool " + toolProcessID);
-        LOGGER.debug("start thread for process " + wacodisJobID);
-
-        //submit job async
+        
         CompletableFuture<ProcessOutputDescription> processFuture = CompletableFuture.supplyAsync(() -> {
             try {
                 LOGGER.info("start new thread for Wacodis Job " + wacodisJobID + ", toolProcess: " + toolProcess);
@@ -137,56 +185,62 @@ public class WacodisJobTaskStarter {
             return null; //satisfy return type
         });
     }
+    
+    private List<ProcessContext> buildContextForEachInput(ProcessContext totalContext, String splitInputID) {
+        List<ProcessContext> contexts = new ArrayList<>();
 
-    @PostConstruct
-    private void initExpectedProcessOutputs() {
-        List<ExpectedProcessOutput> selectedOutputs;
+        List<ResourceDescription> rds = totalContext.getInputResource(splitInputID);
 
-        if (this.expectedProcessOutputs != null) {
-            selectedOutputs = this.expectedProcessOutputs;
-        } else if (this.wpsConfig.getExpectedProcessOutputs() != null) {
-            selectedOutputs = this.wpsConfig.getExpectedProcessOutputs();
-        } else {
-            selectedOutputs = Arrays.asList(new ExpectedProcessOutput[]{PRODUCTOUTPUT, METADATAOUTPUT});
+        if (rds == null) {
+            throw new IllegalArgumentException("cannot split process context, process context does not contain input with identifier " + splitInputID);
         }
 
-        this.expectedProcessOutputs = selectedOutputs;
-        LOGGER.debug("set expected process outputs to: " + selectedOutputs.toString());
+        ProcessContext splitContext;
+        for (ResourceDescription rd : rds) {
+            splitContext = new ProcessContext();
+            //copy common attributes
+            splitContext.setExpectedOutputs(totalContext.getExpectedOutputs());
+            splitContext.setWacodisProcessID(totalContext.getWacodisProcessID());
+            //copy input resources excluding split input
+            Map<String, List<ResourceDescription>> commonInputs = totalContext.getInputResources();
+            commonInputs.remove(splitInputID);
+            splitContext.setInputResources(commonInputs);
+            //add split input to resources
+            splitContext.addInputResource(splitInputID, rd);
+
+            contexts.add(splitContext);
+        }
+
+        return contexts;
     }
 
-    @PreDestroy
-    private void shutdownJobExecutionService() {
-        this.wacodisJobExecutionService.shutdown();
-        LOGGER.info("shutdown wacodis job executor service");
-    }
-
-    private void setDefaultRetrySettingsIfAbsent(WacodisJobDefinition jobDef){
-        if(jobDef.getRetrySettings() == null){
+    private void setDefaultRetrySettingsIfAbsent(WacodisJobDefinition jobDef) {
+        if (jobDef.getRetrySettings() == null) {
             WacodisJobDefinitionRetrySettings defaultRetrySettings = new WacodisJobDefinitionRetrySettings();
             defaultRetrySettings.setMaxRetries(DEFAULT_MAXRETRIES);
             defaultRetrySettings.setRetryDelayMillies(DEFAULT_RETRIEDELAY_MILLIES);
-            
+
             jobDef.setRetrySettings(defaultRetrySettings);
         }
     }
-    
-    
+
     /**
      * assume first found CopernicusSubsetDefinition as input to split context
+     *
      * @param job
-     * @return 
+     * @return
      */
-    private String getSplitInputIdentifier(WacodisJobWrapper job){
+    private String getSplitInputIdentifier(WacodisJobWrapper job) {
         List<InputHelper> inputs = job.getInputs();
         String splitInputIdentifier = null;
-        
-        for(InputHelper input : inputs){
-            if(input.getSubsetDefinition() instanceof CopernicusSubsetDefinition){
+
+        for (InputHelper input : inputs) {
+            if (input.getSubsetDefinition() instanceof CopernicusSubsetDefinition) {
                 splitInputIdentifier = input.getSubsetDefinitionIdentifier();
                 break;
             }
         }
-        
+
         return splitInputIdentifier;
     }
 }
