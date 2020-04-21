@@ -138,6 +138,11 @@ public class ProcessOutputDescription {
         this.originDataEnvelopes = originDataEnvelopes;
     }
 
+    public HashMap<String, String> getOutputParmeters() {
+        return outputParmeters;
+    }
+
+
     @Override
     public String toString() {
         return "ProcessOutputDescription{" + "processIdentifier=" + processIdentifier + ", originDataEnvelopes=" + originDataEnvelopes + ", outputParmeters=" + outputParmeters + '}';

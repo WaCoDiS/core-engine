@@ -27,6 +27,8 @@ public class WebProcessingServiceConfiguration {
     private String defaultResourceMimeType;
     private Schema defaultResourceSchema;
     private boolean callWPSPerInput;
+    private boolean processInputsSequentially;
+    private int maxParallelWPSProcessPerJob;
 
 
     public WebProcessingServiceConfiguration() {
@@ -80,4 +82,22 @@ public class WebProcessingServiceConfiguration {
     public void setCallWPSPerInput(boolean callWPSPerInput) {
         this.callWPSPerInput = callWPSPerInput;
     }
+
+    public boolean isProcessInputsSequentially() {
+        return processInputsSequentially;
+    }
+
+    public void setProcessInputsSequentially(boolean processInputsSequentially) {
+        this.processInputsSequentially = processInputsSequentially;
+    }
+
+    public int getMaxParallelWPSProcessPerJob() {
+        return maxParallelWPSProcessPerJob;
+    }
+
+    public void setMaxParallelWPSProcessPerJob(int maxParallelWPSProcessPerJob) {
+        this.maxParallelWPSProcessPerJob = maxParallelWPSProcessPerJob;
+    }
+    
+    
 }

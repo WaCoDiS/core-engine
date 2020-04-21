@@ -12,8 +12,9 @@ import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
 import de.wacodis.coreengine.executor.events.WacodisJobExecutionFailedEvent;
+import de.wacodis.coreengine.executor.exception.ExecutionException;
 import de.wacodis.coreengine.executor.process.wps.WPSProcess;
-import de.wacodis.coreengine.executor.process.WacodisJobExecutor;
+import de.wacodis.coreengine.executor.process.JobProcessExecutor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.annotation.PreDestroy;
@@ -26,9 +27,14 @@ import de.wacodis.coreengine.executor.process.ProcessContext;
 import de.wacodis.coreengine.executor.process.ProcessContextBuilder;
 import de.wacodis.coreengine.executor.process.wps.WPSProcessContextBuilder;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
+import de.wacodis.coreengine.executor.process.AsynchronousWacodisJobExecutor;
 import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
+import de.wacodis.coreengine.executor.process.ProcessExecutionEvent;
+import de.wacodis.coreengine.executor.process.ProcessExecutionHandler;
 import de.wacodis.coreengine.executor.process.ProcessOutputDescription;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
+import de.wacodis.coreengine.executor.process.SynchronousProcessExecutor;
+import de.wacodis.coreengine.executor.process.WacodisJobExecutor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,7 +62,6 @@ public class WacodisJobTaskStarter {
     private static final long DEFAULT_RETRIEDELAY_MILLIES = 0l;
 
     private final WPSClientSession wpsClient;
-    private final ExecutorService wacodisJobExecutionService;
     private final ProcessContextBuilder contextBuilder;
     private List<ExpectedProcessOutput> expectedProcessOutputs;
 
@@ -71,7 +76,6 @@ public class WacodisJobTaskStarter {
 
     public WacodisJobTaskStarter() {
         this.wpsClient = WPSClientSession.getInstance();
-        this.wacodisJobExecutionService = Executors.newCachedThreadPool();
         this.contextBuilder = new WPSProcessContextBuilder(wpsConfig);
     }
 
@@ -95,10 +99,9 @@ public class WacodisJobTaskStarter {
         String toolProcessID = job.getJobDefinition().getProcessingTool();
         String wacodisJobID = job.getJobDefinition().getId().toString();
         ProcessContext totalToolContext = this.contextBuilder.buildProcessContext(job, this.expectedProcessOutputs.toArray(new ExpectedProcessOutput[this.expectedProcessOutputs.size()]));
-        
-        
+
         LOGGER.info("execute Wacodis Job " + wacodisJobID + " using processing tool " + toolProcessID);
-        
+
         List<ProcessContext> wpsCallContexts;
 
         if (this.wpsConfig.isCallWPSPerInput()) { //call wps proess for each copernicus input
@@ -106,22 +109,13 @@ public class WacodisJobTaskStarter {
             String splitInputID = getSplitInputIdentifier(job);
             wpsCallContexts = buildContextForEachInput(totalToolContext, splitInputID);
             LOGGER.debug("split context of wacodis job {} by input {}, created {} sub contexts", wacodisJobID, splitInputID, wpsCallContexts.size());
-        }else{ //call wps process only once with all inputs
+        } else { //call wps process only once with all inputs
             wpsCallContexts = new ArrayList<>();
             wpsCallContexts.add(totalToolContext);
             LOGGER.debug("retain complete context of wacodis job {}", wacodisJobID);
         }
-        
-        int contextCount = wpsCallContexts.size();
-        int executeCounter = 0;
-        while(!wpsCallContexts.isEmpty()){
-            //submit job async
-            ++executeCounter;
-            LOGGER.info("execute part " + executeCounter + " of " + contextCount + " of Wacodis Job " + wacodisJobID + " using processing tool " + toolProcessID);
-            ProcessContext context = wpsCallContexts.remove(0); //pop
-            executeWPSProcess(job, context);
-        }
 
+        executeWPSProcess(job, wpsCallContexts);
     }
 
     @PostConstruct
@@ -140,52 +134,53 @@ public class WacodisJobTaskStarter {
         LOGGER.debug("set expected process outputs to: " + selectedOutputs.toString());
     }
 
-    @PreDestroy
-    private void shutdownJobExecutionService() {
-        this.wacodisJobExecutionService.shutdown();
-        LOGGER.info("shutdown wacodis job executor service");
-    }
-
-    private void executeWPSProcess(WacodisJobWrapper job, ProcessContext toolContext) {
+    private void executeWPSProcess(WacodisJobWrapper job, List<ProcessContext> subProcesses) {
         String toolProcessID = job.getJobDefinition().getProcessingTool();
         String wacodisJobID = job.getJobDefinition().getId().toString();
 
         Process toolProcess = new WPSProcess(this.wpsClient, this.wpsConfig.getUri(), this.wpsConfig.getVersion(), toolProcessID);
-        
-        CompletableFuture<ProcessOutputDescription> processFuture = CompletableFuture.supplyAsync(() -> {
-            try {
-                LOGGER.info("start new thread for Wacodis Job " + wacodisJobID + ", toolProcess: " + toolProcess);
+        WacodisJobExecutor jobExecutor = createWacodisJobExecutor(toolProcess, newProductPublisher, subProcesses, job.getJobDefinition());
 
-                ProcessOutputDescription processOutput = new WacodisJobExecutor(toolProcess, toolContext, job.getJobDefinition(), this.newProductPublisher).execute();
-                return processOutput;
-            } catch (Exception e) { //catch all exception from async job, rethrow as CompetionException and handle in exceptionally()
-                throw new CompletionException(e);
+        ProcessExecutionHandler execHandler = new ProcessExecutionHandler() {
+            @Override
+            public void handle(ProcessExecutionEvent e) {
+                switch (e.getEventType()) {
+
+                    case PROCESSEXECUTED:
+                        //toDO
+                        break;
+                    case PROCESSFAILED:
+                        setDefaultRetrySettingsIfAbsent(job.getJobDefinition()); //use defaults if retry settings are not set in job definition
+                        LOGGER.error("execution of wacodis job failed, WacodisJobID: " + wacodisJobID + ",toolID: " + toolProcessID + ", retry attempt: " + job.getExecutionContext().getRetryCount() + " of " + job.getJobDefinition().getRetrySettings().getMaxRetries(), e.getMessage());
+                        //trigger job execution failed event
+                        if (job.getExecutionContext().getRetryCount() < job.getJobDefinition().getRetrySettings().getMaxRetries()) { //check if retry
+                            //fire event to schedule retry attempt
+                            int retries = job.incrementRetryCount();
+                            LOGGER.info("publish jobExecutionFailedEvent to schedule retry attempt {} of {}, WacodisJobID {}, toolID: {}", retries, job.getJobDefinition().getRetrySettings().getMaxRetries(), wacodisJobID, toolProcessID);
+                            WacodisJobExecutionFailedEvent failEvent = new WacodisJobExecutionFailedEvent(this, job, new ExecutionException(e.getMessage()));
+                            jobExecutionFailedPublisher.publishEvent(failEvent);
+                        } else {
+                            //retries exceeded, job failed ultimately
+                            LOGGER.error("execution of wacodis job failed ultimately after " + job.getExecutionContext().getRetryCount() + " of " + job.getJobDefinition().getRetrySettings().getMaxRetries() + " retries, WacodisJobID: " + wacodisJobID + ",toolID: " + toolProcessID);
+                        }
+                        break;
+                    case FINALPROCESSFINISHED:
+                        if (!jobExecutor.getExecutorService().isShutdown()) {
+                            jobExecutor.getExecutorService().shutdown();
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
-        }, wacodisJobExecutionService);
+        };
 
-        //handle process output if async job was successfully executed        
-        processFuture.thenAccept((ProcessOutputDescription processOutput)
-                -> {
-            LOGGER.info("execution of wacodis job returned successfully, WacodisJobID: {}, toolID: {}, processOutput: ", wacodisJobID, toolProcessID, processOutput.toString());
-        }).exceptionally((Throwable t) -> { //handle exceptions that were raised by async job
-            setDefaultRetrySettingsIfAbsent(job.getJobDefinition()); //use defaults if retry settings are not set in job definition
-            LOGGER.error("execution of wacodis job failed, WacodisJobID: " + wacodisJobID + ",toolID: " + toolProcessID + ", retry attempt: " + job.getExecutionContext().getRetryCount() + " of " + job.getJobDefinition().getRetrySettings().getMaxRetries(), t.getCause());
-            //trigger job execution failed event
+        jobExecutor.setProcessExecutedHandler(execHandler);
+        jobExecutor.setProcessFailedHandler(execHandler);
 
-            if (job.getExecutionContext().getRetryCount() < job.getJobDefinition().getRetrySettings().getMaxRetries()) { //check if retry
-                //fire event to schedule retry attempt
-                int retries = job.incrementRetryCount();
-                LOGGER.info("publish jobExecutionFailedEvent to schedule retry attempt {} of {}, WacodisJobID {}, toolID: {}", retries, job.getJobDefinition().getRetrySettings().getMaxRetries(), wacodisJobID, toolProcessID);
-                WacodisJobExecutionFailedEvent failEvent = new WacodisJobExecutionFailedEvent(this, job, t);
-                this.jobExecutionFailedPublisher.publishEvent(failEvent);
-            } else {
-                //retries exceeded, job failed ultimately
-                LOGGER.error("execution of wacodis job failed ultimately after " + job.getExecutionContext().getRetryCount() + " of " + job.getJobDefinition().getRetrySettings().getMaxRetries() + " retries, WacodisJobID: " + wacodisJobID + ",toolID: " + toolProcessID);
-            }
-            return null; //satisfy return type
-        });
+        jobExecutor.executeAllSubProcesses();
     }
-    
+
     private List<ProcessContext> buildContextForEachInput(ProcessContext totalContext, String splitInputID) {
         List<ProcessContext> contexts = new ArrayList<>();
 
@@ -243,4 +238,26 @@ public class WacodisJobTaskStarter {
 
         return splitInputIdentifier;
     }
+
+    private WacodisJobExecutor createWacodisJobExecutor(Process toolProcess, ToolMessagePublisherChannel toolMessagePublisher, List<ProcessContext> subProcesses, WacodisJobDefinition jobDefinition) {
+        WacodisJobExecutor executor;
+
+        if (this.wpsConfig.isProcessInputsSequentially()) {
+            //Process toolProcess, ToolMessagePublisherChannel toolMessagePublisher, List<ProcessContext> subProcesses, WacodisJobDefinition jobDefinition, long messagePublishingTimeout_Millis
+            executor = new SynchronousProcessExecutor(toolProcess, toolMessagePublisher, subProcesses, jobDefinition);
+        } else {
+            ExecutorService execService;
+
+            if (this.wpsConfig.getMaxParallelWPSProcessPerJob() > 0) {
+                execService = Executors.newCachedThreadPool();
+            } else {
+                execService = Executors.newFixedThreadPool(this.wpsConfig.getMaxParallelWPSProcessPerJob());
+            }
+
+            executor = new AsynchronousWacodisJobExecutor(toolProcess, toolMessagePublisher, subProcesses, jobDefinition, execService);
+        }
+
+        return executor;
+    }
+
 }
