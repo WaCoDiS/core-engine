@@ -51,7 +51,7 @@ import org.springframework.context.ApplicationEventPublisher;
  */
 @Component
 public class WacodisJobTaskStarter {
-
+    
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WacodisJobTaskStarter.class);
 
     //default expected outputs
@@ -60,68 +60,68 @@ public class WacodisJobTaskStarter {
     //default retry settings
     private static final int DEFAULT_MAXRETRIES = 0;
     private static final long DEFAULT_RETRIEDELAY_MILLIES = 0l;
-
+    
     private final WPSClientSession wpsClient;
     private final ProcessContextBuilder contextBuilder;
     private List<ExpectedProcessOutput> expectedProcessOutputs;
-
+    
     @Autowired
     ToolMessagePublisherChannel newProductPublisher;
-
+    
     @Autowired
     private ApplicationEventPublisher jobExecutionFailedPublisher;
-
+    
     @Autowired
     private WebProcessingServiceConfiguration wpsConfig;
-
+    
     public WacodisJobTaskStarter() {
         this.wpsClient = WPSClientSession.getInstance();
         this.contextBuilder = new WPSProcessContextBuilder(wpsConfig);
     }
-
+    
     public void setWpsConfig(WebProcessingServiceConfiguration wpsConfig) {
         this.wpsConfig = wpsConfig;
     }
-
+    
     public WebProcessingServiceConfiguration getWpsConfig() {
         return wpsConfig;
     }
-
+    
     public List<ExpectedProcessOutput> getExpectedProcessOutputs() {
         return expectedProcessOutputs;
     }
-
+    
     public void setExpectedProcessOutputs(List<ExpectedProcessOutput> expectedProcessOutputs) {
         this.expectedProcessOutputs = expectedProcessOutputs;
     }
-
+    
     public void executeWacodisJob(WacodisJobWrapper job) {
         String toolProcessID = job.getJobDefinition().getProcessingTool();
         String wacodisJobID = job.getJobDefinition().getId().toString();
         ProcessContext totalToolContext = this.contextBuilder.buildProcessContext(job, this.expectedProcessOutputs.toArray(new ExpectedProcessOutput[this.expectedProcessOutputs.size()]));
-
+        
         LOGGER.info("execute Wacodis Job " + wacodisJobID + " using processing tool " + toolProcessID);
-
+        
         List<ProcessContext> wpsCallContexts;
-
+        
         if (this.wpsConfig.isCallWPSPerInput()) { //call wps proess for each copernicus input
             //create seperate input for each copernicus input
             String splitInputID = getSplitInputIdentifier(job);
             wpsCallContexts = buildContextForEachInput(totalToolContext, splitInputID);
-            LOGGER.debug("split context of wacodis job {} by input {}, created {} sub contexts", wacodisJobID, splitInputID, wpsCallContexts.size());
+            LOGGER.debug("split context of wacodis job {} by input {}, created {} sub processes", wacodisJobID, splitInputID, wpsCallContexts.size());
         } else { //call wps process only once with all inputs
             wpsCallContexts = new ArrayList<>();
             wpsCallContexts.add(totalToolContext);
-            LOGGER.debug("retain complete context of wacodis job {}", wacodisJobID);
+            LOGGER.debug("retain complete context of wacodis job {}, execute job as single process", wacodisJobID);
         }
-
-        executeWPSProcess(job, wpsCallContexts);
+        
+        executeWPSProcesses(job, wpsCallContexts);
     }
-
+    
     @PostConstruct
     private void initExpectedProcessOutputs() {
         List<ExpectedProcessOutput> selectedOutputs;
-
+        
         if (this.expectedProcessOutputs != null) {
             selectedOutputs = this.expectedProcessOutputs;
         } else if (this.wpsConfig.getExpectedProcessOutputs() != null) {
@@ -129,29 +129,35 @@ public class WacodisJobTaskStarter {
         } else {
             selectedOutputs = Arrays.asList(new ExpectedProcessOutput[]{PRODUCTOUTPUT, METADATAOUTPUT});
         }
-
+        
         this.expectedProcessOutputs = selectedOutputs;
         LOGGER.debug("set expected process outputs to: " + selectedOutputs.toString());
     }
-
-    private void executeWPSProcess(WacodisJobWrapper job, List<ProcessContext> subProcesses) {
+    
+    private void executeWPSProcesses(WacodisJobWrapper job, List<ProcessContext> subProcesses) {
         String toolProcessID = job.getJobDefinition().getProcessingTool();
         String wacodisJobID = job.getJobDefinition().getId().toString();
-
+        
         Process toolProcess = new WPSProcess(this.wpsClient, this.wpsConfig.getUri(), this.wpsConfig.getVersion(), toolProcessID);
         WacodisJobExecutor jobExecutor = createWacodisJobExecutor(toolProcess, newProductPublisher, subProcesses, job.getJobDefinition());
 
+        //declare handler for execution events
         ProcessExecutionHandler execHandler = new ProcessExecutionHandler() {
             @Override
             public void handle(ProcessExecutionEvent e) {
                 switch (e.getEventType()) {
-
+                    
+                    case FIRSTPROCESSSTARTED:
+                        LOGGER.info("execution of wacodis job {} started, firs sub process: {}" , e.getSubProcessId());
+                        break;
+                    case PROCESSSTARTED:
+                        LOGGER.info("execution of sub process {} of wacodis job {} started", e.getSubProcessId(), e.getJobDefintion().getId());
                     case PROCESSEXECUTED:
-                        //toDO
+                        LOGGER.info("sub process {} of wacodis job {} finished sucessfully", e.getSubProcessId(), e.getJobDefintion().getId());
                         break;
                     case PROCESSFAILED:
                         setDefaultRetrySettingsIfAbsent(job.getJobDefinition()); //use defaults if retry settings are not set in job definition
-                        LOGGER.error("execution of wacodis job failed, WacodisJobID: " + wacodisJobID + ",toolID: " + toolProcessID + ", retry attempt: " + job.getExecutionContext().getRetryCount() + " of " + job.getJobDefinition().getRetrySettings().getMaxRetries(), e.getMessage());
+                        LOGGER.error("execution of  sub process " + e.getSubProcessId() + " of wacodis job " + e.getJobDefintion().getId().toString() + " failed", e.getMessage());
                         //trigger job execution failed event
                         if (job.getExecutionContext().getRetryCount() < job.getJobDefinition().getRetrySettings().getMaxRetries()) { //check if retry
                             //fire event to schedule retry attempt
@@ -165,31 +171,36 @@ public class WacodisJobTaskStarter {
                         }
                         break;
                     case FINALPROCESSFINISHED:
+                        LOGGER.debug("final subprocess ({}) of wacodis job {} finished, shutdown threadpool", e.getSubProcessId(), e.getJobDefintion().getId());
                         if (!jobExecutor.getExecutorService().isShutdown()) {
                             jobExecutor.getExecutorService().shutdown();
                         }
                         break;
                     default:
+                        LOGGER.debug("cannot handle event {} for sub process {} of wacodis job {}, no handling for this event type declared", e.getEventType().name(), e.getSubProcessId(), e.getJobDefintion().getId());
                         break;
                 }
             }
         };
 
+        //register handler for execution events
         jobExecutor.setProcessExecutedHandler(execHandler);
         jobExecutor.setProcessFailedHandler(execHandler);
-
+        
+        //execute  all sub process of wacodis job
+        LOGGER.info("initiate execution of all sub processes of wacodis job {}", job.getJobDefinition().getId());
         jobExecutor.executeAllSubProcesses();
     }
-
+    
     private List<ProcessContext> buildContextForEachInput(ProcessContext totalContext, String splitInputID) {
         List<ProcessContext> contexts = new ArrayList<>();
-
+        
         List<ResourceDescription> rds = totalContext.getInputResource(splitInputID);
-
+        
         if (rds == null) {
             throw new IllegalArgumentException("cannot split process context, process context does not contain input with identifier " + splitInputID);
         }
-
+        
         ProcessContext splitContext;
         for (ResourceDescription rd : rds) {
             splitContext = new ProcessContext();
@@ -202,19 +213,19 @@ public class WacodisJobTaskStarter {
             splitContext.setInputResources(commonInputs);
             //add split input to resources
             splitContext.addInputResource(splitInputID, rd);
-
+            
             contexts.add(splitContext);
         }
-
+        
         return contexts;
     }
-
+    
     private void setDefaultRetrySettingsIfAbsent(WacodisJobDefinition jobDef) {
         if (jobDef.getRetrySettings() == null) {
             WacodisJobDefinitionRetrySettings defaultRetrySettings = new WacodisJobDefinitionRetrySettings();
             defaultRetrySettings.setMaxRetries(DEFAULT_MAXRETRIES);
             defaultRetrySettings.setRetryDelayMillies(DEFAULT_RETRIEDELAY_MILLIES);
-
+            
             jobDef.setRetrySettings(defaultRetrySettings);
         }
     }
@@ -228,36 +239,40 @@ public class WacodisJobTaskStarter {
     private String getSplitInputIdentifier(WacodisJobWrapper job) {
         List<InputHelper> inputs = job.getInputs();
         String splitInputIdentifier = null;
-
+        
         for (InputHelper input : inputs) {
             if (input.getSubsetDefinition() instanceof CopernicusSubsetDefinition) {
                 splitInputIdentifier = input.getSubsetDefinitionIdentifier();
                 break;
             }
         }
-
+        
+        LOGGER.debug("automatically select input {} of wacodis job {} to split job into multiple sub processes");
+        
         return splitInputIdentifier;
     }
-
+    
     private WacodisJobExecutor createWacodisJobExecutor(Process toolProcess, ToolMessagePublisherChannel toolMessagePublisher, List<ProcessContext> subProcesses, WacodisJobDefinition jobDefinition) {
         WacodisJobExecutor executor;
-
+        
         if (this.wpsConfig.isProcessInputsSequentially()) {
             //Process toolProcess, ToolMessagePublisherChannel toolMessagePublisher, List<ProcessContext> subProcesses, WacodisJobDefinition jobDefinition, long messagePublishingTimeout_Millis
             executor = new SynchronousProcessExecutor(toolProcess, toolMessagePublisher, subProcesses, jobDefinition);
         } else {
             ExecutorService execService;
-
+            
             if (this.wpsConfig.getMaxParallelWPSProcessPerJob() > 0) {
                 execService = Executors.newCachedThreadPool();
             } else {
                 execService = Executors.newFixedThreadPool(this.wpsConfig.getMaxParallelWPSProcessPerJob());
             }
-
+            
             executor = new AsynchronousWacodisJobExecutor(toolProcess, toolMessagePublisher, subProcesses, jobDefinition, execService);
         }
-
+        
+        LOGGER.debug("created executor of type {} for wacodis job {}", executor.getClass().getSimpleName(), jobDefinition.getId());
+        
         return executor;
     }
-
+    
 }
