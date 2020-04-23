@@ -18,11 +18,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -35,21 +32,17 @@ public class JobProcessExecutor {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(JobProcessExecutor.class);
 
-    private final de.wacodis.coreengine.executor.process.Process toolProcess;
-    private final ProcessContext toolContext;
-    private final WacodisJobDefinition jobDefinition;
+    private final JobProcess jobProcess;
     private ToolMessagePublisherChannel toolMessagePublisher;
     private long messagePublishingTimeout_Millis = 10000; //default of ten seconds
 
-    public JobProcessExecutor(Process toolProcess, ProcessContext toolContext, WacodisJobDefinition jobDefinition, ToolMessagePublisherChannel toolMessagePublisher) {
-        this.toolProcess = toolProcess;
-        this.toolContext = toolContext;
-        this.jobDefinition = jobDefinition;
+    public JobProcessExecutor(JobProcess jobProcess, ToolMessagePublisherChannel toolMessagePublisher) {
+        this.jobProcess = jobProcess;
         this.toolMessagePublisher = toolMessagePublisher;
     }
 
-    public JobProcessExecutor(Process toolProcess, ProcessContext toolContext, WacodisJobDefinition jobDefinition, ToolMessagePublisherChannel toolMessagePublisher, long messagePublishingTimeout_Millis) {
-        this(toolProcess, toolContext, jobDefinition, toolMessagePublisher);
+    public JobProcessExecutor(JobProcess jobProcess, ToolMessagePublisherChannel toolMessagePublisher, long messagePublishingTimeout_Millis) {
+        this(jobProcess, toolMessagePublisher);
         this.messagePublishingTimeout_Millis = messagePublishingTimeout_Millis;
     }
 
@@ -70,11 +63,13 @@ public class JobProcessExecutor {
     }
 
     public WacodisJobDefinition getJobDefinition() {
-        return jobDefinition;
+        return this.jobProcess.getJobDefinition();
     }
 
-    public JobProcessOutputDescription execute(String jobProcessIdentifer) throws JobProcessException {
-        LOGGER.debug("start execution of process " + toolContext.getWacodisProcessID() + ", toolProcess: " + toolProcess);
+    public JobProcessOutputDescription execute() throws JobProcessException {
+        Process process = this.jobProcess.getProcess();
+        ProcessContext executionContext = this.jobProcess.getExecutionContext();
+        LOGGER.debug("start execution of process " + executionContext.getWacodisProcessID() + ", toolProcess: " + process);
 
         //publish message for execution start
         ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolExecution(), buildToolExecutionStartedMessage(), this.messagePublishingTimeout_Millis);
@@ -83,9 +78,9 @@ public class JobProcessExecutor {
         JobProcessOutputDescription jobProcessOutput = null;
 
         try {
-            ProcessOutputDescription wpsProcessOutput = this.toolProcess.execute(this.toolContext);
-            jobProcessOutput = new JobProcessOutputDescription(wpsProcessOutput, jobProcessIdentifer, this.jobDefinition.getId().toString());
-            LOGGER.debug("Process: " + toolContext.getWacodisProcessID() + ",executed toolProcess " + toolProcess);
+            ProcessOutputDescription wpsProcessOutput = process.execute(executionContext);
+            jobProcessOutput = new JobProcessOutputDescription(wpsProcessOutput, this.jobProcess);
+            LOGGER.debug("Process: " + executionContext.getWacodisProcessID() + ",executed toolProcess " + process);
         } catch (ExecutionException e) {
             LOGGER.error("Process execution failed", e.getMessage());
             LOGGER.warn(e.getMessage(), e);
@@ -93,42 +88,45 @@ public class JobProcessExecutor {
             //publish message with the failure
             ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFailure(), buildToolFailureMessage(e.getMessage()), this.messagePublishingTimeout_Millis);
 
-            throw new JobProcessException(jobProcessIdentifer, this.getJobDefinition().getId().toString(), e);
+            throw new JobProcessException(this.jobProcess, e);
         }
 
         //publish toolFinished message
         ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFinished(), buildToolFinishedMessage(jobProcessOutput), this.messagePublishingTimeout_Millis);
 
-        LOGGER.info("Process: " + toolContext.getWacodisProcessID() + ",finished execution");
+        LOGGER.info("Process: " + executionContext.getWacodisProcessID() + ",finished execution");
 
         return jobProcessOutput;
     }
 
     private Message<WacodisJobFinished> buildToolFinishedMessage(ProcessOutputDescription processOuput) {
+        WacodisJobDefinition jobDefinition = this.jobProcess.getJobDefinition();
         WacodisJobFinished msg = new WacodisJobFinished();
         ProductDescription pd = new ProductDescription();
 
         pd.setWpsJobIdentifier(processOuput.getProcessIdentifier());
-        pd.setProductCollection(this.jobDefinition.getProductCollection());
-        pd.setProcessingTool(this.jobDefinition.getProcessingTool());
+        pd.setProductCollection(jobDefinition.getProductCollection());
+        pd.setProcessingTool(jobDefinition.getProcessingTool());
         //get list of all IDs of distinct dataenvelopes that correspond with a input resource
         pd.setDataEnvelopeReferences(processOuput.getOriginDataEnvelopes());
         // do not include outputs which should no be published (e.g. Metadata output)
         pd.setOutputIdentifiers(getPublishableExpectedOutputIdentifiers());
 
         msg.setExecutionFinished(DateTime.now()); //set to time of tool finished message publication
-        msg.setWacodisJobIdentifier(this.jobDefinition.getId());
+        msg.setWacodisJobIdentifier(jobDefinition.getId());
         msg.setProductDescription(pd);
 
         return MessageBuilder.withPayload(msg).build();
     }
 
     private Message<WacodisJobExecution> buildToolExecutionStartedMessage() {
+        WacodisJobDefinition jobDefinition = this.jobProcess.getJobDefinition();
+        
         WacodisJobExecution msg = new WacodisJobExecution();
-        msg.setWacodisJobIdentifier(this.jobDefinition.getId());
+        msg.setWacodisJobIdentifier(jobDefinition.getId());
         msg.setCreated(new DateTime());
-        msg.setProcessingTool(this.jobDefinition.getProcessingTool());
-        msg.setProductCollection(this.jobDefinition.getProductCollection());
+        msg.setProcessingTool(jobDefinition.getProcessingTool());
+        msg.setProductCollection(jobDefinition.getProductCollection());
 
         return MessageBuilder.withPayload(msg).build();
     }
@@ -139,7 +137,7 @@ public class JobProcessExecutor {
         msg.setWpsJobIdentifier(null);
         msg.setCreated(new DateTime());
         msg.setReason(errorText);
-        msg.setWacodisJobIdentifier(jobDefinition.getId());
+        msg.setWacodisJobIdentifier(this.jobProcess.getJobDefinition().getId());
         return MessageBuilder.withPayload(msg).build();
     }
 
@@ -148,7 +146,7 @@ public class JobProcessExecutor {
      * true
      */
     private List<String> getPublishableExpectedOutputIdentifiers() {
-        List<ExpectedProcessOutput> allExpectedOutputs = this.toolContext.getExpectedOutputs();
+        List<ExpectedProcessOutput> allExpectedOutputs = this.jobProcess.getExecutionContext().getExpectedOutputs();
 
         if (allExpectedOutputs == null || allExpectedOutputs.isEmpty()) {
             return Collections.EMPTY_LIST;

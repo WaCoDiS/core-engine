@@ -14,8 +14,7 @@ import java.util.List;
  */
 public class JobProcessOutputDescription extends ProcessOutputDescription {
 
-    private String wacodisJobIdentifier;
-    private String jobProcessIdentifier;
+    private JobProcess jobProcess;
 
     public JobProcessOutputDescription() {
         super();
@@ -23,65 +22,56 @@ public class JobProcessOutputDescription extends ProcessOutputDescription {
 
     /**
      * @param processIdentifier
-     * @param jobProcessIdentifier
-     * @param wacodisJobIdentifier 
+     * @param jobProcess
      */
-    public JobProcessOutputDescription(String processIdentifier, String jobProcessIdentifier, String wacodisJobIdentifier) {
+    public JobProcessOutputDescription(String processIdentifier, JobProcess jobProcess) {
         super(processIdentifier);
-        this.jobProcessIdentifier = jobProcessIdentifier;
-        this.wacodisJobIdentifier = wacodisJobIdentifier;
+        this.jobProcess = jobProcess;
     }
 
     /**
      * @param processIdentifier
-     * @param jobProcessIdentifier
-     * @param wacodisJobIdentifier
-     * @param outputParameters 
+     * @param jobProcess
+     * @param outputParameters
      */
-    public JobProcessOutputDescription(String processIdentifier, String jobProcessIdentifier, String wacodisJobIdentifier, HashMap<String, String> outputParameters) {
+    public JobProcessOutputDescription(String processIdentifier, JobProcess jobProcess, HashMap<String, String> outputParameters) {
         super(processIdentifier, outputParameters);
-        this.jobProcessIdentifier = jobProcessIdentifier;
-        this.wacodisJobIdentifier = wacodisJobIdentifier;
+        this.jobProcess = jobProcess;
     }
+
     /**
      * @param processIdentifier
-     * @param jobProcessIdentifier
-     * @param wacodisJobIdentifier
+     * @param jobProcess
      * @param outputParmeters
-     * @param originDataEnvelopes 
+     * @param originDataEnvelopes
      */
-    public JobProcessOutputDescription(String processIdentifier, String jobProcessIdentifier, String wacodisJobIdentifier, HashMap<String, String> outputParmeters, List<String> originDataEnvelopes) {
+    public JobProcessOutputDescription(String processIdentifier, JobProcess jobProcess, HashMap<String, String> outputParmeters, List<String> originDataEnvelopes) {
         super(processIdentifier, outputParmeters, originDataEnvelopes);
-        this.jobProcessIdentifier = jobProcessIdentifier;
-        this.wacodisJobIdentifier = wacodisJobIdentifier;
+        this.jobProcess = jobProcess;
     }
-    
+
     /**
-     * 
+     *
      * @param processOutputDescription
-     * @param jobProcessIdentifier
-     * @param wacodisJobIdentifier 
+     * @param jobProcess
      */
-    public JobProcessOutputDescription(ProcessOutputDescription processOutputDescription, String jobProcessIdentifier, String wacodisJobIdentifier){
+    public JobProcessOutputDescription(ProcessOutputDescription processOutputDescription, JobProcess jobProcess) {
         super(processOutputDescription.getProcessIdentifier(), processOutputDescription.getOutputParmeters(), processOutputDescription.getOriginDataEnvelopes());
-        this.jobProcessIdentifier = jobProcessIdentifier;
-        this.wacodisJobIdentifier = wacodisJobIdentifier;
+        this.jobProcess = jobProcess;
     }
 
-    public String getWacodisJobIdentifier() {
-        return wacodisJobIdentifier;
+    /**
+     * @return 
+     */
+    public JobProcess getJobProcess() {
+        return jobProcess;
     }
 
-    public void setWacodisJobIdentifier(String wacodisJobIdentifier) {
-        this.wacodisJobIdentifier = wacodisJobIdentifier;
-    }
-
-    public String getJobProcessIdentifier() {
-        return jobProcessIdentifier;
-    }
-
-    public void setJobProcessIdentifier(String jobProcessIdentifier) {
-        this.jobProcessIdentifier = jobProcessIdentifier;
+    /**
+     * @param jobProcess 
+     */
+    public void setJobProcess(JobProcess jobProcess) {
+        this.jobProcess = jobProcess;
     }
 
 }

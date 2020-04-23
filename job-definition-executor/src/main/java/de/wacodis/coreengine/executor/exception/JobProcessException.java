@@ -5,49 +5,41 @@
  */
 package de.wacodis.coreengine.executor.exception;
 
+import de.wacodis.coreengine.executor.process.JobProcess;
+
 /**
  *
  * @author Arne
  */
 public class JobProcessException extends Exception{
     
-    private final String wacodisJobIdentifier;
-    private final String jobProcessIdentifier;
+    private final JobProcess jobProcess;
 
-    public JobProcessException(String wacodisJobIdentifier, String jobProcessIdentifier) {
-        this.wacodisJobIdentifier = wacodisJobIdentifier;
-        this.jobProcessIdentifier = jobProcessIdentifier;
+    public JobProcessException(JobProcess jobProcess) {
+        this.jobProcess = jobProcess;
     }
 
-    public JobProcessException(String wacodisJobIdentifier, String jobProcessIdentifier, String message) {
+    public JobProcessException(JobProcess jobProcess, String message) {
         super(message);
-        this.wacodisJobIdentifier = wacodisJobIdentifier;
-        this.jobProcessIdentifier = jobProcessIdentifier;
+        this.jobProcess = jobProcess;
     }
 
-    public JobProcessException(String wacodisJobIdentifier, String jobProcessIdentifier, String message, Throwable cause) {
+    public JobProcessException(JobProcess jobProcess, String message, Throwable cause) {
         super(message, cause);
-        this.wacodisJobIdentifier = wacodisJobIdentifier;
-        this.jobProcessIdentifier = jobProcessIdentifier;
+        this.jobProcess = jobProcess;
     }
 
-    public JobProcessException(String wacodisJobIdentifier, String jobProcessIdentifier, Throwable cause) {
+    public JobProcessException(JobProcess jobProcess, Throwable cause) {
         super(cause);
-        this.wacodisJobIdentifier = wacodisJobIdentifier;
-        this.jobProcessIdentifier = jobProcessIdentifier;
+        this.jobProcess = jobProcess;
     }
 
-    public JobProcessException(String wacodisJobIdentifier, String jobProcessIdentifier, String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public JobProcessException(JobProcess jobProcess, String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
-        this.wacodisJobIdentifier = wacodisJobIdentifier;
-        this.jobProcessIdentifier = jobProcessIdentifier;
+        this.jobProcess = jobProcess;
     }
 
-    public String getWacodisJobIdentifier() {
-        return wacodisJobIdentifier;
-    }
-
-    public String getJobProcessIdentifier() {
-        return jobProcessIdentifier;
+    public JobProcess getJobProcess() {
+        return jobProcess;
     }
 }

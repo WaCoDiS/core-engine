@@ -5,7 +5,10 @@
  */
 package de.wacodis.coreengine.executor.process;
 
-import java.util.concurrent.ExecutorService;
+import de.wacodis.coreengine.executor.process.events.JobProcessStartedEventHandler;
+import de.wacodis.coreengine.executor.process.events.JobProcessExecutedEventHandler;
+import de.wacodis.coreengine.executor.process.events.JobProcessFailedEventHandler;
+import de.wacodis.coreengine.executor.process.events.WacodisJobExecutionEventHandler;
 
 /**
  *
@@ -15,15 +18,13 @@ public interface WacodisJobExecutor {
 
     void executeAllSubProcesses();
 
-    void setProcessStartedHandler(ProcessExecutionHandler handler);
+    void setProcessStartedHandler(JobProcessStartedEventHandler handler);
 
-    void setProcessExecutedHandler(ProcessExecutionHandler handler);
+    void setProcessExecutedHandler(JobProcessExecutedEventHandler handler);
 
-    public void setProcessFailedHandler(ProcessExecutionHandler handler);
+    public void setProcessFailedHandler(JobProcessFailedEventHandler handler);
 
-    public void setFirstProcessStartedHandler(ProcessExecutionHandler handler);
+    public void setFirstProcessStartedHandler(WacodisJobExecutionEventHandler handler);
 
-    public void setLastProcessExecutionHandler(ProcessExecutionHandler handler);
-    
-    public ExecutorService getExecutorService();
+    public void setFinalProcessFinishedHandler(WacodisJobExecutionEventHandler handler);
 }

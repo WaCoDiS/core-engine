@@ -3,17 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package de.wacodis.coreengine.executor.process;
-
-import de.wacodis.coreengine.executor.process.events.WacodisJobExecutionEvent;
+package de.wacodis.coreengine.executor.process.events;
 
 /**
  *
  * @author Arne
  */
-public  interface ProcessExecutionHandler {
+public interface JobProcessExecutedEventHandler {
     
-
-    void handle(WacodisJobExecutionEvent e);
-    
+    void onJobProcessFinished(JobProcessExecutedEvent e);
 }

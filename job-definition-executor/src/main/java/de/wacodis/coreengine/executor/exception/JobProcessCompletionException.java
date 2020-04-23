@@ -5,6 +5,7 @@
  */
 package de.wacodis.coreengine.executor.exception;
 
+import de.wacodis.coreengine.executor.process.JobProcess;
 import java.util.concurrent.CompletionException;
 
 /**
@@ -13,37 +14,28 @@ import java.util.concurrent.CompletionException;
  */
 public class JobProcessCompletionException extends CompletionException {
 
-    private final String wacodisJobIdentifier;
-    private final String jobProcessIdentifier;
+    private final JobProcess jobProcess;
 
-    public JobProcessCompletionException(String wacodisJobIdentifier, String jobProcessIdentifier) {
-        this.wacodisJobIdentifier = wacodisJobIdentifier;
-        this.jobProcessIdentifier = jobProcessIdentifier;
+    public JobProcessCompletionException(JobProcess jobProcess) {
+        this.jobProcess = jobProcess;
     }
 
-    public JobProcessCompletionException(String wacodisJobIdentifier, String jobProcessIdentifier, String message) {
+    public JobProcessCompletionException(JobProcess jobProcess, String message) {
         super(message);
-        this.wacodisJobIdentifier = wacodisJobIdentifier;
-        this.jobProcessIdentifier = jobProcessIdentifier;
+        this.jobProcess = jobProcess;
     }
 
-    public JobProcessCompletionException(String wacodisJobIdentifier, String jobProcessIdentifier, String message, Throwable cause) {
+    public JobProcessCompletionException(JobProcess jobProcess, String message, Throwable cause) {
         super(message, cause);
-        this.wacodisJobIdentifier = wacodisJobIdentifier;
-        this.jobProcessIdentifier = jobProcessIdentifier;
+        this.jobProcess = jobProcess;
     }
 
-    public JobProcessCompletionException(String wacodisJobIdentifier, String jobProcessIdentifier, Throwable cause) {
+    public JobProcessCompletionException(JobProcess jobProcess, Throwable cause) {
         super(cause);
-        this.wacodisJobIdentifier = wacodisJobIdentifier;
-        this.jobProcessIdentifier = jobProcessIdentifier;
+        this.jobProcess = jobProcess;
     }
 
-    public String getWacodisJobIdentifier() {
-        return wacodisJobIdentifier;
-    }
-
-    public String getJobProcessIdentifier() {
-        return jobProcessIdentifier;
+    public JobProcess getJobProcess() {
+        return jobProcess;
     }
 }
