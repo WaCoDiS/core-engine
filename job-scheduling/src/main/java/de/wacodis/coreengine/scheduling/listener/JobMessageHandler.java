@@ -19,5 +19,5 @@ public interface JobMessageHandler {
 
     void handleNewJob(WacodisJobDefinition jobDefinition);
 
-    void handleJobDeletion(WacodisJobStatusUpdate jobStatusUpdate);
+    void handleJobDeletion(WacodisJobDefinition jobDefinition);
 }

@@ -20,9 +20,9 @@ public interface JobDefinitionListenerChannel {
     @Input(JOB_CREATION_INPUT)
     SubscribableChannel jobCreation();
 
-    String JOB_STATUS_UPDATE_INPUT = "job-status-update";
+    String JOB_DELETION_INPUT = "job-deletion";
 
-    @Input(JOB_STATUS_UPDATE_INPUT)
-    SubscribableChannel jobStatusUpdate();
+    @Input(JOB_DELETION_INPUT)
+    SubscribableChannel jobDeletion();
 
 }
