@@ -2,7 +2,7 @@ spring:
   application:
     name: core-engine
   scheduler:
-    timezone: Europe/Berlin
+    timezone: UTC
     jobrepository:
       uri: http://localhost:8081
   datasource.core.quartz-data-source:
