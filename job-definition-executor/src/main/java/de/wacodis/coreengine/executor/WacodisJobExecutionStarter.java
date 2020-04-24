@@ -117,6 +117,9 @@ public class WacodisJobExecutionStarter {
             LOGGER.debug("retain complete context of wacodis job {}, execute job as single process", wacodisJobID);
         }
 
+        setDefaultRetrySettingsIfAbsent(job.getJobDefinition()); //use defaults if retry settings are not set in job definition
+        
+        //execute all sub processes
         executeWPSProcesses(job, wpsCallContexts);
     }
 
@@ -143,7 +146,8 @@ public class WacodisJobExecutionStarter {
         Process toolProcess = new WPSProcess(this.wpsClient, this.wpsConfig.getUri(), this.wpsConfig.getVersion(), toolProcessID);
         List<JobProcess> subProcesses = createJobProcesses(subProcessContexts, job.getJobDefinition(), toolProcess);
         WacodisJobExecutor jobExecutor = createWacodisJobExecutor(this.newProductPublisher, subProcesses);
-
+        
+        
         //declare handler for execution events
         //ToDo
         /*ProcessExecutionHandler execHandler = new ProcessExecutionHandler() {

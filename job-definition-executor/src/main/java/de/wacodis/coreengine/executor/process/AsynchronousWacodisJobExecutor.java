@@ -19,7 +19,6 @@ import de.wacodis.coreengine.executor.process.events.WacodisJobExecutionEventHan
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import org.joda.time.DateTime;
 import org.slf4j.LoggerFactory;
 
 /**
