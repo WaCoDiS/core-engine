@@ -121,7 +121,7 @@ public class WacodisJobExecutionStarter {
         }
 
         setDefaultRetrySettingsIfAbsent(job.getJobDefinition()); //use defaults if retry settings are not set in job definition
-        
+
         //execute all sub processes
         executeWPSProcesses(job, wpsCallContexts);
     }
@@ -144,67 +144,23 @@ public class WacodisJobExecutionStarter {
 
     private void executeWPSProcesses(WacodisJobWrapper job, List<ProcessContext> subProcessContexts) {
         String toolProcessID = job.getJobDefinition().getProcessingTool();
-        String wacodisJobID = job.getJobDefinition().getId().toString();
 
         Process toolProcess = new WPSProcess(this.wpsClient, this.wpsConfig.getUri(), this.wpsConfig.getVersion(), toolProcessID);
         List<JobProcess> subProcesses = createJobProcesses(subProcessContexts, job.getJobDefinition(), toolProcess);
         WacodisJobExecutor jobExecutor = createWacodisJobExecutor(this.newProductPublisher, subProcesses);
-        
-        
+
         //declare handler for execution events
         WacodisJobExecutionEventHandler jobExecutionHandler = new JobExecutionEventHandler();
         JobProcessEventHandler jobProcessHandler = new JobProcessEventHandler(job, this.jobExecutionFailedPublisher);
-        
-        /*ProcessExecutionHandler execHandler = new ProcessExecutionHandler() {
-            @Override
-            public void handle(WacodisJobExecutionEvent e) {
-                switch (e.getEventType()) {
 
-                    case FIRSTPROCESSSTARTED:
-                        LOGGER.info("execution of wacodis job {} started, firs sub process: {}", e.getSubProcessId());
-                        break;
-                    case PROCESSSTARTED:
-                        LOGGER.info("execution of sub process {} of wacodis job {} started", e.getSubProcessId(), e.getJobDefintion().getId());
-                    case PROCESSEXECUTED:
-                        LOGGER.info("sub process {} of wacodis job {} finished sucessfully", e.getSubProcessId(), e.getJobDefintion().getId());
-                        break;
-                    case PROCESSFAILED:
-                        setDefaultRetrySettingsIfAbsent(job.getJobDefinition()); //use defaults if retry settings are not set in job definition
-                        LOGGER.error("execution of  sub process " + e.getSubProcessId() + " of wacodis job " + e.getJobDefintion().getId().toString() + " failed", e.getMessage());
-                        //trigger job execution failed event
-                        if (job.getExecutionContext().getRetryCount() < job.getJobDefinition().getRetrySettings().getMaxRetries()) { //check if retry
-                            //fire event to schedule retry attempt
-                            int retries = job.incrementRetryCount();
-                            LOGGER.info("publish jobExecutionFailedEvent to schedule retry attempt {} of {}, WacodisJobID {}, toolID: {}", retries, job.getJobDefinition().getRetrySettings().getMaxRetries(), wacodisJobID, toolProcessID);
-                            WacodisJobExecutionFailedEvent failEvent = new WacodisJobExecutionFailedEvent(this, job, new ExecutionException(e.getMessage()));
-                            jobExecutionFailedPublisher.publishEvent(failEvent);
-                        } else {
-                            //retries exceeded, job failed ultimately
-                            LOGGER.error("execution of wacodis job failed ultimately after " + job.getExecutionContext().getRetryCount() + " of " + job.getJobDefinition().getRetrySettings().getMaxRetries() + " retries, WacodisJobID: " + wacodisJobID + ",toolID: " + toolProcessID);
-                        }
-                        break;
-                    case FINALPROCESSFINISHED:
-                        LOGGER.debug("final subprocess ({}) of wacodis job {} finished, shutdown threadpool", e.getSubProcessId(), e.getJobDefintion().getId());
-                        if (!jobExecutor.getExecutorService().isShutdown()) {
-                            jobExecutor.getExecutorService().shutdown();
-                        }
-                        break;
-                    default:
-                        LOGGER.debug("cannot handle event {} for sub process {} of wacodis job {}, no handling for this event type declared", e.getEventType().name(), e.getSubProcessId(), e.getJobDefintion().getId());
-                        break;
-                }
-            }
-        };*/
-
-        //register handler for execution events
-        //ToDo
-        jobExecutor.setProcessExecutedHandler(jobProcessHandler);
+        //register handler for execution and job process events
+        jobExecutor.setProcessExecutedHandler(jobProcessHandler); //job process events
         jobExecutor.setProcessFailedHandler(jobProcessHandler);
         jobExecutor.setProcessStartedHandler(jobProcessHandler);
-        jobExecutor.setFinalProcessFinishedHandler(jobExecutionHandler);
-        jobExecutor.setFirstProcessStartedHandler(jobExecutionHandler);      
+        jobExecutor.setFinalProcessFinishedHandler(jobExecutionHandler);// job execution events
+        jobExecutor.setFirstProcessStartedHandler(jobExecutionHandler);
 
-        //execute  all sub process of wacodis job
+        //execute  all sub process of wacodis job, call wps per sub process
         LOGGER.info("initiate execution of all sub processes of wacodis job {}", job.getJobDefinition().getId());
         jobExecutor.executeAllSubProcesses();
     }
