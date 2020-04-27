@@ -36,6 +36,9 @@ import de.wacodis.coreengine.executor.process.ProcessOutputDescription;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
 import de.wacodis.coreengine.executor.process.SequentialWacodisJobExecutor;
 import de.wacodis.coreengine.executor.process.WacodisJobExecutor;
+import de.wacodis.coreengine.executor.process.events.JobExecutionEventHandler;
+import de.wacodis.coreengine.executor.process.events.JobProcessEventHandler;
+import de.wacodis.coreengine.executor.process.events.WacodisJobExecutionEventHandler;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -149,7 +152,9 @@ public class WacodisJobExecutionStarter {
         
         
         //declare handler for execution events
-        //ToDo
+        WacodisJobExecutionEventHandler jobExecutionHandler = new JobExecutionEventHandler();
+        JobProcessEventHandler jobProcessHandler = new JobProcessEventHandler(job, this.jobExecutionFailedPublisher);
+        
         /*ProcessExecutionHandler execHandler = new ProcessExecutionHandler() {
             @Override
             public void handle(WacodisJobExecutionEvent e) {
@@ -193,11 +198,11 @@ public class WacodisJobExecutionStarter {
 
         //register handler for execution events
         //ToDo
-        jobExecutor.setProcessExecutedHandler(null);
-        jobExecutor.setProcessFailedHandler(null);
-        jobExecutor.setFinalProcessFinishedHandler(null);
-        jobExecutor.setFirstProcessStartedHandler(null);
-        jobExecutor.setProcessStartedHandler(null);
+        jobExecutor.setProcessExecutedHandler(jobProcessHandler);
+        jobExecutor.setProcessFailedHandler(jobProcessHandler);
+        jobExecutor.setProcessStartedHandler(jobProcessHandler);
+        jobExecutor.setFinalProcessFinishedHandler(jobExecutionHandler);
+        jobExecutor.setFirstProcessStartedHandler(jobExecutionHandler);      
 
         //execute  all sub process of wacodis job
         LOGGER.info("initiate execution of all sub processes of wacodis job {}", job.getJobDefinition().getId());
