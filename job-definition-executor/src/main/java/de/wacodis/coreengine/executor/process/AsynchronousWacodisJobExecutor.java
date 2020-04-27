@@ -91,6 +91,8 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
             }
 
             CompletableFuture<JobProcessOutputDescription> processFuture = CompletableFuture.supplyAsync(() -> {
+                subProcess.setStatus(JobProcess.Status.STARTED);
+                
                 if (subProcessNumber == 0) {
                     WacodisJobExecutionEvent firstProcessStartedEvent = new WacodisJobExecutionEvent(subProcess, this.subProcesses, WacodisJobExecutionEvent.ProcessExecutionEventType.FIRSTPROCESSSTARTED, this.subProcessExecutorService, this);
                     fireWacodisJobExecutionEvent(firstProcessStartedEvent, this.firstProcessStartedHandler);
@@ -101,8 +103,10 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
 
                 try {
                     JobProcessOutputDescription processOutput = executor.execute();
+                    processOutput.getJobProcess().setStatus(JobProcess.Status.SUCCESSFUL);
                     return processOutput;
                 } catch (JobProcessException e) { //catch all exception from async job, rethrow as CompetionException and handle in exceptionally()
+                    e.getJobProcess().setStatus(JobProcess.Status.FAILED);
                     throw new JobProcessCompletionException(e.getJobProcess(), e);
                 }
             }, this.subProcessExecutorService);
