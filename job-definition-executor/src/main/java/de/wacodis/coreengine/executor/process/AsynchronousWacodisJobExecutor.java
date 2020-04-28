@@ -18,6 +18,7 @@ import de.wacodis.coreengine.executor.process.events.WacodisJobExecutionEventHan
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import org.joda.time.DateTime;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -28,6 +29,7 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AsynchronousWacodisJobExecutor.class);
 
+    private static final String EXECUTIONFINISHEDTIMESTAMP_KEY = "endTimeMillis";
 
     private final List<JobProcess> subProcesses;
     private final ExecutorService subProcessExecutorService;
@@ -101,7 +103,7 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
 
             processFuture.thenAccept((JobProcessOutputDescription processOutput)
                     -> {
-                JobProcessExecutedEvent succesfulExecutionEvent = new JobProcessExecutedEvent(processOutput.getJobProcess(), processOutput, this);
+                JobProcessExecutedEvent succesfulExecutionEvent = new JobProcessExecutedEvent(processOutput.getJobProcess(), processOutput, this, getExecutionFinishedTimestamp(processOutput));
                 fireProcessExecutedEvent(succesfulExecutionEvent);
 
                 //ceck if final sub process
@@ -136,7 +138,7 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
             LOGGER.debug("fire event of type {} for job process {} of wacodis job {}", e.getClass().getSimpleName(), subProcessId, wacodisJobId);
             this.processStartedHandler.onJobProcessStarted(e);
         } else {
-            LOGGER.debug("cannot fire event of type {}, event handler is null", e.getClass().getSimpleName());
+            LOGGER.warn("cannot fire event of type {}, event handler is null", e.getClass().getSimpleName());
         }
     }
 
@@ -148,7 +150,7 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
             LOGGER.debug("fire event of type {} for job process {} of wacodis job {}", e.getClass().getSimpleName(), subProcessId, wacodisJobId);
             this.processExecutedHandler.onJobProcessFinished(e);
         } else {
-            LOGGER.debug("cannot fire event of type {}, event handler is null", e.getClass().getSimpleName());
+            LOGGER.warn("cannot fire event of type {}, event handler is null", e.getClass().getSimpleName());
         }
     }
 
@@ -160,7 +162,7 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
             LOGGER.debug("fire event of type {} for job process {} of wacodis job {}", e.getClass().getSimpleName(), subProcessId, wacodisJobId);
             this.processFailedHandler.onJobProcessFailed(e);
         } else {
-            LOGGER.debug("cannot fire event of type {}, event handler is null", e.getClass().getSimpleName());
+            LOGGER.warn("cannot fire event of type {}, event handler is null", e.getClass().getSimpleName());
         }
     }
 
@@ -183,7 +185,31 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
             }
 
         } else {
-            LOGGER.debug("cannot fire event {} of type {}, event handler is null", e.getEventType(), e.getClass().getSimpleName());
+            LOGGER.warn("cannot fire event {} of type {}, event handler is null", e.getEventType(), e.getClass().getSimpleName());
+        }
+    }
+    
+    /**
+     * try to get execution finished timestamp from process output, else use DateTime.now()
+     * @param output
+     * @return 
+     */
+    private DateTime getExecutionFinishedTimestamp(ProcessOutputDescription output){
+        if(output.getAllOutputParameterKeys().contains(EXECUTIONFINISHEDTIMESTAMP_KEY)){
+            String timestampStr = output.getOutputParameter(EXECUTIONFINISHEDTIMESTAMP_KEY);
+            
+            try{
+               long timestamp = Long.parseLong(timestampStr);
+               LOGGER.debug("successfully read execution finished timestamp from process output");
+               return new DateTime(timestamp);
+            }catch(NumberFormatException e){
+                LOGGER.debug("could not read execution finished timestamp from process output because NumberFormatExeception was raised, use current timestamp instead");
+                return DateTime.now();
+            }
+            
+        }else{
+            LOGGER.debug("could not read execution finished timestamp from process output because process output does not contain key {}, use current timestamp instead", EXECUTIONFINISHEDTIMESTAMP_KEY);
+            return DateTime.now();
         }
     }
 

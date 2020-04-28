@@ -49,7 +49,7 @@ public class JobExecutionEventHandler implements WacodisJobExecutionEventHandler
         WacodisJobDefinition jobDefinition = subProcess.getJobDefinition();
         
         //publish message on job execution start
-        ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolExecution(), buildToolExecutionStartedMessage(subProcess), this.messagePublishingTimeout_Millis);
+        ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolExecution(), buildToolExecutionStartedMessage(subProcess, e.getTimestamp()), this.messagePublishingTimeout_Millis);
 
 
         LOGGER.info("execution of wacodis job {} started, first sub process {} started", jobDefinition.getId(), subProcess.getJobProcessIdentifier());
@@ -69,12 +69,12 @@ public class JobExecutionEventHandler implements WacodisJobExecutionEventHandler
         }
     }
 
-    private Message<WacodisJobExecution> buildToolExecutionStartedMessage(JobProcess subProcess) {
+    private Message<WacodisJobExecution> buildToolExecutionStartedMessage(JobProcess subProcess, DateTime timestamp) {
         WacodisJobDefinition jobDefinition = subProcess.getJobDefinition();
 
         WacodisJobExecution msg = new WacodisJobExecution();
         msg.setWacodisJobIdentifier(jobDefinition.getId());
-        msg.setCreated(new DateTime());
+        msg.setCreated(timestamp);
         msg.setProcessingTool(jobDefinition.getProcessingTool());
         msg.setProductCollection(jobDefinition.getProductCollection());
 

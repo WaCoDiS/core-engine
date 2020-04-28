@@ -67,7 +67,7 @@ public class JobProcessEventHandler implements JobProcessExecutedEventHandler, J
         WacodisJobDefinition jobDefinition = subProcess.getJobDefinition();
         
         //publish message on succesful processing
-        ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFinished(), buildProcessFinishedMessage(e.getOutput()), this.messagePublishingTimeout_Millis);
+        ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFinished(), buildProcessFinishedMessage(e.getOutput(), e.getTimestamp()), this.messagePublishingTimeout_Millis);
 
         LOGGER.info("sub process {} of wacodis job {} finished sucessfully", subProcess.getJobProcessIdentifier(), jobDefinition.getId());
     }
@@ -78,7 +78,7 @@ public class JobProcessEventHandler implements JobProcessExecutedEventHandler, J
         WacodisJobDefinition jobDefinition = subProcess.getJobDefinition();
         
         //publish message on failed processing
-         ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFailure(), buildToolFailureMessage(e.getException()), this.messagePublishingTimeout_Millis);
+         ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFailure(), buildToolFailureMessage(e.getException(), e.getTimestamp()), this.messagePublishingTimeout_Millis);
         
         LOGGER.error("execution of  sub process " + subProcess.getJobProcessIdentifier() + " of wacodis job " + jobDefinition.getId() + " failed", e.getException());
         //trigger job execution failed event
@@ -102,7 +102,7 @@ public class JobProcessEventHandler implements JobProcessExecutedEventHandler, J
         LOGGER.info("execution of sub process {} of wacodis job {} started", subProcess.getJobProcessIdentifier(), jobDefinition.getId());
     }
 
-    private Message<WacodisJobFinished> buildProcessFinishedMessage(JobProcessOutputDescription processOuput) {
+    private Message<WacodisJobFinished> buildProcessFinishedMessage(JobProcessOutputDescription processOuput, DateTime timestamp) {
         WacodisJobDefinition jobDefinition = processOuput.getJobProcess().getJobDefinition();
         WacodisJobFinished msg = new WacodisJobFinished();
         ProductDescription pd = new ProductDescription();
@@ -115,18 +115,18 @@ public class JobProcessEventHandler implements JobProcessExecutedEventHandler, J
         // do not include outputs which should no be published (e.g. Metadata output)
         pd.setOutputIdentifiers(getPublishableExpectedOutputIdentifiers(processOuput.getJobProcess()));
 
-        msg.setExecutionFinished(DateTime.now()); //set to time of tool finished message publication
+        msg.setExecutionFinished(timestamp); //set to time of tool finished message publication
         msg.setWacodisJobIdentifier(jobDefinition.getId());
         msg.setProductDescription(pd);
 
         return MessageBuilder.withPayload(msg).build();
     }
 
-    private Message<WacodisJobFailed> buildToolFailureMessage(JobProcessCompletionException exception) {
+    private Message<WacodisJobFailed> buildToolFailureMessage(JobProcessCompletionException exception, DateTime timestamp) {
         WacodisJobFailed msg = new WacodisJobFailed();
         //TODO include wps job identifier (not wacodis job identifier)
         msg.setWpsJobIdentifier(null);
-        msg.setCreated(new DateTime());
+        msg.setCreated(timestamp);
         msg.setReason(exception.getMessage());
         msg.setWacodisJobIdentifier(exception.getJobProcess().getJobDefinition().getId());
         return MessageBuilder.withPayload(msg).build();
