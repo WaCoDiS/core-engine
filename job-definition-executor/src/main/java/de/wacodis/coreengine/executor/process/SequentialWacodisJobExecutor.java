@@ -5,7 +5,6 @@
  */
 package de.wacodis.coreengine.executor.process;
 
-import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
 import de.wacodis.coreengine.executor.process.events.JobProcessExecutedEventHandler;
 import de.wacodis.coreengine.executor.process.events.JobProcessFailedEventHandler;
 import de.wacodis.coreengine.executor.process.events.JobProcessStartedEventHandler;
@@ -25,12 +24,8 @@ public class SequentialWacodisJobExecutor implements WacodisJobExecutor {
 
     private final AsynchronousWacodisJobExecutor wacodisJobExecutor;
 
-    public SequentialWacodisJobExecutor(List<JobProcess> subProcesses, ToolMessagePublisherChannel toolMessagePublisher) {
-        this.wacodisJobExecutor = new AsynchronousWacodisJobExecutor(subProcesses, toolMessagePublisher, this.singleThreadService);
-    }
-
-    public SequentialWacodisJobExecutor(List<JobProcess> subProcesses, ToolMessagePublisherChannel toolMessagePublisher, long messagePublishingTimeout_Millis) { 
-        this.wacodisJobExecutor = new AsynchronousWacodisJobExecutor(subProcesses, toolMessagePublisher, this.singleThreadService, messagePublishingTimeout_Millis);
+    public SequentialWacodisJobExecutor(List<JobProcess> subProcesses) {
+        this.wacodisJobExecutor = new AsynchronousWacodisJobExecutor(subProcesses, this.singleThreadService);
     }
     
     @Override

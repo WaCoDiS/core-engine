@@ -11,13 +11,9 @@ import de.wacodis.core.models.WacodisJobDefinitionRetrySettings;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
-import de.wacodis.coreengine.executor.events.WacodisJobExecutionFailedEvent;
-import de.wacodis.coreengine.executor.exception.ExecutionException;
 import de.wacodis.coreengine.executor.process.wps.WPSProcess;
-import de.wacodis.coreengine.executor.process.JobProcessExecutor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import javax.annotation.PreDestroy;
 import org.n52.geoprocessing.wps.client.WPSClientSession;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +26,6 @@ import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
 import de.wacodis.coreengine.executor.process.AsynchronousWacodisJobExecutor;
 import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.JobProcess;
-import de.wacodis.coreengine.executor.process.events.WacodisJobExecutionEvent;
-import de.wacodis.coreengine.executor.process.ProcessExecutionHandler;
-import de.wacodis.coreengine.executor.process.ProcessOutputDescription;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
 import de.wacodis.coreengine.executor.process.SequentialWacodisJobExecutor;
 import de.wacodis.coreengine.executor.process.WacodisJobExecutor;
@@ -43,8 +36,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import javax.annotation.PostConstruct;
 import org.joda.time.DateTime;
 import org.springframework.context.ApplicationEventPublisher;
@@ -71,7 +62,7 @@ public class WacodisJobExecutionStarter {
     private List<ExpectedProcessOutput> expectedProcessOutputs;
 
     @Autowired
-    ToolMessagePublisherChannel newProductPublisher;
+    ToolMessagePublisherChannel processMessagePublisher;
 
     @Autowired
     private ApplicationEventPublisher jobExecutionFailedPublisher;
@@ -147,11 +138,11 @@ public class WacodisJobExecutionStarter {
 
         Process toolProcess = new WPSProcess(this.wpsClient, this.wpsConfig.getUri(), this.wpsConfig.getVersion(), toolProcessID);
         List<JobProcess> subProcesses = createJobProcesses(subProcessContexts, job.getJobDefinition(), toolProcess);
-        WacodisJobExecutor jobExecutor = createWacodisJobExecutor(this.newProductPublisher, subProcesses);
+        WacodisJobExecutor jobExecutor = createWacodisJobExecutor(subProcesses);
 
         //declare handler for execution events
-        WacodisJobExecutionEventHandler jobExecutionHandler = new JobExecutionEventHandler();
-        JobProcessEventHandler jobProcessHandler = new JobProcessEventHandler(job, this.jobExecutionFailedPublisher);
+        WacodisJobExecutionEventHandler jobExecutionHandler = new JobExecutionEventHandler(this.processMessagePublisher);
+        JobProcessEventHandler jobProcessHandler = new JobProcessEventHandler(job, this.processMessagePublisher, this.jobExecutionFailedPublisher);
 
         //register handler for execution and job process events
         jobExecutor.setProcessExecutedHandler(jobProcessHandler); //job process events
@@ -246,11 +237,11 @@ public class WacodisJobExecutionStarter {
         return jobProcessId;
     }
 
-    private WacodisJobExecutor createWacodisJobExecutor(ToolMessagePublisherChannel toolMessagePublisher, List<JobProcess> subProcesses) {
+    private WacodisJobExecutor createWacodisJobExecutor(List<JobProcess> subProcesses) {
         WacodisJobExecutor executor;
 
         if (this.wpsConfig.isProcessInputsSequentially()) {
-            executor = new SequentialWacodisJobExecutor(subProcesses, toolMessagePublisher);
+            executor = new SequentialWacodisJobExecutor(subProcesses);
         } else {
             ExecutorService execService;
 
@@ -260,7 +251,7 @@ public class WacodisJobExecutionStarter {
                 execService = Executors.newFixedThreadPool(this.wpsConfig.getMaxParallelWPSProcessPerJob());
             }
 
-            executor = new AsynchronousWacodisJobExecutor(subProcesses, toolMessagePublisher, execService);
+            executor = new AsynchronousWacodisJobExecutor(subProcesses, execService);
         }
 
         LOGGER.debug("created executor of type {} for wacodis job {}", executor.getClass().getSimpleName(), subProcesses.get(0).getJobDefinition().getId());

@@ -8,7 +8,6 @@ package de.wacodis.coreengine.executor.process;
 import de.wacodis.coreengine.executor.process.events.WacodisJobExecutionEvent;
 import de.wacodis.coreengine.executor.exception.JobProcessCompletionException;
 import de.wacodis.coreengine.executor.exception.JobProcessException;
-import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
 import de.wacodis.coreengine.executor.process.events.JobProcessExecutedEvent;
 import de.wacodis.coreengine.executor.process.events.JobProcessExecutedEventHandler;
 import de.wacodis.coreengine.executor.process.events.JobProcessFailedEvent;
@@ -29,8 +28,7 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AsynchronousWacodisJobExecutor.class);
 
-    private final ToolMessagePublisherChannel toolMessagePublisher;
-    private long messagePublishingTimeout_Millis = -1;
+
     private final List<JobProcess> subProcesses;
     private final ExecutorService subProcessExecutorService;
     private JobProcessStartedEventHandler processStartedHandler;
@@ -39,15 +37,9 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
     private WacodisJobExecutionEventHandler firstProcessStartedHandler;
     private WacodisJobExecutionEventHandler lastProcessFinishedHandler;
 
-    public AsynchronousWacodisJobExecutor(List<JobProcess> subProcesses, ToolMessagePublisherChannel toolMessagePublisher, ExecutorService subProcessExecutorService) {
-        this.toolMessagePublisher = toolMessagePublisher;
+    public AsynchronousWacodisJobExecutor(List<JobProcess> subProcesses, ExecutorService subProcessExecutorService) {
         this.subProcesses = subProcesses;
         this.subProcessExecutorService = subProcessExecutorService;
-    }
-
-    public AsynchronousWacodisJobExecutor(List<JobProcess> subProcesses, ToolMessagePublisherChannel toolMessagePublisher, ExecutorService subProcessExecutorService, long messagePublishingTimeout_Millis) {
-        this(subProcesses, toolMessagePublisher, subProcessExecutorService);
-        this.messagePublishingTimeout_Millis = messagePublishingTimeout_Millis;
     }
 
     @Override
@@ -82,13 +74,8 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
         for (int i = 0; i < this.subProcesses.size(); i++) {
             Integer subProcessNumber = i;
             JobProcess subProcess = this.subProcesses.get(i);
-            JobProcessExecutor executor;
-
-            if (this.messagePublishingTimeout_Millis > 0) {
-                executor = new JobProcessExecutor(subProcess, this.toolMessagePublisher, this.messagePublishingTimeout_Millis);
-            } else {
-                executor = new JobProcessExecutor(subProcess, this.toolMessagePublisher);
-            }
+            JobProcessExecutor executor = new JobProcessExecutor(subProcess);
+    
 
             CompletableFuture<JobProcessOutputDescription> processFuture = CompletableFuture.supplyAsync(() -> {
                 subProcess.setStatus(JobProcess.Status.STARTED);
@@ -101,6 +88,7 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
                 JobProcessStartedEvent processStartedEvent = new JobProcessStartedEvent(subProcess, this);
                 fireProcessStartedEvent(processStartedEvent);
 
+                //execute process
                 try {
                     JobProcessOutputDescription processOutput = executor.execute();
                     processOutput.getJobProcess().setStatus(JobProcess.Status.SUCCESSFUL);
