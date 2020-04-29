@@ -9,6 +9,7 @@ import de.wacodis.coreengine.executor.process.events.JobProcessStartedEventHandl
 import de.wacodis.coreengine.executor.process.events.JobProcessExecutedEventHandler;
 import de.wacodis.coreengine.executor.process.events.JobProcessFailedEventHandler;
 import de.wacodis.coreengine.executor.process.events.WacodisJobExecutionEventHandler;
+import java.util.List;
 
 /**
  *
@@ -16,7 +17,7 @@ import de.wacodis.coreengine.executor.process.events.WacodisJobExecutionEventHan
  */
 public interface WacodisJobExecutor {
 
-    void executeAllSubProcesses();
+    void executeAllSubProcesses(List<JobProcess> subProcesses);
 
     void setProcessStartedHandler(JobProcessStartedEventHandler handler);
 

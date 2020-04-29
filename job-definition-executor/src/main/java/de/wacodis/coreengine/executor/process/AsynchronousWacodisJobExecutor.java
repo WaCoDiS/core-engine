@@ -31,7 +31,6 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
 
     private static final String EXECUTIONFINISHEDTIMESTAMP_KEY = "endTimeMillis";
 
-    private final List<JobProcess> subProcesses;
     private final ExecutorService subProcessExecutorService;
     private JobProcessStartedEventHandler processStartedHandler;
     private JobProcessExecutedEventHandler processExecutedHandler;
@@ -39,8 +38,7 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
     private WacodisJobExecutionEventHandler firstProcessStartedHandler;
     private WacodisJobExecutionEventHandler lastProcessFinishedHandler;
 
-    public AsynchronousWacodisJobExecutor(List<JobProcess> subProcesses, ExecutorService subProcessExecutorService) {
-        this.subProcesses = subProcesses;
+    public AsynchronousWacodisJobExecutor(ExecutorService subProcessExecutorService) {
         this.subProcessExecutorService = subProcessExecutorService;
     }
 
@@ -70,12 +68,12 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
     }
 
     @Override
-    public void executeAllSubProcesses() {
-        final String lastSubProcessId = this.subProcesses.get((this.subProcesses.size() - 1)).getJobProcessIdentifier();
+    public void executeAllSubProcesses(List<JobProcess> subProcesses) {
+        final String lastSubProcessId = subProcesses.get((subProcesses.size() - 1)).getJobProcessIdentifier();
 
-        for (int i = 0; i < this.subProcesses.size(); i++) {
+        for (int i = 0; i < subProcesses.size(); i++) {
             Integer subProcessNumber = i;
-            JobProcess subProcess = this.subProcesses.get(i);
+            JobProcess subProcess = subProcesses.get(i);
             JobProcessExecutor executor = new JobProcessExecutor(subProcess);
     
 
@@ -83,7 +81,7 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
                 subProcess.setStatus(JobProcess.Status.STARTED);
                 
                 if (subProcessNumber == 0) {
-                    WacodisJobExecutionEvent firstProcessStartedEvent = new WacodisJobExecutionEvent(subProcess, this.subProcesses, WacodisJobExecutionEvent.ProcessExecutionEventType.FIRSTPROCESSSTARTED, this.subProcessExecutorService, this);
+                    WacodisJobExecutionEvent firstProcessStartedEvent = new WacodisJobExecutionEvent(subProcess, subProcesses, WacodisJobExecutionEvent.ProcessExecutionEventType.FIRSTPROCESSSTARTED, this.subProcessExecutorService, this);
                     fireWacodisJobExecutionEvent(firstProcessStartedEvent, this.firstProcessStartedHandler);
                 }
 
@@ -108,7 +106,7 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
 
                 //ceck if final sub process
                 if (processOutput.getJobProcess().getJobProcessIdentifier().equals(lastSubProcessId)) {
-                    WacodisJobExecutionEvent finalProcessFinishedEvent = new WacodisJobExecutionEvent(processOutput.getJobProcess(), this.subProcesses, WacodisJobExecutionEvent.ProcessExecutionEventType.FINALPROCESSFINISHED, this.subProcessExecutorService, this);
+                    WacodisJobExecutionEvent finalProcessFinishedEvent = new WacodisJobExecutionEvent(processOutput.getJobProcess(), subProcesses, WacodisJobExecutionEvent.ProcessExecutionEventType.FINALPROCESSFINISHED, this.subProcessExecutorService, this);
                     fireWacodisJobExecutionEvent(finalProcessFinishedEvent, this.lastProcessFinishedHandler);
                 }
 
@@ -119,7 +117,7 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
 
                   //ceck if final sub process
                 if (e.getJobProcess().getJobProcessIdentifier().equals(lastSubProcessId)) {
-                    WacodisJobExecutionEvent finalProcessFinishedEvent = new WacodisJobExecutionEvent(e.getJobProcess(), this.subProcesses, WacodisJobExecutionEvent.ProcessExecutionEventType.FINALPROCESSFINISHED, this.subProcessExecutorService, this);
+                    WacodisJobExecutionEvent finalProcessFinishedEvent = new WacodisJobExecutionEvent(e.getJobProcess(), subProcesses, WacodisJobExecutionEvent.ProcessExecutionEventType.FINALPROCESSFINISHED, this.subProcessExecutorService, this);
                     fireWacodisJobExecutionEvent(finalProcessFinishedEvent, this.lastProcessFinishedHandler);
                 }
 

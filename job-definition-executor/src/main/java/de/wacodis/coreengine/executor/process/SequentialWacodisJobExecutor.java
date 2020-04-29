@@ -24,13 +24,13 @@ public class SequentialWacodisJobExecutor implements WacodisJobExecutor {
 
     private final AsynchronousWacodisJobExecutor wacodisJobExecutor;
 
-    public SequentialWacodisJobExecutor(List<JobProcess> subProcesses) {
-        this.wacodisJobExecutor = new AsynchronousWacodisJobExecutor(subProcesses, this.singleThreadService);
+    public SequentialWacodisJobExecutor() {
+        this.wacodisJobExecutor = new AsynchronousWacodisJobExecutor( this.singleThreadService);
     }
     
     @Override
-    public void executeAllSubProcesses() {
-        this.wacodisJobExecutor.executeAllSubProcesses();
+    public void executeAllSubProcesses(List<JobProcess> subProcesses) {
+        this.wacodisJobExecutor.executeAllSubProcesses(subProcesses);
     }
 
     @Override

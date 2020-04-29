@@ -138,7 +138,7 @@ public class WacodisJobExecutionStarter {
 
         Process toolProcess = new WPSProcess(this.wpsClient, this.wpsConfig.getUri(), this.wpsConfig.getVersion(), toolProcessID);
         List<JobProcess> subProcesses = createJobProcesses(subProcessContexts, job.getJobDefinition(), toolProcess);
-        WacodisJobExecutor jobExecutor = createWacodisJobExecutor(subProcesses);
+        WacodisJobExecutor jobExecutor = createWacodisJobExecutor(job.getJobDefinition());
 
         //declare handler for execution events
         WacodisJobExecutionEventHandler jobExecutionHandler = new JobExecutionEventHandler(this.processMessagePublisher);
@@ -153,7 +153,7 @@ public class WacodisJobExecutionStarter {
 
         //execute  all sub process of wacodis job, call wps per sub process
         LOGGER.info("initiate execution of all sub processes of wacodis job {}", job.getJobDefinition().getId());
-        jobExecutor.executeAllSubProcesses();
+        jobExecutor.executeAllSubProcesses(subProcesses);
     }
 
     private List<ProcessContext> buildContextForEachInput(ProcessContext totalContext, String splitInputID) {
@@ -237,11 +237,11 @@ public class WacodisJobExecutionStarter {
         return jobProcessId;
     }
 
-    private WacodisJobExecutor createWacodisJobExecutor(List<JobProcess> subProcesses) {
+    private WacodisJobExecutor createWacodisJobExecutor(WacodisJobDefinition jobDefinition) {
         WacodisJobExecutor executor;
 
         if (this.wpsConfig.isProcessInputsSequentially()) {
-            executor = new SequentialWacodisJobExecutor(subProcesses);
+            executor = new SequentialWacodisJobExecutor();
         } else {
             ExecutorService execService;
 
@@ -251,10 +251,10 @@ public class WacodisJobExecutionStarter {
                 execService = Executors.newFixedThreadPool(this.wpsConfig.getMaxParallelWPSProcessPerJob());
             }
 
-            executor = new AsynchronousWacodisJobExecutor(subProcesses, execService);
+            executor = new AsynchronousWacodisJobExecutor(execService);
         }
 
-        LOGGER.debug("created executor of type {} for wacodis job {}", executor.getClass().getSimpleName(), subProcesses.get(0).getJobDefinition().getId());
+        LOGGER.debug("created executor of type {} for wacodis job {}", executor.getClass().getSimpleName(), jobDefinition.getId());
 
         return executor;
     }
