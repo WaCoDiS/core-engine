@@ -75,18 +75,17 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
             Integer subProcessNumber = i;
             JobProcess subProcess = subProcesses.get(i);
             JobProcessExecutor executor = new JobProcessExecutor(subProcess);
-    
 
             CompletableFuture<JobProcessOutputDescription> processFuture = CompletableFuture.supplyAsync(() -> {
                 subProcess.setStatus(JobProcess.Status.STARTED);
-                
+
                 if (subProcessNumber == 0) {
                     WacodisJobExecutionEvent firstProcessStartedEvent = new WacodisJobExecutionEvent(subProcess, subProcesses, WacodisJobExecutionEvent.ProcessExecutionEventType.FIRSTPROCESSSTARTED, this.subProcessExecutorService, this);
-                    fireWacodisJobExecutionEvent(firstProcessStartedEvent, this.firstProcessStartedHandler);
+                    JobExecutionEventHelper.fireWacodisJobExecutionEvent(firstProcessStartedEvent, this.firstProcessStartedHandler);
                 }
 
                 JobProcessStartedEvent processStartedEvent = new JobProcessStartedEvent(subProcess, this);
-                fireProcessStartedEvent(processStartedEvent);
+                JobExecutionEventHelper.fireProcessStartedEvent(processStartedEvent, this.processStartedHandler);
 
                 //execute process
                 try {
@@ -102,23 +101,23 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
             processFuture.thenAccept((JobProcessOutputDescription processOutput)
                     -> {
                 JobProcessExecutedEvent succesfulExecutionEvent = new JobProcessExecutedEvent(processOutput.getJobProcess(), processOutput, this, getExecutionFinishedTimestamp(processOutput));
-                fireProcessExecutedEvent(succesfulExecutionEvent);
+                JobExecutionEventHelper.fireProcessExecutedEvent(succesfulExecutionEvent, this.processExecutedHandler);
 
                 //ceck if final sub process
                 if (processOutput.getJobProcess().getJobProcessIdentifier().equals(lastSubProcessId)) {
                     WacodisJobExecutionEvent finalProcessFinishedEvent = new WacodisJobExecutionEvent(processOutput.getJobProcess(), subProcesses, WacodisJobExecutionEvent.ProcessExecutionEventType.FINALPROCESSFINISHED, this.subProcessExecutorService, this);
-                    fireWacodisJobExecutionEvent(finalProcessFinishedEvent, this.lastProcessFinishedHandler);
+                    JobExecutionEventHelper.fireWacodisJobExecutionEvent(finalProcessFinishedEvent, this.lastProcessFinishedHandler);
                 }
 
             }).exceptionally((Throwable t) -> { //handle exceptions that were raised by async job
                 JobProcessCompletionException e = (JobProcessCompletionException) t; //cast is safe since only JobProcessCompletionException can be thrown in supplyAsync
                 JobProcessFailedEvent processFailedEvent = new JobProcessFailedEvent(e.getJobProcess(), e, this);
-                fireProcessFailedEvent(processFailedEvent);
+                JobExecutionEventHelper.fireProcessFailedEvent(processFailedEvent, this.processFailedHandler);
 
-                  //ceck if final sub process
+                //ceck if final sub process
                 if (e.getJobProcess().getJobProcessIdentifier().equals(lastSubProcessId)) {
                     WacodisJobExecutionEvent finalProcessFinishedEvent = new WacodisJobExecutionEvent(e.getJobProcess(), subProcesses, WacodisJobExecutionEvent.ProcessExecutionEventType.FINALPROCESSFINISHED, this.subProcessExecutorService, this);
-                    fireWacodisJobExecutionEvent(finalProcessFinishedEvent, this.lastProcessFinishedHandler);
+                    JobExecutionEventHelper.fireWacodisJobExecutionEvent(finalProcessFinishedEvent, this.lastProcessFinishedHandler);
                 }
 
                 return null; //satisfy return type
@@ -128,84 +127,27 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
 
     }
 
-    private void fireProcessStartedEvent(JobProcessStartedEvent e) {
-        String subProcessId = e.getJobProcess().getJobProcessIdentifier();
-        String wacodisJobId = e.getJobProcess().getJobDefinition().getId().toString();
-
-        if (this.processStartedHandler != null) {
-            LOGGER.debug("fire event of type {} for job process {} of wacodis job {}", e.getClass().getSimpleName(), subProcessId, wacodisJobId);
-            this.processStartedHandler.onJobProcessStarted(e);
-        } else {
-            LOGGER.warn("cannot fire event of type {}, event handler is null", e.getClass().getSimpleName());
-        }
-    }
-
-    private void fireProcessExecutedEvent(JobProcessExecutedEvent e) {
-        String subProcessId = e.getJobProcess().getJobProcessIdentifier();
-        String wacodisJobId = e.getJobProcess().getJobDefinition().getId().toString();
-
-        if (this.processStartedHandler != null) {
-            LOGGER.debug("fire event of type {} for job process {} of wacodis job {}", e.getClass().getSimpleName(), subProcessId, wacodisJobId);
-            this.processExecutedHandler.onJobProcessFinished(e);
-        } else {
-            LOGGER.warn("cannot fire event of type {}, event handler is null", e.getClass().getSimpleName());
-        }
-    }
-
-    private void fireProcessFailedEvent(JobProcessFailedEvent e) {
-        String subProcessId = e.getJobProcess().getJobProcessIdentifier();
-        String wacodisJobId = e.getJobProcess().getJobDefinition().getId().toString();
-
-        if (this.processStartedHandler != null) {
-            LOGGER.debug("fire event of type {} for job process {} of wacodis job {}", e.getClass().getSimpleName(), subProcessId, wacodisJobId);
-            this.processFailedHandler.onJobProcessFailed(e);
-        } else {
-            LOGGER.warn("cannot fire event of type {}, event handler is null", e.getClass().getSimpleName());
-        }
-    }
-
-    private void fireWacodisJobExecutionEvent(WacodisJobExecutionEvent e, WacodisJobExecutionEventHandler eventHandler) {
-        String wacodisJobId = e.getCurrentJobProcess().getJobDefinition().getId().toString();
-
-        if (eventHandler != null) {
-            LOGGER.debug("fire event {} of type {} for of wacodis job {}", e.getClass().getSimpleName(), wacodisJobId);
-
-            switch (e.getEventType()) {
-                case FINALPROCESSFINISHED:
-                    eventHandler.onFinalJobProcessFinished(e);
-                    break;
-                case FIRSTPROCESSSTARTED:
-                    eventHandler.onFirstJobProcessStarted(e);
-                    break;
-                default:
-                    LOGGER.error("cannot fire event {} of type {}, event type {} is unknown", e.getEventType(), e.getClass().getSimpleName(), e.getEventType());
-                    break;
-            }
-
-        } else {
-            LOGGER.warn("cannot fire event {} of type {}, event handler is null", e.getEventType(), e.getClass().getSimpleName());
-        }
-    }
-    
     /**
-     * try to get execution finished timestamp from process output, else use DateTime.now()
+     * try to get execution finished timestamp from process output, else use
+     * DateTime.now()
+     *
      * @param output
-     * @return 
+     * @return
      */
-    private DateTime getExecutionFinishedTimestamp(ProcessOutputDescription output){
-        if(output.getAllOutputParameterKeys().contains(EXECUTIONFINISHEDTIMESTAMP_KEY)){
+    private DateTime getExecutionFinishedTimestamp(ProcessOutputDescription output) {
+        if (output.getAllOutputParameterKeys().contains(EXECUTIONFINISHEDTIMESTAMP_KEY)) {
             String timestampStr = output.getOutputParameter(EXECUTIONFINISHEDTIMESTAMP_KEY);
-            
-            try{
-               long timestamp = Long.parseLong(timestampStr);
-               LOGGER.debug("successfully read execution finished timestamp from process output");
-               return new DateTime(timestamp);
-            }catch(NumberFormatException e){
+
+            try {
+                long timestamp = Long.parseLong(timestampStr);
+                LOGGER.debug("successfully read execution finished timestamp from process output");
+                return new DateTime(timestamp);
+            } catch (NumberFormatException e) {
                 LOGGER.debug("could not read execution finished timestamp from process output because NumberFormatExeception was raised, use current timestamp instead");
                 return DateTime.now();
             }
-            
-        }else{
+
+        } else {
             LOGGER.debug("could not read execution finished timestamp from process output because process output does not contain key {}, use current timestamp instead", EXECUTIONFINISHEDTIMESTAMP_KEY);
             return DateTime.now();
         }
