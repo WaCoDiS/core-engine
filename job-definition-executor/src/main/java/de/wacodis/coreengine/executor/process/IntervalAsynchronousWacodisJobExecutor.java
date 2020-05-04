@@ -32,8 +32,6 @@ public class IntervalAsynchronousWacodisJobExecutor implements WacodisJobExecuto
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(IntervalAsynchronousWacodisJobExecutor.class);
 
-    private static final String EXECUTIONFINISHEDTIMESTAMP_KEY = "endTimeMillis";
-
     private int schedulerCorePoolSize = 3; //default of 3
     private final ScheduledExecutorService subProcessScheduler;
     private final long intialDelay_milliseconds;
@@ -122,28 +120,28 @@ public class IntervalAsynchronousWacodisJobExecutor implements WacodisJobExecuto
             try {
                 if (subProcess == firstSubProcess) {
                     WacodisJobExecutionEvent firstStartedEvent = new WacodisJobExecutionEvent(subProcess, new ArrayList<>(this.subProcessStack), WacodisJobExecutionEvent.ProcessExecutionEventType.FIRSTPROCESSSTARTED, this.subProcessExecutorService, this.jobExecutor);
-                    //toDO raise event
+                    JobExecutionEventHelper.fireWacodisJobExecutionEvent(firstStartedEvent,firstProcessStartedHandler);
                 }
 
                 JobProcessStartedEvent startedEvent = new JobProcessStartedEvent(subProcess, this.jobExecutor);
-                //ToDO raise started event
+                JobExecutionEventHelper.fireProcessStartedEvent(startedEvent, processStartedHandler);
 
                 JobProcessOutputDescription output = subProcessExecutor.execute();
                 JobProcessExecutedEvent executedEvent = new JobProcessExecutedEvent(subProcess, output, this.jobExecutor);
-                //ToDO raise executed event
+                JobExecutionEventHelper.fireProcessExecutedEvent(executedEvent, processExecutedHandler);
 
                 if (output.getJobProcess() == lastSubProcess) {
                     WacodisJobExecutionEvent lastFinishedEvent = new WacodisJobExecutionEvent(output.getJobProcess(), new ArrayList<>(this.subProcessStack), WacodisJobExecutionEvent.ProcessExecutionEventType.FINALPROCESSFINISHED, this.subProcessExecutorService, this.jobExecutor);
-                    //toDO raise Event
+                    JobExecutionEventHelper.fireWacodisJobExecutionEvent(lastFinishedEvent, lastProcessFinishedHandler);
                 }
 
             } catch (JobProcessException ex) {
                 JobProcessFailedEvent failedEvent = new JobProcessFailedEvent(ex.getJobProcess(), new JobProcessCompletionException(ex.getJobProcess(), ex), this.jobExecutor);
-                //ToDO raise failed event
+                JobExecutionEventHelper.fireProcessFailedEvent(failedEvent, processFailedHandler);
 
                 if (ex.getJobProcess() == lastSubProcess) {
                     WacodisJobExecutionEvent lastFinishedEvent = new WacodisJobExecutionEvent(ex.getJobProcess(), new ArrayList<>(this.subProcessStack), WacodisJobExecutionEvent.ProcessExecutionEventType.FINALPROCESSFINISHED, this.subProcessExecutorService, this.jobExecutor);
-                    //toDO raise Event
+                    JobExecutionEventHelper.fireWacodisJobExecutionEvent(lastFinishedEvent, lastProcessFinishedHandler);
                 }
             }
 
