@@ -69,9 +69,13 @@ spring:
         #defaultResourceSchema:
       #   name: GML3
       #   schemaLocation: http://schemas.opengis.net/gml/3.1.1/base/feature.xsd
-      callWPSPerInput: true
-      processInputsSequentially: false
+      callWPSPerInput: true   
       maxParallelWPSProcessPerJob: 3
+      #intialDelay and delay applicable if processInputDelayed is true
+      processInputsDelayed: false
+      initialDelay_Milliseconds: 0 
+      delay_Milliseconds: 900000
+      processInputsSequentially: false
   datasource.core.quartz-data-source:
     name: quartzDataSource
     driverClassName: org.h2.Driver

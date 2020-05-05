@@ -29,6 +29,9 @@ public class WebProcessingServiceConfiguration {
     private boolean callWPSPerInput;
     private boolean processInputsSequentially;
     private int maxParallelWPSProcessPerJob;
+    private boolean processInputsDelayed;
+    private long initialDelay_Milliseconds;
+    private long delay_Milliseconds;
 
 
     public WebProcessingServiceConfiguration() {
@@ -97,6 +100,30 @@ public class WebProcessingServiceConfiguration {
 
     public void setMaxParallelWPSProcessPerJob(int maxParallelWPSProcessPerJob) {
         this.maxParallelWPSProcessPerJob = maxParallelWPSProcessPerJob;
+    }
+
+    public boolean isProcessInputsDelayed() {
+        return processInputsDelayed;
+    }
+
+    public void setProcessInputsDelayed(boolean processInputsDelayed) {
+        this.processInputsDelayed = processInputsDelayed;
+    }
+
+    public long getInitialDelay_Milliseconds() {
+        return initialDelay_Milliseconds;
+    }
+
+    public void setInitialDelay_Milliseconds(long initialDelay_Milliseconds) {
+        this.initialDelay_Milliseconds = initialDelay_Milliseconds;
+    }
+
+    public long getDelay_Milliseconds() {
+        return delay_Milliseconds;
+    }
+
+    public void setDelay_Milliseconds(long delay_Milliseconds) {
+        this.delay_Milliseconds = delay_Milliseconds;
     }
     
     

@@ -25,6 +25,7 @@ import de.wacodis.coreengine.executor.process.wps.WPSProcessContextBuilder;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
 import de.wacodis.coreengine.executor.process.AsynchronousWacodisJobExecutor;
 import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
+import de.wacodis.coreengine.executor.process.IntervalAsynchronousWacodisJobExecutor;
 import de.wacodis.coreengine.executor.process.JobProcess;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
 import de.wacodis.coreengine.executor.process.SequentialWacodisJobExecutor;
@@ -242,6 +243,10 @@ public class WacodisJobExecutionStarter {
 
         if (this.wpsConfig.isProcessInputsSequentially()) {
             executor = new SequentialWacodisJobExecutor();
+        } else if (this.wpsConfig.isProcessInputsDelayed()) {
+            long delay = (this.wpsConfig.getDelay_Milliseconds() >= 0) ? this.wpsConfig.getDelay_Milliseconds() : 0;
+            long initDelay = (this.wpsConfig.getInitialDelay_Milliseconds() >= 0) ? this.wpsConfig.getInitialDelay_Milliseconds() : 0;
+            executor = new IntervalAsynchronousWacodisJobExecutor(initDelay, delay);
         } else {
             ExecutorService execService;
 
