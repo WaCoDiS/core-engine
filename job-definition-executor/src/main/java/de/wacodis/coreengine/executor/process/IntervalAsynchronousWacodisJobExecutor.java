@@ -94,6 +94,7 @@ public class IntervalAsynchronousWacodisJobExecutor implements WacodisJobExecuto
         private final JobProcess firstSubProcess;
         private final JobProcess lastSubProcess;
         private final IntervalAsynchronousWacodisJobExecutor jobExecutor;
+        private final Object lockObj = new Object();
 
         public SubProcessExecutionTask(List<JobProcess> subProcesses, ExecutorService subProcessExecutorService, IntervalAsynchronousWacodisJobExecutor jobExecutor) {
             this.subProcessStack = getSubProcessesAsStack(subProcesses);
@@ -107,8 +108,8 @@ public class IntervalAsynchronousWacodisJobExecutor implements WacodisJobExecuto
         public void run() {
             JobProcess subProcess;
             //access sub process stack only from one thread at a time
-            synchronized (this) {
-                if (!subProcessStack.isEmpty()) {
+            synchronized (this.lockObj) {
+                if (!this.subProcessStack.isEmpty()) {
                     subProcess = this.subProcessStack.pop();
                 } else {
                     shutdownExecutorService();
