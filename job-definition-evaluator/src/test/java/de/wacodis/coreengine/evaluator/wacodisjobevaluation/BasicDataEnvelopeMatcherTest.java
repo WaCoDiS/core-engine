@@ -73,17 +73,6 @@ public class BasicDataEnvelopeMatcherTest {
     }
 
     @Test
-    public void testIsMatchCopernicusDataEnvelopeCopernicusSubsetDefinitionIdentifier() {
-        CopernicusDataEnvelope copernicusEnv = getCopernicusDataEnvelope();
-        CopernicusSubsetDefinition copernicusSubset = getCopernicusSubsetDefinition();
-
-        copernicusEnv.setDatasetId("identifierA");
-        copernicusSubset.setIdentifier("identifierB");
-
-        assertFalse(this.matcher.match(copernicusEnv, getJobWrapper(), copernicusSubset));
-    }
-
-    @Test
     public void testIsMatchSensorWebDataEnvelopeSensorWebSubsetDefinition() {
         SensorWebDataEnvelope sensorWebEnv = getSensorWebDataEnvelope();
         SensorWebSubsetDefinition sensorWebSubset = getSensorWebSubsetDefinition();

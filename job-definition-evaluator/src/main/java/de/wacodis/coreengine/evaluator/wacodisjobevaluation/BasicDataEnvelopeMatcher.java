@@ -174,8 +174,7 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
     }
 
     private boolean matchCopernicusDataEnvelope(CopernicusDataEnvelope dataEnvelope, CopernicusSubsetDefinition subsetDefinition) {
-        return dataEnvelope.getDatasetId().equals(subsetDefinition.getIdentifier())
-                && matchSatellite(dataEnvelope.getSatellite(), subsetDefinition.getSatellite())
+        return matchSatellite(dataEnvelope.getSatellite(), subsetDefinition.getSatellite())
                 && dataEnvelope.getCloudCoverage() <= subsetDefinition.getMaximumCloudCoverage(); //cloud coverage must not exceed max. cloud coverage
     }
 
@@ -228,7 +227,7 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
      * @return
      */
     private boolean matchSatellite(CopernicusDataEnvelope.SatelliteEnum satelliteEnv, CopernicusSubsetDefinition.SatelliteEnum satelliteSub) {
-        return satelliteEnv.toString().equals(satelliteSub.toString());
+        return satelliteEnv.toString().toLowerCase().equals(satelliteSub.toString().toLowerCase());
     }
 
     /**
