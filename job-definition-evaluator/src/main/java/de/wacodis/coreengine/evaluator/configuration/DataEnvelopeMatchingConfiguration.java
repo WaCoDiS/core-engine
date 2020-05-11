@@ -29,8 +29,8 @@ public class DataEnvelopeMatchingConfiguration {
     }
 
     public void setMinimumOverlapPercentage(float minimumOverlapPercentage) {
-        if (minimumOverlapPercentage > 100.0f || minimumOverlapPercentage < 0.0f) {
-            throw new IllegalArgumentException("minimumOverlapPercentage is " + minimumOverlapPercentage + " but must be between 0.0 and 100.0");
+        if (minimumOverlapPercentage > 100.0f) {
+            throw new IllegalArgumentException("minimumOverlapPercentage is " + minimumOverlapPercentage + " but must not be bigger than 100.0");
         }
 
         this.minimumOverlapPercentage = minimumOverlapPercentage;

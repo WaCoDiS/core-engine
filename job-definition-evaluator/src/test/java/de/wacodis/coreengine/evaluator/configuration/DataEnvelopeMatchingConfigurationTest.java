@@ -24,13 +24,6 @@ public class DataEnvelopeMatchingConfigurationTest {
         DataEnvelopeMatchingConfiguration config = new DataEnvelopeMatchingConfiguration();
         assertThrows(IllegalArgumentException.class, () -> config.setMinimumOverlapPercentage(110.5f));
     }
-
-    @Test
-    @DisplayName("throws exception if value deceeds 0.0")
-    public void testSetMinimumOverlapPercentage_Deceed() {
-        DataEnvelopeMatchingConfiguration config = new DataEnvelopeMatchingConfiguration();
-        assertThrows(IllegalArgumentException.class, () -> config.setMinimumOverlapPercentage(-1.0f));
-    }
     
     @Test
     @DisplayName("setMinimumOverlapPercentage valid value")
