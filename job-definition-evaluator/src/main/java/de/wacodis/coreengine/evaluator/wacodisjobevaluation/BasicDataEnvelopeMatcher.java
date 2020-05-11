@@ -124,9 +124,9 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
             case WACODISPRODUCTDATAENVELOPE:
                 WacodisProductDataEnvelope productDataEnvelope = (WacodisProductDataEnvelope) dataEnvelope;
                 WacodisProductSubsetDefinition productSubset = (WacodisProductSubsetDefinition) subsetDefinition;
-                
+
                 isMatch = matchProductdataEnvelope(productDataEnvelope, productSubset);
-                
+
                 break;
             default:
                 //unknown source type or not set
@@ -165,7 +165,13 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
         Float[] aoiExtent = extentAreaOfInterest.getExtent().toArray(new Float[0]);
         Float[] envExtent = extentDataEnvelope.getExtent().toArray(new Float[0]);
 
-        return (calculateOverlapPercentage(aoiExtent, envExtent) >= this.config.getMinimumOverlapPercentage());
+        if (this.config.getMinimumOverlapPercentage() >= 0.0f) {
+            LOGGER.debug("minimum overlap percentage is {}, calculate of percentage of overlap", this.config.getMinimumOverlapPercentage());
+            return (calculateOverlapPercentage(aoiExtent, envExtent) >= this.config.getMinimumOverlapPercentage());
+        } else {
+            LOGGER.debug("minimum overlap percentage is {}, check if extents intersect", this.config.getMinimumOverlapPercentage());
+            return intersectsExtent(aoiExtent, envExtent);
+        }
     }
 
     private boolean matchGdiDeDataEnevelope(GdiDeDataEnvelope dataEnvelope, CatalogueSubsetDefinition subsetDefinition) {
@@ -190,8 +196,8 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
         return dataEnvelope.getServiceUrl().equals(subsetDefinition.getServiceUrl())
                 && dataEnvelope.getLayerName().equals(subsetDefinition.getLayerName());
     }
-    
-    private boolean matchProductdataEnvelope(WacodisProductDataEnvelope dataEnvelope, WacodisProductSubsetDefinition subsetDefinition){
+
+    private boolean matchProductdataEnvelope(WacodisProductDataEnvelope dataEnvelope, WacodisProductSubsetDefinition subsetDefinition) {
         return dataEnvelope.getProductType().equalsIgnoreCase(subsetDefinition.getProductType())
                 && dataEnvelope.getServiceDefinition().getBackendType().equals(subsetDefinition.getBackendType());
     }
@@ -212,7 +218,7 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
             return true;
         } else if (dataEnvelope.getSourceType() == AbstractDataEnvelope.SourceTypeEnum.DWDDATAENVELOPE && subsetDefinition.getSourceType() == AbstractSubsetDefinition.SourceTypeEnum.DWDSUBSETDEFINITION) {
             return true;
-        } else if(dataEnvelope.getSourceType() == AbstractDataEnvelope.SourceTypeEnum.WACODISPRODUCTDATAENVELOPE && subsetDefinition.getSourceType() == AbstractSubsetDefinition.SourceTypeEnum.WACODISPRODUCTSUBSETDEFINITION){
+        } else if (dataEnvelope.getSourceType() == AbstractDataEnvelope.SourceTypeEnum.WACODISPRODUCTDATAENVELOPE && subsetDefinition.getSourceType() == AbstractSubsetDefinition.SourceTypeEnum.WACODISPRODUCTSUBSETDEFINITION) {
             return true;
         } else {
             return false;
