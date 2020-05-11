@@ -183,6 +183,28 @@ public class BasicDataEnvelopeMatcherTest {
     }
 
     @Test
+    public void testMatchTimeFrameDataEnvelope_BoundaryValues() {
+        WacodisJobWrapper wrapper = getJobWrapper();
+        CopernicusDataEnvelope copEnv = getCopernicusDataEnvelope();
+        CopernicusSubsetDefinition copSubset = getCopernicusSubsetDefinition();
+
+        WacodisJobDefinition def = wrapper.getJobDefinition();
+        def.getTemporalCoverage().duration("P1D");
+        
+        //envelope time frame can be equal to boundary values of input relvancy time frame
+        //execution time 2018-02-01T00:00:00Z
+        copEnv.getTimeFrame().setStartTime(DateTime.parse("2018-01-31T00:00:00Z"));
+        copEnv.getTimeFrame().setEndTime(DateTime.parse("2018-01-31T00:00:00Z"));
+
+        assertTrue(this.matcher.match(copEnv, wrapper, copSubset));
+
+        copEnv.getTimeFrame().setStartTime(DateTime.parse("2018-02-01T00:00:00Z"));
+        copEnv.getTimeFrame().setEndTime(DateTime.parse("2018-02-01T00:00:00Z"));
+
+        assertTrue(this.matcher.match(copEnv, wrapper, copSubset));
+    }
+
+    @Test
     public void testMatchTimeFrameDataEnvelopeStartPreviousExectution_BeforeRelevancy() {
         WacodisJobWrapper wrapper = getJobWrapper();
         GdiDeDataEnvelope gdiDeEnv = getGdiDeDataEnvelope();
@@ -304,7 +326,7 @@ public class BasicDataEnvelopeMatcherTest {
 
         productEnvelope.getServiceDefinition().setBackendType(ProductBackend.ARCGISIMAGESERVERBACKEND);
         productSubset.setBackendType(ProductBackend.ARCGISIMAGESERVERBACKEND);
-        
+
         assertTrue(this.matcher.match(productEnvelope, wrapper, productSubset));
     }
 
@@ -577,7 +599,7 @@ public class BasicDataEnvelopeMatcherTest {
         jobDef.setExecution(execution);
 
         DateTime executionTime = new DateTime(DateTime.parse("2018-02-01T00:00:00Z"));
-        WacodisJobWrapper jobWrapper =new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), executionTime, 0), jobDef);
+        WacodisJobWrapper jobWrapper = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), executionTime, 0), jobDef);
 
         return jobWrapper;
     }
