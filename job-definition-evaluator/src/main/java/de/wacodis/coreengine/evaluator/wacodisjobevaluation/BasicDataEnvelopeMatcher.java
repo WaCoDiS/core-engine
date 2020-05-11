@@ -72,7 +72,7 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
     public boolean match(AbstractDataEnvelope dataEnvelope, WacodisJobWrapper jobWrapper, AbstractSubsetDefinition subsetDefinition) {
         //SourceTypes must match
         if (!matchSourceTypes(dataEnvelope, subsetDefinition)) {
-            LOGGER.info("Matching " + dataEnvelope.getSourceType() + " with " + subsetDefinition.getSourceType() + "(ID: " + subsetDefinition.getIdentifier() + "), Result: " + false + " (incompatible SourceType)");
+            LOGGER.debug("Matching " + dataEnvelope.getSourceType() + " with " + subsetDefinition.getSourceType() + "(ID: " + subsetDefinition.getIdentifier() + "), Result: " + false + " (incompatible SourceType)");
             return false;
         }
 
@@ -83,8 +83,13 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
         //combine partial results
         boolean isMatch = (isMatchTF && isMatchAOI && isMatchAttr);
 
-        LOGGER.info("Matching " + dataEnvelope.getSourceType() + " with " + subsetDefinition.getSourceType() + "(ID: " + subsetDefinition.getIdentifier() + "), Result: " + isMatch
-                + " (TimeFrame: " + isMatchTF + ", AreaOfInterest: " + isMatchAOI + ", Attributes: " + isMatchAttr + ")");
+        String logMsg = "Matching " + dataEnvelope.getSourceType() + " with " + subsetDefinition.getSourceType() + "(ID: " + subsetDefinition.getIdentifier() + "), Result: " + isMatch
+                + " (TimeFrame: " + isMatchTF + ", AreaOfInterest: " + isMatchAOI + ", Attributes: " + isMatchAttr + ")";
+        if(isMatch){
+            LOGGER.info(logMsg);
+        }else{
+            LOGGER.debug(logMsg);
+        }
 
         return isMatch;
     }
