@@ -151,8 +151,10 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
     private boolean matchTimeFrame(AbstractDataEnvelope dataEnvelope, WacodisJobWrapper jobWrapper) {
         Interval inputRelevancyTimeFrame = jobWrapper.calculateInputRelevancyTimeFrame();
 
-        return dataEnvelope.getTimeFrame().getEndTime().isAfter(inputRelevancyTimeFrame.getStart()) //envelopes timeframe intersects time between beginRelevancy (start) and executionTime (end)
-                && dataEnvelope.getTimeFrame().getStartTime().isBefore(inputRelevancyTimeFrame.getEnd());
+        //envelopes timeframe intersects time between beginRelevancy (start) and executionTime (end)
+        //also allow values equal to boundaries of inputRelevancyTimeFrame
+        return (dataEnvelope.getTimeFrame().getEndTime().isAfter(inputRelevancyTimeFrame.getStart()) || dataEnvelope.getTimeFrame().getEndTime().isEqual(inputRelevancyTimeFrame.getStart()))
+                && (dataEnvelope.getTimeFrame().getStartTime().isBefore(inputRelevancyTimeFrame.getEnd()) || dataEnvelope.getTimeFrame().getStartTime().isEqual(inputRelevancyTimeFrame.getEnd()));
     }
 
     /**
