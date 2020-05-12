@@ -118,7 +118,7 @@ public class JobEvaluatorRunner {
 
             if (addJobToInputTracker) {
                 this.inputTracker.addJob(job);
-                LOGGER.warn("Wacodis-Job {} could not be evaluated and might not be executed, add Wacodis-Job to InputTracker to wait for new, accesible DataEnvelopes");
+                LOGGER.warn("Wacodis-Job {} could not be evaluated and might not be executed, add Wacodis-Job to InputTracker to wait for new, accessible DataEnvelopes");
             } else {
                 LOGGER.error("Wacodis-Job " + job.getJobDefinition().getId() + "could not be evaluated and will not be executed!");
             }
@@ -229,18 +229,19 @@ public class JobEvaluatorRunner {
         @Override
         public void onJobIsExecutableChanged(WacodisJobInputTracker eventSource, WacodisJobWrapper job, EvaluationStatus status) {
             if (status.equals(EvaluationStatus.EXECUTABLE)) {
-                LOGGER.info("Received notification on executable WacodisJob " + job.getJobDefinition().getName() + ", initiating final validity check");
+                LOGGER.info("Received notification on executable WacodisJob " + job.getJobDefinition().getName() + " (Id: " + job.getJobDefinition().getId() + "), initiating final validity check");
                 //check again (items might have been removed from DataAccess during waiting time)
                 EvaluationStatus validityCheck = evaluateJob(job);
 
                 if (validityCheck.equals(EvaluationStatus.EXECUTABLE)) {
-                    LOGGER.info("Validity Check for WacodisJob " + job.getJobDefinition().getName() + "  succeeded, publishing WacodisJobExecutableEvent");
+                    LOGGER.info("Validity Check for WacodisJob " + job.getJobDefinition().getName() + " (Id: " + job.getJobDefinition().getId() + ")  succeeded, publishing WacodisJobExecutableEvent");
                     WacodisJobExecutableEvent event = new WacodisJobExecutableEvent(this.eventOrigin, job, validityCheck);
                     this.publisher.publishEvent(event);
+                    //remove from InputTracker
                     eventSource.removeJob(job);
                 } else {
-                    LOGGER.info("Validity Check for WacodisJob " + job.getJobDefinition().getName() + " failed");
-                    //else wait for further DataEnvelopes           
+                    //wait for further DataEnvelopes     
+                    LOGGER.info("Validity Check for WacodisJob " + job.getJobDefinition().getName() + " (Id: " + job.getJobDefinition().getId() + ") failed, wait for further accessible DataEnvelopes");              
                 }
             }
         }
