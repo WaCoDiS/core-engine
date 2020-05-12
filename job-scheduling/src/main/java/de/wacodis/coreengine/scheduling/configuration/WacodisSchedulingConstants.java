@@ -18,5 +18,7 @@ public class WacodisSchedulingConstants {
     public static final String EXECUTION_ID_KEY = "executionID";
     
     public static final String RETRY_COUNT_KEY = "retryCount";
+    
+    public static final String RETRY_FIRST_EXECUTION_TIME_KEY = "executionTime";
 
 }

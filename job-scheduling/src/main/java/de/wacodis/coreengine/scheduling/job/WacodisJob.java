@@ -36,25 +36,27 @@ public class WacodisJob extends QuartzJobBean {
 
     @Autowired
     private JobRepositoryProvider jobRepositoryProvider;
-    
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         LOGGER.info("Executing job: {}", context.getJobDetail().getKey());
         JobDataMap jobData = context.getMergedJobDataMap();
         String id = jobData.getString(JOB_KEY_ID);
-        int retryCount = (jobData.containsKey(RETRY_COUNT_KEY)) ? jobData.getIntFromString(RETRY_COUNT_KEY) : 0; //zero retries happened if not present
-        
+        //jobData contains retryCount and orig. execution time if retry
+        int retryCount = (jobData.containsKey(RETRY_COUNT_KEY)) ? jobData.getIntFromString(RETRY_COUNT_KEY) : 0; //zero retries happened if not present (regular execution)
+        DateTime executionTime = (jobData.containsKey(RETRY_FIRST_EXECUTION_TIME_KEY)) ? DateTime.parse(jobData.getString(RETRY_FIRST_EXECUTION_TIME_KEY)) : new DateTime(context.getFireTime()); //keep execution time of first (regular) execution if retry
+
         try {
             UUID executionID;
-            
-            if(jobData.getString(EXECUTION_ID_KEY) == null || jobData.getString(EXECUTION_ID_KEY).isEmpty()){ //check if regular excution or retry
+
+            if (jobData.getString(EXECUTION_ID_KEY) == null || jobData.getString(EXECUTION_ID_KEY).isEmpty()) { //check if regular excution or retry
                 executionID = UUID.randomUUID(); //is regular execution if ID does not exist -> generate ID
-            }else{
+            } else {
                 executionID = UUID.fromString(jobData.getString(EXECUTION_ID_KEY)); //is retry if ID already exits
             }
 
             WacodisJobDefinition job = jobRepositoryProvider.getJobDefinitionForId(id);
-            WacodisJobExecutionContext execContext = new WacodisJobExecutionContext(executionID, new DateTime(context.getFireTime()), retryCount);
+            WacodisJobExecutionContext execContext = new WacodisJobExecutionContext(executionID, executionTime, retryCount);
             WacodisJobWrapper jobWrapper = new WacodisJobWrapper(execContext, job);
             evaluator.evaluateJob(jobWrapper, true);
         } catch (JobRepositoryRequestException ex) {
