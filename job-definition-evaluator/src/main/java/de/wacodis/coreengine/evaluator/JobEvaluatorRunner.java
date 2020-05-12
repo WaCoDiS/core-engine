@@ -114,7 +114,15 @@ public class JobEvaluatorRunner {
 
             return (isExecutable) ? EvaluationStatus.EXECUTABLE : EvaluationStatus.NOTEXECUTABLE;
         } catch (IOException ex) {
-            LOGGER.error("Wacodis-Job could not be evaluated, unable to retrieve resources from data-access, ", ex);
+            LOGGER.error("Wacodis-Job " + job.getJobDefinition().getId() + "could not be evaluated, unable to retrieve resources from data-access, ", ex);
+
+            if (addJobToInputTracker) {
+                this.inputTracker.addJob(job);
+                LOGGER.warn("Wacodis-Job {} could not be evaluated and might not be executed, add Wacodis-Job to InputTracker to wait for new, accesible DataEnvelopes");
+            } else {
+                LOGGER.error("Wacodis-Job " + job.getJobDefinition().getId() + "could not be evaluated and will not be executed!");
+            }
+            
             return EvaluationStatus.UNEVALUATED;
         }
     }
@@ -183,7 +191,7 @@ public class JobEvaluatorRunner {
             if (!inputAlreadyHasResources) {
                 input.setResource(Optional.empty());
                 input.setResourceAvailable(false);
-            }else{
+            } else {
                 input.setResourceAvailable(true);
             }
         }
@@ -226,7 +234,7 @@ public class JobEvaluatorRunner {
                 EvaluationStatus validityCheck = evaluateJob(job);
 
                 if (validityCheck.equals(EvaluationStatus.EXECUTABLE)) {
-                    LOGGER.info("Validity Check for WacodisJob " + job.getJobDefinition().getName() + " succeeded, publishing event");
+                    LOGGER.info("Validity Check for WacodisJob " + job.getJobDefinition().getName() + "  succeeded, publishing WacodisJobExecutableEvent");
                     WacodisJobExecutableEvent event = new WacodisJobExecutableEvent(this.eventOrigin, job, validityCheck);
                     this.publisher.publishEvent(event);
                     eventSource.removeJob(job);
