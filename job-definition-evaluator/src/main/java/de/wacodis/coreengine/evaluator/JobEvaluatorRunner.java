@@ -16,6 +16,7 @@ import de.wacodis.coreengine.evaluator.wacodisjobevaluation.JobIsExecutableChang
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobInputTracker;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -85,7 +86,7 @@ public class JobEvaluatorRunner {
     /**
      * Evaluates a job but does not inform the input tracker on execution status
      * changes
-     * 
+     *
      * @param job the job
      * @return info on the executable state
      */
@@ -95,12 +96,13 @@ public class JobEvaluatorRunner {
 
     /**
      * Evaluates a job executability
-     * 
+     *
      * @param job the job
-     * @param addJobToInputTracker if the input tracker should be informed about the execution status
+     * @param addJobToInputTracker if the input tracker should be informed about
+     * the execution status
      * @return info on the executable state
      */
-    public EvaluationStatus evaluateJob(WacodisJobWrapper job, boolean addJobToInputTracker) {        
+    public EvaluationStatus evaluateJob(WacodisJobWrapper job, boolean addJobToInputTracker) {
         try {
             DataAccessResourceSearchBody query = generateDataAccessQuery(job);
             Map<String, List<AbstractResource>> searchResult = this.dataAccessConnector.searchResources(query);
@@ -109,7 +111,7 @@ public class JobEvaluatorRunner {
             if (addJobToInputTracker) {
                 this.inputTracker.addJob(job);
             }
-            
+
             return (isExecutable) ? EvaluationStatus.EXECUTABLE : EvaluationStatus.NOTEXECUTABLE;
         } catch (IOException ex) {
             LOGGER.error("Wacodis-Job could not be evaluated, unable to retrieve resources from data-access, ", ex);
@@ -128,7 +130,7 @@ public class JobEvaluatorRunner {
         DataAccessResourceSearchBody query = new DataAccessResourceSearchBody();
         query.setAreaOfInterest(job.getJobDefinition().getAreaOfInterest());
         //exclude static inputs from data access query
-        List<AbstractSubsetDefinition> nonStaticInputs = job.getJobDefinition().getInputs().stream().filter( input -> !StaticSubsetDefinition.class.isAssignableFrom(input.getClass())).collect(Collectors.toList());
+        List<AbstractSubsetDefinition> nonStaticInputs = job.getJobDefinition().getInputs().stream().filter(input -> !StaticSubsetDefinition.class.isAssignableFrom(input.getClass())).collect(Collectors.toList());
         query.setInputs(nonStaticInputs);
         query.setTimeFrame(calculateTimeFrame(job));
 
@@ -157,12 +159,33 @@ public class JobEvaluatorRunner {
     }
 
     private void updateInputResource(InputHelper input, Optional<List<AbstractResource>> resourceList) {
+        boolean inputAlreadyHasResources = (input.getResource().isPresent() && input.getResource().get().size() > 0);
+
         if (resourceList.isPresent() && resourceList.get().size() > 0) {
-            input.setResource(resourceList);
+            if (!inputAlreadyHasResources) {
+                input.setResource(resourceList);
+            } else {
+                //combine existing and new resources
+                List<AbstractResource> currentResources = input.getResource().get();
+                List<AbstractResource> newResources = resourceList.get();
+                List<AbstractResource> allResources = new ArrayList<>();
+                //do not add new resource if already existing
+                newResources.removeAll(currentResources);
+                // combine resource lists
+                allResources.addAll(currentResources);
+                allResources.addAll(newResources);
+
+                input.setResource(Optional.of(allResources));
+            }
             input.setResourceAvailable(true);
         } else {
-            input.setResource(Optional.empty());
-            input.setResourceAvailable(false);
+            //do not overwrite if resource is already set (e.g. StaticDummyResouces)
+            if (!inputAlreadyHasResources) {
+                input.setResource(Optional.empty());
+                input.setResourceAvailable(false);
+            }else{
+                input.setResourceAvailable(true);
+            }
         }
     }
 
