@@ -32,6 +32,7 @@
         <h2.version>1.4.196</h2.version>
         <wps-client-lib.version>1.0.6</wps-client-lib.version>
         <maven.javadocplugin.version>3.1.1</maven.javadocplugin.version>
+        <release-plugin.version>3.0.0-M1</release-plugin.version>
     </properties>
 
     <scm>
@@ -171,6 +172,14 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>${release-plugin.version}</version>
+                <configuration>
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
+                </configuration>
             </plugin>
         </plugins>
     </build>
