@@ -4,7 +4,6 @@ The WaCoDiS Core Engine component provides core functionalities such as job sche
 
 **Table of Content**  
 TODO  
-Create a nice table of content, please.
 
 
 ## WaCoDiS Project Information
