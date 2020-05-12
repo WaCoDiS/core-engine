@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.joda.time.Interval;
@@ -106,6 +107,7 @@ public class JobEvaluatorRunner {
         try {
             DataAccessResourceSearchBody query = generateDataAccessQuery(job);
             Map<String, List<AbstractResource>> searchResult = this.dataAccessConnector.searchResources(query);
+            LOGGER.info("retrieved available resources for wacodis job {} from Data Access, response contained {} resources", job.getJobDefinition().getId(), getResourceCount(searchResult));
             boolean isExecutable = editJobWrapperInputs(searchResult, job);
 
             if (addJobToInputTracker) {
@@ -122,7 +124,7 @@ public class JobEvaluatorRunner {
             } else {
                 LOGGER.error("Wacodis-Job " + job.getJobDefinition().getId() + "could not be evaluated and will not be executed!");
             }
-            
+
             return EvaluationStatus.UNEVALUATED;
         }
     }
@@ -197,6 +199,16 @@ public class JobEvaluatorRunner {
         }
     }
 
+    private int getResourceCount(Map<String, List<AbstractResource>> resources) {
+        int count = 0;
+
+        for (Map.Entry<String, List<AbstractResource>> entry : resources.entrySet()) {
+            count += entry.getValue().size();
+        }
+
+        return count;
+    }
+
     private class EvaluatorListener implements JobIsExecutableChangeListener {
 
         private ApplicationEventPublisher publisher;
@@ -241,7 +253,7 @@ public class JobEvaluatorRunner {
                     eventSource.removeJob(job);
                 } else {
                     //wait for further DataEnvelopes     
-                    LOGGER.info("Validity Check for WacodisJob " + job.getJobDefinition().getName() + " (Id: " + job.getJobDefinition().getId() + ") failed, wait for further accessible DataEnvelopes");              
+                    LOGGER.info("Validity Check for WacodisJob " + job.getJobDefinition().getName() + " (Id: " + job.getJobDefinition().getId() + ") failed, wait for further accessible DataEnvelopes");
                 }
             }
         }
