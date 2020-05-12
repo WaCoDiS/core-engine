@@ -100,7 +100,7 @@ public class QuartzSingleExecutionSchedulingManager implements SingleExecutionSc
 
         try {
             firstFiringTime = schedulerFactoryBean.getScheduler().scheduleJob(quartzJobContext.getJobDetails(), quartzJobContext.getTrigger());	//runs QuartzJob's execute()
-            LOGGER.info("Scheduling single execution for job {} was successful. Execution is trifered at {}", quartzJobContext.getJobDetails().getKey(), firstFiringTime);
+            LOGGER.info("Scheduling single execution for job {} was successful. Execution is triggered at {}", quartzJobContext.getJobDetails().getKey(), firstFiringTime);
         } catch (SchedulerException ex) {
             LOGGER.error(ex.getMessage());
             LOGGER.debug("Error while trying to schedule single execution for  job " + quartzJobContext.getJobDetails().getKey(), ex);
