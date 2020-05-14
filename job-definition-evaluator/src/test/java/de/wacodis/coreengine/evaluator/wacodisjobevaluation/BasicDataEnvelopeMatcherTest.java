@@ -73,6 +73,44 @@ public class BasicDataEnvelopeMatcherTest {
     }
 
     @Test
+    public void testIsMatchCopernicusDataEnvelopeCopernicusSubsetDefinition_OptionalParams() {
+        CopernicusDataEnvelope copernicusEnv = getCopernicusDataEnvelope();
+        copernicusEnv.sensorMode("IW").instrument("SAR").productType("L1C").productLevel("LEVEL1C");
+        CopernicusSubsetDefinition copernicusSubset = getCopernicusSubsetDefinition();
+        copernicusSubset.sensorMode("IW").instrument("SAR").productType("L1C").productLevel("LEVEL1C");
+
+        assertTrue(this.matcher.match(copernicusEnv, getJobWrapper(), copernicusSubset));
+
+        //only attributes not null should be matched with DataEnvelope (only sensorMode in this case)
+        copernicusSubset.instrument(null).productType(null).productLevel(null);
+        assertTrue(this.matcher.match(copernicusEnv, getJobWrapper(), copernicusSubset));
+
+        copernicusSubset.sensorMode(null);
+        assertTrue(this.matcher.match(copernicusEnv, getJobWrapper(), copernicusSubset));
+    }
+
+    @Test
+    public void testIsMatchCopernicusDataEnvelopeCopernicusSubsetDefinition_OptionalParams_NoMatch() {
+        CopernicusDataEnvelope copernicusEnv = getCopernicusDataEnvelope();
+        copernicusEnv.sensorMode("IW").instrument("SAR").productType("L1C").productLevel("LEVEL1C");
+        CopernicusSubsetDefinition copernicusSubset = getCopernicusSubsetDefinition();
+        //different params
+        copernicusSubset.sensorMode("EW").instrument("SAR").productType("L1C").productLevel("LEVEL1C");
+        assertFalse(this.matcher.match(copernicusEnv, getJobWrapper(), copernicusSubset));
+        copernicusSubset.sensorMode("IW").instrument("MIS");
+        assertFalse(this.matcher.match(copernicusEnv, getJobWrapper(), copernicusSubset));
+        copernicusSubset.productLevel("LEVEL2").instrument("SAR");
+        assertFalse(this.matcher.match(copernicusEnv, getJobWrapper(), copernicusSubset));
+        copernicusSubset.productLevel("LEVEL1C").productType("GRD");
+        assertFalse(this.matcher.match(copernicusEnv, getJobWrapper(), copernicusSubset));
+
+        //match attributes if not null for SubsetDefinition
+        copernicusEnv.instrument(null).productType(null).productLevel(null).sensorMode(null);
+        assertFalse(this.matcher.match(copernicusEnv, getJobWrapper(), copernicusSubset));
+
+    }
+
+    @Test
     public void testIsMatchSensorWebDataEnvelopeSensorWebSubsetDefinition() {
         SensorWebDataEnvelope sensorWebEnv = getSensorWebDataEnvelope();
         SensorWebSubsetDefinition sensorWebSubset = getSensorWebSubsetDefinition();
@@ -190,7 +228,7 @@ public class BasicDataEnvelopeMatcherTest {
 
         WacodisJobDefinition def = wrapper.getJobDefinition();
         def.getTemporalCoverage().duration("P1D");
-        
+
         //envelope time frame can be equal to boundary values of input relvancy time frame
         //execution time 2018-02-01T00:00:00Z
         copEnv.getTimeFrame().setStartTime(DateTime.parse("2018-01-31T00:00:00Z"));

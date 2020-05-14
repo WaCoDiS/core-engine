@@ -72,7 +72,7 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
     public boolean match(AbstractDataEnvelope dataEnvelope, WacodisJobWrapper jobWrapper, AbstractSubsetDefinition subsetDefinition) {
         //SourceTypes must match
         if (!matchSourceTypes(dataEnvelope, subsetDefinition)) {
-            LOGGER.debug("Matching " + dataEnvelope.getSourceType() +  "(ID: " + dataEnvelope.getIdentifier() + ") with " + subsetDefinition.getSourceType() + "(ID: " + subsetDefinition.getIdentifier() + ", Wacodis Job: " + jobWrapper.getJobDefinition().getId() + "), Result: " + false + " (incompatible SourceType)");
+            LOGGER.debug("Matching " + dataEnvelope.getSourceType() + "(ID: " + dataEnvelope.getIdentifier() + ") with " + subsetDefinition.getSourceType() + "(ID: " + subsetDefinition.getIdentifier() + ", Wacodis Job: " + jobWrapper.getJobDefinition().getId() + "), Result: " + false + " (incompatible SourceType)");
             return false;
         }
 
@@ -83,11 +83,11 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
         //combine partial results
         boolean isMatch = (isMatchTF && isMatchAOI && isMatchAttr);
 
-        String logMsg = "Matching " + dataEnvelope.getSourceType() +  "(ID: " + dataEnvelope.getIdentifier() + ") with " + subsetDefinition.getSourceType() + "(ID: " + subsetDefinition.getIdentifier() + ", Wacodis Job: " + jobWrapper.getJobDefinition().getId() + "), Result: " + isMatch
+        String logMsg = "Matching " + dataEnvelope.getSourceType() + "(ID: " + dataEnvelope.getIdentifier() + ") with " + subsetDefinition.getSourceType() + "(ID: " + subsetDefinition.getIdentifier() + ", Wacodis Job: " + jobWrapper.getJobDefinition().getId() + "), Result: " + isMatch
                 + " (TimeFrame: " + isMatchTF + ", AreaOfInterest: " + isMatchAOI + ", Attributes: " + isMatchAttr + ")";
-        if(isMatch){
+        if (isMatch) {
             LOGGER.info(logMsg);
-        }else{
+        } else {
             LOGGER.debug(logMsg);
         }
 
@@ -187,8 +187,25 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
     }
 
     private boolean matchCopernicusDataEnvelope(CopernicusDataEnvelope dataEnvelope, CopernicusSubsetDefinition subsetDefinition) {
-        return matchSatellite(dataEnvelope.getSatellite(), subsetDefinition.getSatellite())
+        boolean mandatoryAttributes = matchSatellite(dataEnvelope.getSatellite(), subsetDefinition.getSatellite())
                 && dataEnvelope.getCloudCoverage() <= subsetDefinition.getMaximumCloudCoverage(); //cloud coverage must not exceed max. cloud coverage
+        
+        //only match optional attributes if defined in subset definition
+        boolean optionalAttributes = true;
+        if(subsetDefinition.getSensorMode() != null){
+            optionalAttributes &= subsetDefinition.getSensorMode().equalsIgnoreCase(dataEnvelope.getSensorMode());
+        }
+        if(subsetDefinition.getInstrument() != null){
+            optionalAttributes &= subsetDefinition.getInstrument().equalsIgnoreCase(dataEnvelope.getInstrument());
+        }
+        if(subsetDefinition.getProductLevel() != null){
+            optionalAttributes &= subsetDefinition.getProductLevel().equalsIgnoreCase(dataEnvelope.getProductLevel());  
+        }
+        if(subsetDefinition.getProductType() != null){
+            optionalAttributes &= subsetDefinition.getProductType().equalsIgnoreCase(dataEnvelope.getProductType());
+        }
+        
+        return (mandatoryAttributes && optionalAttributes);
     }
 
     private boolean matchSensorWebDataEnvelope(SensorWebDataEnvelope dataEnvelope, SensorWebSubsetDefinition subsetDefinition) {
