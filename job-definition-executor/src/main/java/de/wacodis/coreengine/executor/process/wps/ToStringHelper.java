@@ -31,13 +31,17 @@ public class ToStringHelper {
             ComplexData complexInput = (ComplexData) input;
             if (complexInput.isReference() && complexInput.getReference() != null) {
                 return complexInput.getReference().getHref();
+            } else if (complexInput.isReference() && complexInput.getReference() == null) {
+                return null;
+            } else {
+                return complexInput.getValue();
             }
         } else {
             if (input != null) {
                 return input.getValue();
+            } else {
+                return null;
             }
         }
-        
-        return "unparseable input value";
     }
 }
