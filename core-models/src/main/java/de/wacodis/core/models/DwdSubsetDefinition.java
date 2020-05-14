@@ -15,7 +15,7 @@ import javax.validation.constraints.*;
  * contains information for defining a subset definition for German weather service process inputs
  */
 @ApiModel(description = "contains information for defining a subset definition for German weather service process inputs")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-03-04T15:22:22.969+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-05-14T13:10:16.857+02:00[Europe/Berlin]")
 
 public class DwdSubsetDefinition extends AbstractSubsetDefinition implements Serializable {
   private static final long serialVersionUID = 1L;

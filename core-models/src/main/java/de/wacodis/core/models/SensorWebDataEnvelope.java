@@ -18,7 +18,7 @@ import javax.validation.constraints.*;
  * describes specific metadata information about a Sensor Web dataset
  */
 @ApiModel(description = "describes specific metadata information about a Sensor Web dataset")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-03-04T15:22:22.969+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-05-14T13:10:16.857+02:00[Europe/Berlin]")
 
 public class SensorWebDataEnvelope extends AbstractDataEnvelope implements Serializable {
   private static final long serialVersionUID = 1L;
