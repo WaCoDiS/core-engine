@@ -15,7 +15,7 @@ import javax.validation.constraints.*;
  * contains information for defining a subset definition for Copernicus process inputs
  */
 @ApiModel(description = "contains information for defining a subset definition for Copernicus process inputs")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-05-07T14:39:59.287+02:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-05-14T13:10:16.857+02:00[Europe/Berlin]")
 
 public class CopernicusSubsetDefinition extends AbstractSubsetDefinition implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -118,10 +118,10 @@ public class CopernicusSubsetDefinition extends AbstractSubsetDefinition impleme
   }
 
   /**
-   * abbreviation for sensor mode used by Sentinel-1 satellite instruments [EW (Extra Wide), IW (Interferometric Wide), SM (Stripmap), WV (Wave)]
+   * abbreviation for sensor mode used by Sentinel-1 satellite instruments [EW (Extra Wide), IW (Interferometric Wide), SM (Stripmap), WV (Wave)] 
    * @return sensorMode
   **/
-  @ApiModelProperty(value = "abbreviation for sensor mode used by Sentinel-1 satellite instruments [EW (Extra Wide), IW (Interferometric Wide), SM (Stripmap), WV (Wave)]")
+  @ApiModelProperty(value = "abbreviation for sensor mode used by Sentinel-1 satellite instruments [EW (Extra Wide), IW (Interferometric Wide), SM (Stripmap), WV (Wave)] ")
 
 
   public String getSensorMode() {

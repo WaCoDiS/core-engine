@@ -72,7 +72,7 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
     public boolean match(AbstractDataEnvelope dataEnvelope, WacodisJobWrapper jobWrapper, AbstractSubsetDefinition subsetDefinition) {
         //SourceTypes must match
         if (!matchSourceTypes(dataEnvelope, subsetDefinition)) {
-            LOGGER.info("Matching " + dataEnvelope.getSourceType() + " with " + subsetDefinition.getSourceType() + "(ID: " + subsetDefinition.getIdentifier() + "), Result: " + false + " (incompatible SourceType)");
+            LOGGER.debug("Matching " + dataEnvelope.getSourceType() + "(ID: " + dataEnvelope.getIdentifier() + ") with " + subsetDefinition.getSourceType() + "(ID: " + subsetDefinition.getIdentifier() + ", Wacodis Job: " + jobWrapper.getJobDefinition().getId() + "), Result: " + false + " (incompatible SourceType)");
             return false;
         }
 
@@ -83,8 +83,13 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
         //combine partial results
         boolean isMatch = (isMatchTF && isMatchAOI && isMatchAttr);
 
-        LOGGER.info("Matching " + dataEnvelope.getSourceType() + " with " + subsetDefinition.getSourceType() + "(ID: " + subsetDefinition.getIdentifier() + "), Result: " + isMatch
-                + " (TimeFrame: " + isMatchTF + ", AreaOfInterest: " + isMatchAOI + ", Attributes: " + isMatchAttr + ")");
+        String logMsg = "Matching " + dataEnvelope.getSourceType() + "(ID: " + dataEnvelope.getIdentifier() + ") with " + subsetDefinition.getSourceType() + "(ID: " + subsetDefinition.getIdentifier() + ", Wacodis Job: " + jobWrapper.getJobDefinition().getId() + "), Result: " + isMatch
+                + " (TimeFrame: " + isMatchTF + ", AreaOfInterest: " + isMatchAOI + ", Attributes: " + isMatchAttr + ")";
+        if (isMatch) {
+            LOGGER.info(logMsg);
+        } else {
+            LOGGER.debug(logMsg);
+        }
 
         return isMatch;
     }
@@ -124,9 +129,9 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
             case WACODISPRODUCTDATAENVELOPE:
                 WacodisProductDataEnvelope productDataEnvelope = (WacodisProductDataEnvelope) dataEnvelope;
                 WacodisProductSubsetDefinition productSubset = (WacodisProductSubsetDefinition) subsetDefinition;
-                
+
                 isMatch = matchProductdataEnvelope(productDataEnvelope, productSubset);
-                
+
                 break;
             default:
                 //unknown source type or not set
@@ -151,8 +156,10 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
     private boolean matchTimeFrame(AbstractDataEnvelope dataEnvelope, WacodisJobWrapper jobWrapper) {
         Interval inputRelevancyTimeFrame = jobWrapper.calculateInputRelevancyTimeFrame();
 
-        return dataEnvelope.getTimeFrame().getEndTime().isAfter(inputRelevancyTimeFrame.getStart()) //envelopes timeframe intersects time between beginRelevancy (start) and executionTime (end)
-                && dataEnvelope.getTimeFrame().getStartTime().isBefore(inputRelevancyTimeFrame.getEnd());
+        //envelopes timeframe intersects time between beginRelevancy (start) and executionTime (end)
+        //also allow values equal to boundaries of inputRelevancyTimeFrame
+        return (dataEnvelope.getTimeFrame().getEndTime().isAfter(inputRelevancyTimeFrame.getStart()) || dataEnvelope.getTimeFrame().getEndTime().isEqual(inputRelevancyTimeFrame.getStart()))
+                && (dataEnvelope.getTimeFrame().getStartTime().isBefore(inputRelevancyTimeFrame.getEnd()) || dataEnvelope.getTimeFrame().getStartTime().isEqual(inputRelevancyTimeFrame.getEnd()));
     }
 
     /**
@@ -165,7 +172,13 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
         Float[] aoiExtent = extentAreaOfInterest.getExtent().toArray(new Float[0]);
         Float[] envExtent = extentDataEnvelope.getExtent().toArray(new Float[0]);
 
-        return (calculateOverlapPercentage(aoiExtent, envExtent) >= this.config.getMinimumOverlapPercentage());
+        if (this.config.getMinimumOverlapPercentage() >= 0.0f) {
+            LOGGER.debug("minimum overlap percentage is {}, calculate of percentage of overlap", this.config.getMinimumOverlapPercentage());
+            return (calculateOverlapPercentage(aoiExtent, envExtent) >= this.config.getMinimumOverlapPercentage());
+        } else {
+            LOGGER.debug("minimum overlap percentage is {}, check if extents intersect", this.config.getMinimumOverlapPercentage());
+            return intersectsExtent(aoiExtent, envExtent);
+        }
     }
 
     private boolean matchGdiDeDataEnevelope(GdiDeDataEnvelope dataEnvelope, CatalogueSubsetDefinition subsetDefinition) {
@@ -174,9 +187,25 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
     }
 
     private boolean matchCopernicusDataEnvelope(CopernicusDataEnvelope dataEnvelope, CopernicusSubsetDefinition subsetDefinition) {
-        return dataEnvelope.getDatasetId().equals(subsetDefinition.getIdentifier())
-                && matchSatellite(dataEnvelope.getSatellite(), subsetDefinition.getSatellite())
+        boolean mandatoryAttributes = matchSatellite(dataEnvelope.getSatellite(), subsetDefinition.getSatellite())
                 && dataEnvelope.getCloudCoverage() <= subsetDefinition.getMaximumCloudCoverage(); //cloud coverage must not exceed max. cloud coverage
+        
+        //only match optional attributes if defined in subset definition
+        boolean optionalAttributes = true;
+        if(subsetDefinition.getSensorMode() != null){
+            optionalAttributes &= subsetDefinition.getSensorMode().equalsIgnoreCase(dataEnvelope.getSensorMode());
+        }
+        if(subsetDefinition.getInstrument() != null){
+            optionalAttributes &= subsetDefinition.getInstrument().equalsIgnoreCase(dataEnvelope.getInstrument());
+        }
+        if(subsetDefinition.getProductLevel() != null){
+            optionalAttributes &= subsetDefinition.getProductLevel().equalsIgnoreCase(dataEnvelope.getProductLevel());  
+        }
+        if(subsetDefinition.getProductType() != null){
+            optionalAttributes &= subsetDefinition.getProductType().equalsIgnoreCase(dataEnvelope.getProductType());
+        }
+        
+        return (mandatoryAttributes && optionalAttributes);
     }
 
     private boolean matchSensorWebDataEnvelope(SensorWebDataEnvelope dataEnvelope, SensorWebSubsetDefinition subsetDefinition) {
@@ -191,8 +220,8 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
         return dataEnvelope.getServiceUrl().equals(subsetDefinition.getServiceUrl())
                 && dataEnvelope.getLayerName().equals(subsetDefinition.getLayerName());
     }
-    
-    private boolean matchProductdataEnvelope(WacodisProductDataEnvelope dataEnvelope, WacodisProductSubsetDefinition subsetDefinition){
+
+    private boolean matchProductdataEnvelope(WacodisProductDataEnvelope dataEnvelope, WacodisProductSubsetDefinition subsetDefinition) {
         return dataEnvelope.getProductType().equalsIgnoreCase(subsetDefinition.getProductType())
                 && dataEnvelope.getServiceDefinition().getBackendType().equals(subsetDefinition.getBackendType());
     }
@@ -213,7 +242,7 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
             return true;
         } else if (dataEnvelope.getSourceType() == AbstractDataEnvelope.SourceTypeEnum.DWDDATAENVELOPE && subsetDefinition.getSourceType() == AbstractSubsetDefinition.SourceTypeEnum.DWDSUBSETDEFINITION) {
             return true;
-        } else if(dataEnvelope.getSourceType() == AbstractDataEnvelope.SourceTypeEnum.WACODISPRODUCTDATAENVELOPE && subsetDefinition.getSourceType() == AbstractSubsetDefinition.SourceTypeEnum.WACODISPRODUCTSUBSETDEFINITION){
+        } else if (dataEnvelope.getSourceType() == AbstractDataEnvelope.SourceTypeEnum.WACODISPRODUCTDATAENVELOPE && subsetDefinition.getSourceType() == AbstractSubsetDefinition.SourceTypeEnum.WACODISPRODUCTSUBSETDEFINITION) {
             return true;
         } else {
             return false;
@@ -228,7 +257,7 @@ public class BasicDataEnvelopeMatcher implements DataEnvelopeMatcher {
      * @return
      */
     private boolean matchSatellite(CopernicusDataEnvelope.SatelliteEnum satelliteEnv, CopernicusSubsetDefinition.SatelliteEnum satelliteSub) {
-        return satelliteEnv.toString().equals(satelliteSub.toString());
+        return satelliteEnv.toString().toLowerCase().equals(satelliteSub.toString().toLowerCase());
     }
 
     /**

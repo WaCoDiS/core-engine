@@ -33,12 +33,10 @@ public class JobDefinitionListener {
         messageHandler.handleNewJob(jobDefinition);
     }
 
-    @StreamListener(target = JobDefinitionListenerChannel.JOB_STATUS_UPDATE_INPUT)
-    public void jobDefinitionDeleted(WacodisJobStatusUpdate jobStatusUpdate) {
-        if (jobStatusUpdate.getNewStatus().equals(WacodisJobStatus.DELETED)) {
-            LOGGER.info("Received deleted job status update: {}", jobStatusUpdate.getWacodisJobIdentifier().toString());
-            messageHandler.handleJobDeletion(jobStatusUpdate);
-        }
+    @StreamListener(target = JobDefinitionListenerChannel.JOB_DELETION_INPUT)
+    public void jobDefinitionDeleted(WacodisJobDefinition jobDefinition) {
+        LOGGER.info("Received deletion for job: {}", jobDefinition.getId().toString());
+        messageHandler.handleJobDeletion(jobDefinition);
     }
 
 }

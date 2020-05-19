@@ -21,7 +21,7 @@ import javax.validation.constraints.*;
  * describes specific metadata information about a product dataset created from the WaCoDiS System
  */
 @ApiModel(description = "describes specific metadata information about a product dataset created from the WaCoDiS System")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-05-07T14:39:59.287+02:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-05-14T13:10:16.857+02:00[Europe/Berlin]")
 
 public class WacodisProductDataEnvelope extends AbstractDataEnvelope implements Serializable {
   private static final long serialVersionUID = 1L;

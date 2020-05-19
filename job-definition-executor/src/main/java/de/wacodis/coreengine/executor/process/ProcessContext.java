@@ -77,4 +77,9 @@ public class ProcessContext {
     public void removeExpectedOutput(ExpectedProcessOutput expectedOutput) {
         this.expectedOutputs.remove(expectedOutput);
     }
+
+    @Override
+    public String toString() {
+        return "ProcessContext{" + "inputResources=" + inputResources + ", expectedOutputs=" + expectedOutputs + ", wacodisProcessID=" + wacodisProcessID + '}';
+    }
 }

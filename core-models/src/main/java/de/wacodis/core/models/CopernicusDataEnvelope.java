@@ -18,7 +18,7 @@ import javax.validation.constraints.*;
  * describes specific metadata information about a Copernicus dataset
  */
 @ApiModel(description = "describes specific metadata information about a Copernicus dataset")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-05-07T14:39:59.287+02:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-05-14T13:10:16.857+02:00[Europe/Berlin]")
 
 public class CopernicusDataEnvelope extends AbstractDataEnvelope implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -61,6 +61,18 @@ public class CopernicusDataEnvelope extends AbstractDataEnvelope implements Seri
 
   @JsonProperty("satellite")
   private SatelliteEnum satellite = null;
+
+  @JsonProperty("instrument")
+  private String instrument = null;
+
+  @JsonProperty("sensorMode")
+  private String sensorMode = null;
+
+  @JsonProperty("productType")
+  private String productType = null;
+
+  @JsonProperty("productLevel")
+  private String productLevel = null;
 
   @JsonProperty("cloudCoverage")
   private Float cloudCoverage = null;
@@ -141,6 +153,86 @@ public class CopernicusDataEnvelope extends AbstractDataEnvelope implements Seri
     this.satellite = satellite;
   }
 
+  public CopernicusDataEnvelope instrument(String instrument) {
+    this.instrument = instrument;
+    return this;
+  }
+
+  /**
+   * abbreviation for the instrument that is carried by a Sentinel mission [SAR (Sentinel-1 Synthetic Aperture Radar), MSI ( Sentinel-2 MultiSpectral Instrument)] 
+   * @return instrument
+  **/
+  @ApiModelProperty(value = "abbreviation for the instrument that is carried by a Sentinel mission [SAR (Sentinel-1 Synthetic Aperture Radar), MSI ( Sentinel-2 MultiSpectral Instrument)] ")
+
+
+  public String getInstrument() {
+    return instrument;
+  }
+
+  public void setInstrument(String instrument) {
+    this.instrument = instrument;
+  }
+
+  public CopernicusDataEnvelope sensorMode(String sensorMode) {
+    this.sensorMode = sensorMode;
+    return this;
+  }
+
+  /**
+   * abbreviation for sensor mode used by Sentinel-1 satellite instruments [EW (Extra Wide), IW (Interferometric Wide), SM (Stripmap), WV (Wave)] 
+   * @return sensorMode
+  **/
+  @ApiModelProperty(value = "abbreviation for sensor mode used by Sentinel-1 satellite instruments [EW (Extra Wide), IW (Interferometric Wide), SM (Stripmap), WV (Wave)] ")
+
+
+  public String getSensorMode() {
+    return sensorMode;
+  }
+
+  public void setSensorMode(String sensorMode) {
+    this.sensorMode = sensorMode;
+  }
+
+  public CopernicusDataEnvelope productType(String productType) {
+    this.productType = productType;
+    return this;
+  }
+
+  /**
+   * abbreviation for the product type of the Copernicus subset [RAW (raw data), GRD (Ground Range Detected), SLC (Single Look Complex), OCN (Ocean), L1C (Sentinel-2 Level 1C), L2A (Sentinel-2 Level 2A)] 
+   * @return productType
+  **/
+  @ApiModelProperty(value = "abbreviation for the product type of the Copernicus subset [RAW (raw data), GRD (Ground Range Detected), SLC (Single Look Complex), OCN (Ocean), L1C (Sentinel-2 Level 1C), L2A (Sentinel-2 Level 2A)] ")
+
+
+  public String getProductType() {
+    return productType;
+  }
+
+  public void setProductType(String productType) {
+    this.productType = productType;
+  }
+
+  public CopernicusDataEnvelope productLevel(String productLevel) {
+    this.productLevel = productLevel;
+    return this;
+  }
+
+  /**
+   * abbreviation for the level of the Copernicus product (e.g) [LEVEL0, LEVEL1, LEVEL2, LEVEL1C, LEVEL2A] 
+   * @return productLevel
+  **/
+  @ApiModelProperty(value = "abbreviation for the level of the Copernicus product (e.g) [LEVEL0, LEVEL1, LEVEL2, LEVEL1C, LEVEL2A] ")
+
+
+  public String getProductLevel() {
+    return productLevel;
+  }
+
+  public void setProductLevel(String productLevel) {
+    this.productLevel = productLevel;
+  }
+
   public CopernicusDataEnvelope cloudCoverage(Float cloudCoverage) {
     this.cloudCoverage = cloudCoverage;
     return this;
@@ -195,6 +287,10 @@ public class CopernicusDataEnvelope extends AbstractDataEnvelope implements Seri
     CopernicusDataEnvelope copernicusDataEnvelope = (CopernicusDataEnvelope) o;
     return Objects.equals(this.datasetId, copernicusDataEnvelope.datasetId) &&
         Objects.equals(this.satellite, copernicusDataEnvelope.satellite) &&
+        Objects.equals(this.instrument, copernicusDataEnvelope.instrument) &&
+        Objects.equals(this.sensorMode, copernicusDataEnvelope.sensorMode) &&
+        Objects.equals(this.productType, copernicusDataEnvelope.productType) &&
+        Objects.equals(this.productLevel, copernicusDataEnvelope.productLevel) &&
         Objects.equals(this.cloudCoverage, copernicusDataEnvelope.cloudCoverage) &&
         Objects.equals(this.portal, copernicusDataEnvelope.portal) &&
         super.equals(o);
@@ -202,7 +298,7 @@ public class CopernicusDataEnvelope extends AbstractDataEnvelope implements Seri
 
   @Override
   public int hashCode() {
-    return Objects.hash(datasetId, satellite, cloudCoverage, portal, super.hashCode());
+    return Objects.hash(datasetId, satellite, instrument, sensorMode, productType, productLevel, cloudCoverage, portal, super.hashCode());
   }
 
   @Override
@@ -212,6 +308,10 @@ public class CopernicusDataEnvelope extends AbstractDataEnvelope implements Seri
     sb.append("    ").append(toIndentedString(super.toString())).append("\n");
     sb.append("    datasetId: ").append(toIndentedString(datasetId)).append("\n");
     sb.append("    satellite: ").append(toIndentedString(satellite)).append("\n");
+    sb.append("    instrument: ").append(toIndentedString(instrument)).append("\n");
+    sb.append("    sensorMode: ").append(toIndentedString(sensorMode)).append("\n");
+    sb.append("    productType: ").append(toIndentedString(productType)).append("\n");
+    sb.append("    productLevel: ").append(toIndentedString(productLevel)).append("\n");
     sb.append("    cloudCoverage: ").append(toIndentedString(cloudCoverage)).append("\n");
     sb.append("    portal: ").append(toIndentedString(portal)).append("\n");
     sb.append("}");

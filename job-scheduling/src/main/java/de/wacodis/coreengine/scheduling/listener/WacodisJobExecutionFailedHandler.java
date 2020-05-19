@@ -9,8 +9,10 @@ import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionRetrySettings;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionContext;
 import de.wacodis.coreengine.executor.events.WacodisJobExecutionFailedEvent;
+import de.wacodis.coreengine.scheduling.configuration.WacodisSchedulingConstants;
 import static de.wacodis.coreengine.scheduling.configuration.WacodisSchedulingConstants.EXECUTION_ID_KEY;
 import static de.wacodis.coreengine.scheduling.configuration.WacodisSchedulingConstants.RETRY_COUNT_KEY;
+import static de.wacodis.coreengine.scheduling.configuration.WacodisSchedulingConstants.RETRY_FIRST_EXECUTION_TIME_KEY;
 import de.wacodis.coreengine.scheduling.manage.QuartzSingleExecutionSchedulingManager;
 import java.util.Date;
 import java.util.HashMap;
@@ -66,6 +68,7 @@ public class WacodisJobExecutionFailedHandler implements ApplicationListener<Wac
         Map<String, String> jobData = new HashMap<>();
         jobData.put(EXECUTION_ID_KEY, context.getExecutionID().toString());
         jobData.put(RETRY_COUNT_KEY, String.valueOf(context.getRetryCount()));
+        jobData.put(RETRY_FIRST_EXECUTION_TIME_KEY, context.getExecutionTime().toString());
 
         return jobData;
     }

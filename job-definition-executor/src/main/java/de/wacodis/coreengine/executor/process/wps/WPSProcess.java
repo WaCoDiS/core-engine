@@ -218,6 +218,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
 
     private List<String> setComplexInputData(ComplexInputDescription complexProcessInput, List<ResourceDescription> providedResources, ExecuteRequestBuilder executeRequestBuilder) {
         ResourceDescription providedResource;
+        String inputValue;
         List<String> originDataEnvelopes = new ArrayList<>();
 
         for (int i = 0; i < providedResources.size(); i++) {
@@ -227,15 +228,10 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
             }
 
             providedResource = providedResources.get(i);
-
-            if (StaticDummyResource.class
-                    .isAssignableFrom(providedResource.getResource().getClass())) {
-                throw new IllegalArgumentException(
-                        "illegal ressource type for complex wps input, resource for input " + complexProcessInput.getId() + " is a static resource, only non-static resources are allowed for complex inputs");
-            }
-
+            inputValue = getValueFromResource(providedResource);
+            
             try {
-                executeRequestBuilder.addComplexDataReference(complexProcessInput.getId(), providedResource.getResource().getUrl(), providedResource.getSchema().getSchemaLocation(), null, providedResource.getMimeType());
+                executeRequestBuilder.addComplexDataReference(complexProcessInput.getId(), inputValue, providedResource.getSchema().getSchemaLocation(), null, providedResource.getMimeType());
             } catch (MalformedURLException ex) {
                 throw new IllegalArgumentException("cannot add complex input " + complexProcessInput.getId() + " as reference, invalid reference, malformed url" + providedResource.getResource().getUrl(), ex);
             }

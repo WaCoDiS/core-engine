@@ -46,15 +46,15 @@ public class JobMessageScheduleHandler implements JobMessageHandler {
     }
 
     @Override
-    public void handleJobDeletion(WacodisJobStatusUpdate jobStatusUpdate) {
-        if (regularExecutionschedulingManager.existsJob(jobStatusUpdate.getWacodisJobIdentifier().toString())) {
-            if (regularExecutionschedulingManager.deleteJob(jobStatusUpdate.getWacodisJobIdentifier().toString())) {
-                LOG.info("Job '{}' deleted succesfully.", jobStatusUpdate.getWacodisJobIdentifier().toString());
+    public void handleJobDeletion(WacodisJobDefinition jobDefinition) {
+        if (regularExecutionschedulingManager.existsJob(jobDefinition.getId().toString())) {
+            if (regularExecutionschedulingManager.deleteJob(jobDefinition.getId().toString())) {
+                LOG.info("Job '{}' deleted succesfully.", jobDefinition.getId().toString());
             } else {
-                LOG.warn("Deletion of job '{}' failed.", jobStatusUpdate.getWacodisJobIdentifier().toString());
+                LOG.warn("Deletion of job '{}' failed.", jobDefinition.getId().toString());
             }
         } else {
-            LOG.warn("Job '{}' does not exist.", jobStatusUpdate.getWacodisJobIdentifier().toString());
+            LOG.warn("Job '{}' does not exist.", jobDefinition.getId().toString());
         }
     }
 

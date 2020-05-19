@@ -73,14 +73,41 @@ public class BasicDataEnvelopeMatcherTest {
     }
 
     @Test
-    public void testIsMatchCopernicusDataEnvelopeCopernicusSubsetDefinitionIdentifier() {
+    public void testIsMatchCopernicusDataEnvelopeCopernicusSubsetDefinition_OptionalParams() {
         CopernicusDataEnvelope copernicusEnv = getCopernicusDataEnvelope();
+        copernicusEnv.sensorMode("IW").instrument("SAR").productType("L1C").productLevel("LEVEL1C");
         CopernicusSubsetDefinition copernicusSubset = getCopernicusSubsetDefinition();
+        copernicusSubset.sensorMode("IW").instrument("SAR").productType("L1C").productLevel("LEVEL1C");
 
-        copernicusEnv.setDatasetId("identifierA");
-        copernicusSubset.setIdentifier("identifierB");
+        assertTrue(this.matcher.match(copernicusEnv, getJobWrapper(), copernicusSubset));
 
+        //only attributes not null should be matched with DataEnvelope (only sensorMode in this case)
+        copernicusSubset.instrument(null).productType(null).productLevel(null);
+        assertTrue(this.matcher.match(copernicusEnv, getJobWrapper(), copernicusSubset));
+
+        copernicusSubset.sensorMode(null);
+        assertTrue(this.matcher.match(copernicusEnv, getJobWrapper(), copernicusSubset));
+    }
+
+    @Test
+    public void testIsMatchCopernicusDataEnvelopeCopernicusSubsetDefinition_OptionalParams_NoMatch() {
+        CopernicusDataEnvelope copernicusEnv = getCopernicusDataEnvelope();
+        copernicusEnv.sensorMode("IW").instrument("SAR").productType("L1C").productLevel("LEVEL1C");
+        CopernicusSubsetDefinition copernicusSubset = getCopernicusSubsetDefinition();
+        //different params
+        copernicusSubset.sensorMode("EW").instrument("SAR").productType("L1C").productLevel("LEVEL1C");
         assertFalse(this.matcher.match(copernicusEnv, getJobWrapper(), copernicusSubset));
+        copernicusSubset.sensorMode("IW").instrument("MIS");
+        assertFalse(this.matcher.match(copernicusEnv, getJobWrapper(), copernicusSubset));
+        copernicusSubset.productLevel("LEVEL2").instrument("SAR");
+        assertFalse(this.matcher.match(copernicusEnv, getJobWrapper(), copernicusSubset));
+        copernicusSubset.productLevel("LEVEL1C").productType("GRD");
+        assertFalse(this.matcher.match(copernicusEnv, getJobWrapper(), copernicusSubset));
+
+        //match attributes if not null for SubsetDefinition
+        copernicusEnv.instrument(null).productType(null).productLevel(null).sensorMode(null);
+        assertFalse(this.matcher.match(copernicusEnv, getJobWrapper(), copernicusSubset));
+
     }
 
     @Test
@@ -191,6 +218,28 @@ public class BasicDataEnvelopeMatcherTest {
         gdiDeEnv.getTimeFrame().setEndTime(DateTime.parse("2020-01-01T00:00:00Z"));
 
         assertTrue(this.matcher.match(gdiDeEnv, wrapper, catalogueSubset));
+    }
+
+    @Test
+    public void testMatchTimeFrameDataEnvelope_BoundaryValues() {
+        WacodisJobWrapper wrapper = getJobWrapper();
+        CopernicusDataEnvelope copEnv = getCopernicusDataEnvelope();
+        CopernicusSubsetDefinition copSubset = getCopernicusSubsetDefinition();
+
+        WacodisJobDefinition def = wrapper.getJobDefinition();
+        def.getTemporalCoverage().duration("P1D");
+
+        //envelope time frame can be equal to boundary values of input relvancy time frame
+        //execution time 2018-02-01T00:00:00Z
+        copEnv.getTimeFrame().setStartTime(DateTime.parse("2018-01-31T00:00:00Z"));
+        copEnv.getTimeFrame().setEndTime(DateTime.parse("2018-01-31T00:00:00Z"));
+
+        assertTrue(this.matcher.match(copEnv, wrapper, copSubset));
+
+        copEnv.getTimeFrame().setStartTime(DateTime.parse("2018-02-01T00:00:00Z"));
+        copEnv.getTimeFrame().setEndTime(DateTime.parse("2018-02-01T00:00:00Z"));
+
+        assertTrue(this.matcher.match(copEnv, wrapper, copSubset));
     }
 
     @Test
@@ -315,7 +364,7 @@ public class BasicDataEnvelopeMatcherTest {
 
         productEnvelope.getServiceDefinition().setBackendType(ProductBackend.ARCGISIMAGESERVERBACKEND);
         productSubset.setBackendType(ProductBackend.ARCGISIMAGESERVERBACKEND);
-        
+
         assertTrue(this.matcher.match(productEnvelope, wrapper, productSubset));
     }
 
@@ -588,7 +637,7 @@ public class BasicDataEnvelopeMatcherTest {
         jobDef.setExecution(execution);
 
         DateTime executionTime = new DateTime(DateTime.parse("2018-02-01T00:00:00Z"));
-        WacodisJobWrapper jobWrapper =new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), executionTime, 0), jobDef);
+        WacodisJobWrapper jobWrapper = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), executionTime, 0), jobDef);
 
         return jobWrapper;
     }

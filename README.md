@@ -1,9 +1,9 @@
 # WaCoDiS Core Engine
+![Build](https://github.com/WaCoDiS/core-engine/workflows/Build/badge.svg)  
 The WaCoDiS Core Engine component provides core functionalities such as job scheduling, evaluation and execution.
 
 **Table of Content**  
 TODO  
-Create a nice table of content, please.
 
 
 ## WaCoDiS Project Information
