@@ -7,9 +7,12 @@ package de.wacodis.coreengine.executor;
 
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionRetrySettings;
+import de.wacodis.core.models.WacodisJobFailed;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
+import de.wacodis.coreengine.executor.exception.JobProcessCompletionException;
 import de.wacodis.coreengine.executor.exception.JobProcessCreationException;
+import de.wacodis.coreengine.executor.messaging.ToolMessagePublisher;
 import de.wacodis.coreengine.executor.process.wps.WPSProcess;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,7 +39,10 @@ import de.wacodis.coreengine.executor.process.events.WacodisJobExecutionEventHan
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.PostConstruct;
+import org.joda.time.DateTime;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 
 /**
  * start execution of wacodis jobs asynchronously in separate threads
@@ -144,7 +150,11 @@ public class WacodisJobExecutionStarter {
             try {
                 subProcesses = subProcessCreator.getJobProcessesForWacodisJob(job, toolProcess);
             } catch (JobProcessCreationException ex2) {
-                throw new IllegalArgumentException("unable to execute wacodis job " + job.getJobDefinition().getId().toString() + ", could not create sub process, fallback to single sub process also failed ", ex2);
+                //publish failure message if unable to build subprocesses and throw exception
+                IllegalArgumentException iae = new IllegalArgumentException("unable to execute wacodis job " + job.getJobDefinition().getId().toString() + ", could not create sub process, fallback to single sub process also failed ", ex2);
+                ToolMessagePublisher.publishMessageSync(this.processMessagePublisher.toolFailure(), buildUnableToProcessMessage(job.getJobDefinition(), iae.getMessage(), DateTime.now()));
+            
+                throw iae;
             }
         }
         WacodisJobExecutor jobExecutor = createWacodisJobExecutor(job.getJobDefinition());
@@ -199,6 +209,14 @@ public class WacodisJobExecutionStarter {
         LOGGER.debug("created executor of type {} for wacodis job {}", executor.getClass().getSimpleName(), jobDefinition.getId());
 
         return executor;
+    }
+    
+        private Message<WacodisJobFailed> buildUnableToProcessMessage(WacodisJobDefinition jobDef,  String reason, DateTime timestamp) {
+        WacodisJobFailed msg = new WacodisJobFailed();
+        msg.setCreated(timestamp);
+        msg.setReason(reason);
+        msg.setWacodisJobIdentifier(jobDef.getId());
+        return MessageBuilder.withPayload(msg).build();
     }
 
 }
