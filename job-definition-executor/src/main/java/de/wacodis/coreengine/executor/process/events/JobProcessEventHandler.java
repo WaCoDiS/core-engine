@@ -36,19 +36,16 @@ public class JobProcessEventHandler implements JobProcessExecutedEventHandler, J
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(JobProcessEventHandler.class);
 
     private final ApplicationEventPublisher jobProcessFailedPublisher;
-    private final WacodisJobWrapper job;
     private final ToolMessagePublisherChannel toolMessagePublisher;
     private long messagePublishingTimeout_Millis = 10000; //default of ten seconds
 
-    public JobProcessEventHandler(WacodisJobWrapper job, ToolMessagePublisherChannel toolMessagePublisher, ApplicationEventPublisher jobProcessFailedPublisher) {
+    public JobProcessEventHandler(ToolMessagePublisherChannel toolMessagePublisher, ApplicationEventPublisher jobProcessFailedPublisher) {
         this.jobProcessFailedPublisher = jobProcessFailedPublisher;
-        this.job = job;
         this.toolMessagePublisher = toolMessagePublisher;
     }
 
-    public JobProcessEventHandler(WacodisJobWrapper job, ToolMessagePublisherChannel toolMessagePublisher, ApplicationEventPublisher jobProcessFailedPublisher, long messagePublishingTimeout_Millis) {
+    public JobProcessEventHandler(ToolMessagePublisherChannel toolMessagePublisher, ApplicationEventPublisher jobProcessFailedPublisher, long messagePublishingTimeout_Millis) {
         this.jobProcessFailedPublisher = jobProcessFailedPublisher;
-        this.job = job;
         this.toolMessagePublisher = toolMessagePublisher;
         this.messagePublishingTimeout_Millis = messagePublishingTimeout_Millis;
     }
@@ -65,7 +62,7 @@ public class JobProcessEventHandler implements JobProcessExecutedEventHandler, J
     public void onJobProcessFinished(JobProcessExecutedEvent e) {
         JobProcess subProcess = e.getJobProcess();
         WacodisJobDefinition jobDefinition = subProcess.getJobDefinition();
-        
+
         //publish message on succesful processing
         ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFinished(), buildProcessFinishedMessage(e.getOutput(), e.getTimestamp()), this.messagePublishingTimeout_Millis);
 
@@ -76,22 +73,11 @@ public class JobProcessEventHandler implements JobProcessExecutedEventHandler, J
     public void onJobProcessFailed(JobProcessFailedEvent e) {
         JobProcess subProcess = e.getJobProcess();
         WacodisJobDefinition jobDefinition = subProcess.getJobDefinition();
-        
+
         //publish message on failed processing
-         ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFailure(), buildToolFailureMessage(e.getException(), e.getTimestamp()), this.messagePublishingTimeout_Millis);
-        
+        ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFailure(), buildToolFailureMessage(e.getException(), e.getTimestamp()), this.messagePublishingTimeout_Millis);
+
         LOGGER.error("execution of  sub process " + subProcess.getJobProcessIdentifier() + " of wacodis job " + jobDefinition.getId() + " failed", e.getException());
-        //trigger job execution failed event
-        if (this.job.getExecutionContext().getRetryCount() < this.job.getJobDefinition().getRetrySettings().getMaxRetries()) { //check if retry
-            //fire event to schedule retry attempt
-            int retries = this.job.incrementRetryCount();
-            LOGGER.info("publish jobExecutionFailedEvent to schedule retry attempt {} of {}, WacodisJobID {}, toolID: {}", retries, job.getJobDefinition().getRetrySettings().getMaxRetries(), jobDefinition.getId(), subProcess.getExecutionContext().getWacodisProcessID());
-            WacodisJobExecutionFailedEvent failEvent = new WacodisJobExecutionFailedEvent(this, job, new ExecutionException(e.getException()));
-            this.jobProcessFailedPublisher.publishEvent(failEvent);
-        } else {
-            //retries exceeded, job failed ultimately
-            LOGGER.error("execution of wacodis job failed ultimately after " + job.getExecutionContext().getRetryCount() + " of " + job.getJobDefinition().getRetrySettings().getMaxRetries() + " retries, WacodisJobID: " + jobDefinition.getId().toString() + ",toolID: " + subProcess.getExecutionContext().getWacodisProcessID());
-        }
     }
 
     @Override

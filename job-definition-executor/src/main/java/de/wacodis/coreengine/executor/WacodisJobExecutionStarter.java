@@ -103,9 +103,9 @@ public class WacodisJobExecutionStarter {
         this.expectedProcessOutputs = selectedOutputs;
         LOGGER.debug("set expected process outputs to: " + selectedOutputs.toString());
     }
-    
+
     @PostConstruct
-    private void initContextBuilder(){
+    private void initContextBuilder() {
         this.wpsContextBuilder = new WPSProcessContextBuilder(this.wpsConfig);
     }
 
@@ -115,7 +115,7 @@ public class WacodisJobExecutionStarter {
 
         LOGGER.info("execute Wacodis Job " + wacodisJobID + " using processing tool " + toolProcessID);
 
-       JobProcessBuilder subProcessCreator;
+        JobProcessBuilder subProcessCreator;
 
         if (this.wpsConfig.isCallWPSPerInput()) { //call wps proess for each copernicus input
             //create separate input for each copernicus input
@@ -144,14 +144,14 @@ public class WacodisJobExecutionStarter {
             try {
                 subProcesses = subProcessCreator.getJobProcessesForWacodisJob(job, toolProcess);
             } catch (JobProcessCreationException ex2) {
-                throw new IllegalArgumentException("unable to execute wacodis job " + job.getJobDefinition().getId().toString()+ ", could not create sub process, fallback to single sub process also failed ", ex2);
+                throw new IllegalArgumentException("unable to execute wacodis job " + job.getJobDefinition().getId().toString() + ", could not create sub process, fallback to single sub process also failed ", ex2);
             }
         }
         WacodisJobExecutor jobExecutor = createWacodisJobExecutor(job.getJobDefinition());
 
         //declare handler for execution events
-        WacodisJobExecutionEventHandler jobExecutionHandler = new JobExecutionEventHandler(this.processMessagePublisher);
-        JobProcessEventHandler jobProcessHandler = new JobProcessEventHandler(job, this.processMessagePublisher, this.jobExecutionFailedPublisher);
+        WacodisJobExecutionEventHandler jobExecutionHandler = new JobExecutionEventHandler(job, this.processMessagePublisher, this.jobExecutionFailedPublisher);
+        JobProcessEventHandler jobProcessHandler = new JobProcessEventHandler(this.processMessagePublisher, this.jobExecutionFailedPublisher);
 
         //register handler for execution and job process events
         jobExecutor.setProcessExecutedHandler(jobProcessHandler); //job process events
