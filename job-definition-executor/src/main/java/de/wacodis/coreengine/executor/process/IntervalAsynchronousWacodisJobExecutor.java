@@ -123,11 +123,12 @@ public class IntervalAsynchronousWacodisJobExecutor implements WacodisJobExecuto
                     WacodisJobExecutionEvent firstStartedEvent = new WacodisJobExecutionEvent(subProcess, new ArrayList<>(this.subProcessStack), WacodisJobExecutionEvent.ProcessExecutionEventType.FIRSTPROCESSSTARTED, this.subProcessExecutorService, this.jobExecutor);
                     JobExecutionEventHelper.fireWacodisJobExecutionEvent(firstStartedEvent,firstProcessStartedHandler);
                 }
-
+         
                 JobProcessStartedEvent startedEvent = new JobProcessStartedEvent(subProcess, this.jobExecutor);
                 JobExecutionEventHelper.fireProcessStartedEvent(startedEvent, processStartedHandler);
 
                 JobProcessOutputDescription output = subProcessExecutor.execute();
+                subProcess.setProcessOutput(output);
                 JobProcessExecutedEvent executedEvent = new JobProcessExecutedEvent(subProcess, output, this.jobExecutor);
                 JobExecutionEventHelper.fireProcessExecutedEvent(executedEvent, processExecutedHandler);
 
@@ -137,6 +138,7 @@ public class IntervalAsynchronousWacodisJobExecutor implements WacodisJobExecuto
                 }
 
             } catch (JobProcessException ex) {
+                ex.getJobProcess().setException(ex);
                 JobProcessFailedEvent failedEvent = new JobProcessFailedEvent(ex.getJobProcess(), new JobProcessCompletionException(ex.getJobProcess(), ex), this.jobExecutor);
                 JobExecutionEventHelper.fireProcessFailedEvent(failedEvent, processFailedHandler);
 

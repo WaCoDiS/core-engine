@@ -6,6 +6,7 @@
 package de.wacodis.coreengine.executor.process;
 
 import de.wacodis.core.models.WacodisJobDefinition;
+import java.util.Optional;
 
 /**
  *
@@ -17,6 +18,8 @@ public class JobProcess {
     private final WacodisJobDefinition jobDefinition;
     private final Process process;
     private final ProcessContext executionContext;
+    private Optional<JobProcessOutputDescription> processOutput;
+    private Optional<Exception> exception; 
     private Status status;
 
     public JobProcess(String jobProcessIdentifier, WacodisJobDefinition jobDefinition, Process process, ProcessContext executionContext) {
@@ -50,6 +53,24 @@ public class JobProcess {
     public Status getStatus() {
         return status;
     }
+
+    public Optional<JobProcessOutputDescription> getProcessOutput() {
+        return processOutput;
+    }
+
+    public void setProcessOutput(JobProcessOutputDescription processOutput) {
+        this.processOutput = Optional.ofNullable(processOutput);
+    }
+
+    public Optional<Exception> getException() {
+        return exception;
+    }
+
+    public void setException(Exception exception) {
+        this.exception = Optional.ofNullable(exception);
+    }
+    
+    
 
     public enum Status {
         NOTSTARTED, STARTED, FAILED, SUCCESSFUL

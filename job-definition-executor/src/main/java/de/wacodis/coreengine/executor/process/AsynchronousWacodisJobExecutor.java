@@ -100,6 +100,7 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
 
             processFuture.thenAccept((JobProcessOutputDescription processOutput)
                     -> {
+                processOutput.getJobProcess().setProcessOutput(processOutput);
                 JobProcessExecutedEvent succesfulExecutionEvent = new JobProcessExecutedEvent(processOutput.getJobProcess(), processOutput, this, getExecutionFinishedTimestamp(processOutput));
                 JobExecutionEventHelper.fireProcessExecutedEvent(succesfulExecutionEvent, this.processExecutedHandler);
 
@@ -111,6 +112,7 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
 
             }).exceptionally((Throwable t) -> { //handle exceptions that were raised by async job
                 JobProcessCompletionException e = (JobProcessCompletionException) t; //cast is safe since only JobProcessCompletionException can be thrown in supplyAsync
+                e.getJobProcess().setException(e);
                 JobProcessFailedEvent processFailedEvent = new JobProcessFailedEvent(e.getJobProcess(), e, this);
                 JobExecutionEventHelper.fireProcessFailedEvent(processFailedEvent, this.processFailedHandler);
 
