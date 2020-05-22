@@ -197,7 +197,7 @@ public class WacodisJobExecutionStarter {
         } else {
             ExecutorService execService;
 
-            if (this.wpsConfig.getMaxParallelWPSProcessPerJob() > 0) {
+            if (this.wpsConfig.getMaxParallelWPSProcessPerJob() <= 0) {
                 execService = Executors.newCachedThreadPool();
             } else {
                 execService = Executors.newFixedThreadPool(this.wpsConfig.getMaxParallelWPSProcessPerJob());
