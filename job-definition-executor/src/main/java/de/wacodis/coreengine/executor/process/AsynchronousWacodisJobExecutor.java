@@ -18,6 +18,7 @@ import de.wacodis.coreengine.executor.process.events.WacodisJobExecutionEventHan
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 import org.joda.time.DateTime;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +70,6 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
 
     @Override
     public void executeAllSubProcesses(List<JobProcess> subProcesses) {
-        final String lastSubProcessId = subProcesses.get((subProcesses.size() - 1)).getJobProcessIdentifier();
 
         for (int i = 0; i < subProcesses.size(); i++) {
             Integer subProcessNumber = i;
@@ -104,8 +104,8 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
                 JobProcessExecutedEvent succesfulExecutionEvent = new JobProcessExecutedEvent(processOutput.getJobProcess(), processOutput, this, getExecutionFinishedTimestamp(processOutput));
                 JobExecutionEventHelper.fireProcessExecutedEvent(succesfulExecutionEvent, this.processExecutedHandler);
 
-                //ceck if final sub process
-                if (processOutput.getJobProcess().getJobProcessIdentifier().equals(lastSubProcessId)) {
+                //ceck if all sub processes finished
+                if (getUnfinishedJobProcesses(subProcesses).isEmpty()) {
                     WacodisJobExecutionEvent finalProcessFinishedEvent = new WacodisJobExecutionEvent(processOutput.getJobProcess(), subProcesses, WacodisJobExecutionEvent.ProcessExecutionEventType.FINALPROCESSFINISHED, this.subProcessExecutorService, this);
                     JobExecutionEventHelper.fireWacodisJobExecutionEvent(finalProcessFinishedEvent, this.lastProcessFinishedHandler);
                 }
@@ -117,7 +117,7 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
                 JobExecutionEventHelper.fireProcessFailedEvent(processFailedEvent, this.processFailedHandler);
 
                 //ceck if final sub process
-                if (e.getJobProcess().getJobProcessIdentifier().equals(lastSubProcessId)) {
+                if (getUnfinishedJobProcesses(subProcesses).isEmpty()) {
                     WacodisJobExecutionEvent finalProcessFinishedEvent = new WacodisJobExecutionEvent(e.getJobProcess(), subProcesses, WacodisJobExecutionEvent.ProcessExecutionEventType.FINALPROCESSFINISHED, this.subProcessExecutorService, this);
                     JobExecutionEventHelper.fireWacodisJobExecutionEvent(finalProcessFinishedEvent, this.lastProcessFinishedHandler);
                 }
@@ -153,6 +153,16 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
             LOGGER.debug("could not read execution finished timestamp from process output because process output does not contain key {}, use current timestamp instead", EXECUTIONFINISHEDTIMESTAMP_KEY);
             return DateTime.now();
         }
+    }
+
+    /**
+     * return jobProcesses that not finished successfully or failed
+     *
+     * @param jobProcesses
+     * @return
+     */
+    private List<JobProcess> getUnfinishedJobProcesses(List<JobProcess> jobProcesses) {
+        return jobProcesses.stream().filter(p -> (!p.getStatus().equals(JobProcess.Status.SUCCESSFUL) && !p.getStatus().equals(JobProcess.Status.FAILED))).collect(Collectors.toList());
     }
 
 }
