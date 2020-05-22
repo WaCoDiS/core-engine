@@ -43,14 +43,14 @@ public class JobExecutionEventHandler implements WacodisJobExecutionEventHandler
         this.jobFailedEventPublisher = jobFailedEventPublisher;
     }
 
-    public JobExecutionEventHandler(WacodisJobWrapper job, ToolMessagePublisherChannel toolMessagePublisher,ApplicationEventPublisher jobFailedEventPublisher, long messagePublishingTimeout_Millis) {
+    public JobExecutionEventHandler(WacodisJobWrapper job, ToolMessagePublisherChannel toolMessagePublisher, ApplicationEventPublisher jobFailedEventPublisher, long messagePublishingTimeout_Millis) {
         this.job = job;
         this.toolMessagePublisher = toolMessagePublisher;
         this.messagePublishingTimeout_Millis = messagePublishingTimeout_Millis;
         this.jobFailedEventPublisher = jobFailedEventPublisher;
     }
 
-    public JobExecutionEventHandler(WacodisJobWrapper job, ToolMessagePublisherChannel toolMessagePublisher,ApplicationEventPublisher jobFailedEventPublisher, long messagePublishingTimeout_Millis, int maxFailedJobProcesses) {
+    public JobExecutionEventHandler(WacodisJobWrapper job, ToolMessagePublisherChannel toolMessagePublisher, ApplicationEventPublisher jobFailedEventPublisher, long messagePublishingTimeout_Millis, int maxFailedJobProcesses) {
         this.job = job;
         this.toolMessagePublisher = toolMessagePublisher;
         this.messagePublishingTimeout_Millis = messagePublishingTimeout_Millis;
@@ -114,11 +114,11 @@ public class JobExecutionEventHandler implements WacodisJobExecutionEventHandler
                 //retries exceeded, job failed ultimately
                 LOGGER.error("execution of wacodis job failed ultimately after " + job.getExecutionContext().getRetryCount() + " of " + job.getJobDefinition().getRetrySettings().getMaxRetries() + " retries, WacodisJobID: " + jobDefinition.getId().toString() + ",toolID: " + subProcess.getExecutionContext().getWacodisProcessID());
             }
-        }else{
-            LOGGER.info("execution of wacodis job {} successfully finished, {} sub processes failed (max failed subprocesses: {})", jobDefinition.getId(),  failedSubProcessesCount,  this.maxFailedJobProcesses);
+        } else {
+            LOGGER.info("execution of wacodis job {} successfully finished, {} sub processes failed (max failed subprocesses: {})", jobDefinition.getId(), failedSubProcessesCount, this.maxFailedJobProcesses);
         }
 
-        LOGGER.info("final subprocess ({}) of wacodis job {} finished, subprocess: " + System.lineSeparator() + subProcessReport);
+        LOGGER.info("final subprocess ({}) of wacodis job {} finished, subprocess: " + System.lineSeparator() + subProcessReport, subProcess.getJobProcessIdentifier(), jobDefinition.getId());
         LOGGER.info("final subprocess ({}) of wacodis job {} finished, shutdown threadpool", subProcess.getJobProcessIdentifier(), jobDefinition.getId());
         shutdownThreadpool(e.getExecutorService(), jobDefinition);
     }
@@ -147,25 +147,25 @@ public class JobExecutionEventHandler implements WacodisJobExecutionEventHandler
             LOGGER.debug("threadpool for execution of wacodis job {} is already shut down", jobDefinition.getId());
         }
     }
-    
-    private String getSubProcessReport(List<JobProcess> subProcesses){
+
+    private String getSubProcessReport(List<JobProcess> subProcesses) {
         StringBuilder report = new StringBuilder();
-        
-        for(JobProcess process : subProcesses){
+
+        for (JobProcess process : subProcesses) {
             report.append("subprocess: ").append(process.getJobProcessIdentifier()).append(", wacodis Job: ").append(process.getJobDefinition().getId()).append(", processing tool: ").append(process.getJobDefinition().getProcessingTool()).append(", status: ").append(process.getStatus().toString());
-            
-            if(process.getProcessOutput().isPresent()){
+
+            if (process.getProcessOutput().isPresent()) {
                 ProcessOutputDescription output = process.getProcessOutput().get();
                 report.append(", output parameters: ").append(process.getExecutionContext().getExpectedOutputs());
             }
-            if(process.getException().isPresent()){
+            if (process.getException().isPresent()) {
                 Exception exception = process.getException().get();
                 report.append(", exception message: ").append(exception.getMessage());
             }
-            
+
             report.append(System.lineSeparator());
-        }        
-  
+        }
+
         return report.toString();
     }
 }
