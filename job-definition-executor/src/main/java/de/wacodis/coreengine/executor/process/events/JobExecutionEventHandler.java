@@ -5,7 +5,6 @@
  */
 package de.wacodis.coreengine.executor.process.events;
 
-import com.sun.media.jfxmedia.logging.Logger;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobExecution;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
@@ -30,7 +29,7 @@ import org.springframework.context.ApplicationEventPublisher;
  */
 public class JobExecutionEventHandler implements WacodisJobExecutionEventHandler {
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(JobProcessEventHandler.class);
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(JobExecutionEventHandler.class);
 
     private final ToolMessagePublisherChannel toolMessagePublisher;
     private final ApplicationEventPublisher jobFailedEventPublisher;
