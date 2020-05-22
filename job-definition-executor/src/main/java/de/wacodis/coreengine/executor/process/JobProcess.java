@@ -28,6 +28,8 @@ public class JobProcess {
         this.process = process;
         this.executionContext = executionContext;
         this.status = Status.NOTSTARTED;  //by default job process is not started 
+        this.exception = Optional.empty();
+        this.processOutput = Optional.empty();
     }
 
     public String getJobProcessIdentifier() {
