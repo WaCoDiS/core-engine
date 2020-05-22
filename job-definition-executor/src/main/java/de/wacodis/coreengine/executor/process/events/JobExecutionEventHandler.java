@@ -152,11 +152,11 @@ public class JobExecutionEventHandler implements WacodisJobExecutionEventHandler
         StringBuilder report = new StringBuilder();
         
         for(JobProcess process : subProcesses){
-            report.append("subprocess: ").append(process.getJobProcessIdentifier()).append(", wacodis Job: ").append(process.getJobDefinition().getId()).append(", process: ").append(process.getExecutionContext().getWacodisProcessID()).append(", status: ").append(process.getStatus().toString());
+            report.append("subprocess: ").append(process.getJobProcessIdentifier()).append(", wacodis Job: ").append(process.getJobDefinition().getId()).append(", processing tool: ").append(process.getJobDefinition().getProcessingTool()).append(", status: ").append(process.getStatus().toString());
             
             if(process.getProcessOutput().isPresent()){
                 ProcessOutputDescription output = process.getProcessOutput().get();
-                report.append(", output parameters: ").append(output.getAllOutputParameterKeys());
+                report.append(", output parameters: ").append(process.getExecutionContext().getExpectedOutputs());
             }
             if(process.getException().isPresent()){
                 Exception exception = process.getException().get();
