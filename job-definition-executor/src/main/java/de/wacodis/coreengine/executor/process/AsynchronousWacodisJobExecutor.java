@@ -116,7 +116,7 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
                 JobProcessFailedEvent processFailedEvent = new JobProcessFailedEvent(e.getJobProcess(), e, this);
                 JobExecutionEventHelper.fireProcessFailedEvent(processFailedEvent, this.processFailedHandler);
 
-                //ceck if final sub process
+                 //ceck if all sub processes finished
                 if (getUnfinishedJobProcesses(subProcesses).isEmpty()) {
                     WacodisJobExecutionEvent finalProcessFinishedEvent = new WacodisJobExecutionEvent(e.getJobProcess(), subProcesses, WacodisJobExecutionEvent.ProcessExecutionEventType.FINALPROCESSFINISHED, this.subProcessExecutorService, this);
                     JobExecutionEventHelper.fireWacodisJobExecutionEvent(finalProcessFinishedEvent, this.lastProcessFinishedHandler);

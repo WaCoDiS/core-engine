@@ -22,6 +22,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -92,15 +93,15 @@ public class IntervalAsynchronousWacodisJobExecutor implements WacodisJobExecuto
         private final Stack<JobProcess> subProcessStack;
         private final ExecutorService subProcessExecutorService;
         private final JobProcess firstSubProcess;
-        private final JobProcess lastSubProcess;
         private final IntervalAsynchronousWacodisJobExecutor jobExecutor;
         private final Object lockObj = new Object();
+        private final List<JobProcess> subProcesses;
 
         public SubProcessExecutionTask(List<JobProcess> subProcesses, ExecutorService subProcessExecutorService, IntervalAsynchronousWacodisJobExecutor jobExecutor) {
             this.subProcessStack = getSubProcessesAsStack(subProcesses);
             this.subProcessExecutorService = subProcessExecutorService;
             this.firstSubProcess = subProcesses.get(0);
-            this.lastSubProcess = subProcesses.get((subProcesses.size() - 1));
+            this.subProcesses = subProcesses;
             this.jobExecutor = jobExecutor;
         }
 
@@ -132,7 +133,8 @@ public class IntervalAsynchronousWacodisJobExecutor implements WacodisJobExecuto
                 JobProcessExecutedEvent executedEvent = new JobProcessExecutedEvent(subProcess, output, this.jobExecutor);
                 JobExecutionEventHelper.fireProcessExecutedEvent(executedEvent, processExecutedHandler);
 
-                if (output.getJobProcess() == lastSubProcess) {
+                 //ceck if all sub processes finished
+                if (getUnfinishedJobProcesses(subProcesses).isEmpty()) {
                     WacodisJobExecutionEvent lastFinishedEvent = new WacodisJobExecutionEvent(output.getJobProcess(), new ArrayList<>(this.subProcessStack), WacodisJobExecutionEvent.ProcessExecutionEventType.FINALPROCESSFINISHED, this.subProcessExecutorService, this.jobExecutor);
                     JobExecutionEventHelper.fireWacodisJobExecutionEvent(lastFinishedEvent, lastProcessFinishedHandler);
                 }
@@ -142,7 +144,8 @@ public class IntervalAsynchronousWacodisJobExecutor implements WacodisJobExecuto
                 JobProcessFailedEvent failedEvent = new JobProcessFailedEvent(ex.getJobProcess(), new JobProcessCompletionException(ex.getJobProcess(), ex), this.jobExecutor);
                 JobExecutionEventHelper.fireProcessFailedEvent(failedEvent, processFailedHandler);
 
-                if (ex.getJobProcess() == lastSubProcess) {
+                 //ceck if all sub processes finished
+                if (getUnfinishedJobProcesses(subProcesses).isEmpty()) {
                     WacodisJobExecutionEvent lastFinishedEvent = new WacodisJobExecutionEvent(ex.getJobProcess(), new ArrayList<>(this.subProcessStack), WacodisJobExecutionEvent.ProcessExecutionEventType.FINALPROCESSFINISHED, this.subProcessExecutorService, this.jobExecutor);
                     JobExecutionEventHelper.fireWacodisJobExecutionEvent(lastFinishedEvent, lastProcessFinishedHandler);
                 }
@@ -162,6 +165,16 @@ public class IntervalAsynchronousWacodisJobExecutor implements WacodisJobExecuto
                 this.subProcessExecutorService.shutdown();
             }
         }
+        
+            /**
+     * return jobProcesses that not finished successfully or failed
+     *
+     * @param jobProcesses
+     * @return
+     */
+    private List<JobProcess> getUnfinishedJobProcesses(List<JobProcess> jobProcesses) {
+        return jobProcesses.stream().filter(p -> (!p.getStatus().equals(JobProcess.Status.SUCCESSFUL) && !p.getStatus().equals(JobProcess.Status.FAILED))).collect(Collectors.toList());
+    }
 
     }
 
