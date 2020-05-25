@@ -33,7 +33,7 @@ public class JobProcessExecutor {
         Process process = this.jobProcess.getProcess();
         ProcessContext executionContext = this.jobProcess.getExecutionContext();
         
-        LOGGER.debug("start execution of process {} of wacodis job {} using tool {}", this.jobProcess.getJobProcessIdentifier(), this.jobProcess.getJobDefinition().getId(),  executionContext.getWacodisProcessID());
+        LOGGER.debug("start execution of process {} of wacodis job {} using tool {}", this.jobProcess.getJobProcessIdentifier(), this.jobProcess.getJobDefinition().getId(),  jobProcess.getJobDefinition().getProcessingTool());
 
         //execute processing tool
         JobProcessOutputDescription jobProcessOutput = null;
@@ -42,7 +42,7 @@ public class JobProcessExecutor {
             ProcessOutputDescription wpsProcessOutput = process.execute(executionContext);
             jobProcessOutput = new JobProcessOutputDescription(wpsProcessOutput, this.jobProcess);
         } catch (ExecutionException e) {
-            LOGGER.error("sucessfully executed process "+ this.jobProcess.getJobProcessIdentifier()+" of wacodis job "+this.jobProcess.getJobDefinition().getId().toString()+ " using tool " + executionContext.getWacodisProcessID(), e);
+            LOGGER.error("sucessfully executed process "+ this.jobProcess.getJobProcessIdentifier()+" of wacodis job "+this.jobProcess.getJobDefinition().getId().toString()+ " using tool " + jobProcess.getJobDefinition().getProcessingTool(), e);
             LOGGER.warn(e.getMessage(), e); 
 
             throw new JobProcessException(this.jobProcess, e);
