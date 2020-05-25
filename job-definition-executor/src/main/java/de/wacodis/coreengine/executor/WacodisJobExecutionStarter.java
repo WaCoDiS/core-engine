@@ -135,7 +135,7 @@ public class WacodisJobExecutionStarter {
     private void executeWPSProcesses(WacodisJobWrapper job, JobProcessBuilder subProcessCreator) {
         String toolProcessID = job.getJobDefinition().getProcessingTool();
 
-        Process toolProcess = new WPSProcess(this.wpsClient, this.wpsConfig.getUri(), this.wpsConfig.getVersion(), toolProcessID);
+        Process toolProcess = new WPSProcess(this.wpsClient, this.wpsConfig.getUri(), this.wpsConfig.getVersion(), toolProcessID, this.wpsConfig.isValidateInputs());
         List<JobProcess> subProcesses;
         try {
             subProcesses = subProcessCreator.getJobProcessesForWacodisJob(job, toolProcess);

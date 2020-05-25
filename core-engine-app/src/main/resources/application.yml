@@ -69,6 +69,7 @@ spring:
         #defaultResourceSchema:
       #   name: GML3
       #   schemaLocation: http://schemas.opengis.net/gml/3.1.1/base/feature.xsd
+      validateInputs: true
       callWPSPerInput: true   
       maxParallelWPSProcessPerJob: 3
       #intialDelay and delay applicable if processInputDelayed is true

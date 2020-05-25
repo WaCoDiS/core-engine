@@ -32,6 +32,7 @@ public class WebProcessingServiceConfiguration {
     private boolean processInputsDelayed;
     private long initialDelay_Milliseconds;
     private long delay_Milliseconds;
+    private boolean validateInputs;
 
 
     public WebProcessingServiceConfiguration() {
@@ -125,6 +126,12 @@ public class WebProcessingServiceConfiguration {
     public void setDelay_Milliseconds(long delay_Milliseconds) {
         this.delay_Milliseconds = delay_Milliseconds;
     }
-    
-    
+
+    public boolean isValidateInputs() {
+        return validateInputs;
+    }
+
+    public void setValidateInputs(boolean validateInputs) {
+        this.validateInputs = validateInputs;
+    }
 }
