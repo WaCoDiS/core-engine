@@ -78,10 +78,6 @@ public class WacodisJobExecutionStarter {
         this.wpsClient = WPSClientSession.getInstance();
     }
 
-    public void setWpsConfig(WebProcessingServiceConfiguration wpsConfig) {
-        this.wpsConfig = wpsConfig;
-    }
-
     public WebProcessingServiceConfiguration getWpsConfig() {
         return wpsConfig;
     }
