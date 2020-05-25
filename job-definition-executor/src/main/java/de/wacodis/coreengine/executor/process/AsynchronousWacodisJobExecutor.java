@@ -38,6 +38,8 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
     private JobProcessFailedEventHandler processFailedHandler;
     private WacodisJobExecutionEventHandler firstProcessStartedHandler;
     private WacodisJobExecutionEventHandler lastProcessFinishedHandler;
+    private final Object lockObj = new Object();
+    private boolean firedFinalSubProcessEvent = false;
 
     public AsynchronousWacodisJobExecutor(ExecutorService subProcessExecutorService) {
         this.subProcessExecutorService = subProcessExecutorService;
@@ -104,11 +106,8 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
                 JobProcessExecutedEvent succesfulExecutionEvent = new JobProcessExecutedEvent(processOutput.getJobProcess(), processOutput, this, getExecutionFinishedTimestamp(processOutput));
                 JobExecutionEventHelper.fireProcessExecutedEvent(succesfulExecutionEvent, this.processExecutedHandler);
 
-                //ceck if all sub processes finished
-                if (getUnfinishedJobProcesses(subProcesses).isEmpty()) {
-                    WacodisJobExecutionEvent finalProcessFinishedEvent = new WacodisJobExecutionEvent(processOutput.getJobProcess(), subProcesses, WacodisJobExecutionEvent.ProcessExecutionEventType.FINALPROCESSFINISHED, this.subProcessExecutorService, this);
-                    JobExecutionEventHelper.fireWacodisJobExecutionEvent(finalProcessFinishedEvent, this.lastProcessFinishedHandler);
-                }
+                //raise event if final sub process
+                handleFinalSubProcess(subProcesses, processOutput.getJobProcess());
 
             }).exceptionally((Throwable t) -> { //handle exceptions that were raised by async job
                 JobProcessCompletionException e = (JobProcessCompletionException) t; //cast is safe since only JobProcessCompletionException can be thrown in supplyAsync
@@ -116,11 +115,8 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
                 JobProcessFailedEvent processFailedEvent = new JobProcessFailedEvent(e.getJobProcess(), e, this);
                 JobExecutionEventHelper.fireProcessFailedEvent(processFailedEvent, this.processFailedHandler);
 
-                 //ceck if all sub processes finished
-                if (getUnfinishedJobProcesses(subProcesses).isEmpty()) {
-                    WacodisJobExecutionEvent finalProcessFinishedEvent = new WacodisJobExecutionEvent(e.getJobProcess(), subProcesses, WacodisJobExecutionEvent.ProcessExecutionEventType.FINALPROCESSFINISHED, this.subProcessExecutorService, this);
-                    JobExecutionEventHelper.fireWacodisJobExecutionEvent(finalProcessFinishedEvent, this.lastProcessFinishedHandler);
-                }
+                //raise event if final sub process
+                handleFinalSubProcess(subProcesses, e.getJobProcess());
 
                 return null; //satisfy return type
             });
@@ -152,6 +148,22 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
         } else {
             LOGGER.debug("could not read execution finished timestamp from process output because process output does not contain key {}, use current timestamp instead", EXECUTIONFINISHEDTIMESTAMP_KEY);
             return DateTime.now();
+        }
+    }
+
+    /**
+     * raise event if final subProcess
+     * @param subProcesses
+     * @param subProcess 
+     */
+    private void handleFinalSubProcess(List<JobProcess> subProcesses, JobProcess subProcess) {
+        synchronized (this.lockObj) {
+            //make sure event is only fired once
+            if (getUnfinishedJobProcesses(subProcesses).isEmpty() && !this.firedFinalSubProcessEvent) {
+                WacodisJobExecutionEvent finalProcessFinishedEvent = new WacodisJobExecutionEvent(subProcess, subProcesses, WacodisJobExecutionEvent.ProcessExecutionEventType.FINALPROCESSFINISHED, this.subProcessExecutorService, this);
+                JobExecutionEventHelper.fireWacodisJobExecutionEvent(finalProcessFinishedEvent, this.lastProcessFinishedHandler);
+                this.firedFinalSubProcessEvent = true;
+            }
         }
     }
 
