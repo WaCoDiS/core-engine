@@ -101,7 +101,7 @@ public class IntervalAsynchronousWacodisJobExecutor implements WacodisJobExecuto
         public SubProcessExecutionTask(List<JobProcess> subProcesses, ExecutorService subProcessExecutorService, IntervalAsynchronousWacodisJobExecutor jobExecutor) {
             this.subProcessStack = getSubProcessesAsStack(subProcesses);
             this.subProcessExecutorService = subProcessExecutorService;
-            this.firstSubProcess = subProcesses.get(0);
+            this.firstSubProcess = subProcessStack.peek();
             this.subProcesses = subProcesses;
             this.jobExecutor = jobExecutor;
         }
