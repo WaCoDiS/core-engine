@@ -16,6 +16,7 @@ import de.wacodis.coreengine.executor.process.events.JobProcessStartedEventHandl
 import de.wacodis.coreengine.executor.process.events.WacodisJobExecutionEvent;
 import de.wacodis.coreengine.executor.process.events.WacodisJobExecutionEventHandler;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.ExecutorService;
@@ -114,6 +115,7 @@ public class IntervalAsynchronousWacodisJobExecutor implements WacodisJobExecuto
                 if (!this.subProcessStack.isEmpty()) {
                     subProcess = this.subProcessStack.pop();
                 } else {
+                    LOGGER.info("started all sub processes of wacodis job, shutdown executor service");
                     shutdownExecutorService();
                     return; //nothing do do anymore
                 }
@@ -126,11 +128,13 @@ public class IntervalAsynchronousWacodisJobExecutor implements WacodisJobExecuto
                     JobExecutionEventHelper.fireWacodisJobExecutionEvent(firstStartedEvent, firstProcessStartedHandler);
                 }
 
+                subProcess.setStatus(JobProcess.Status.STARTED);
                 JobProcessStartedEvent startedEvent = new JobProcessStartedEvent(subProcess, this.jobExecutor);
                 JobExecutionEventHelper.fireProcessStartedEvent(startedEvent, processStartedHandler);
 
                 JobProcessOutputDescription output = subProcessExecutor.execute();
                 subProcess.setProcessOutput(output);
+                subProcess.setStatus(JobProcess.Status.SUCCESSFUL);
                 JobProcessExecutedEvent executedEvent = new JobProcessExecutedEvent(subProcess, output, this.jobExecutor);
                 JobExecutionEventHelper.fireProcessExecutedEvent(executedEvent, processExecutedHandler);
 
@@ -139,6 +143,7 @@ public class IntervalAsynchronousWacodisJobExecutor implements WacodisJobExecuto
 
             } catch (JobProcessException ex) {
                 ex.getJobProcess().setException(ex);
+                ex.getJobProcess().setStatus(JobProcess.Status.FAILED);
                 JobProcessFailedEvent failedEvent = new JobProcessFailedEvent(ex.getJobProcess(), new JobProcessCompletionException(ex.getJobProcess(), ex), this.jobExecutor);
                 JobExecutionEventHelper.fireProcessFailedEvent(failedEvent, processFailedHandler);
 
@@ -151,6 +156,7 @@ public class IntervalAsynchronousWacodisJobExecutor implements WacodisJobExecuto
         private Stack<JobProcess> getSubProcessesAsStack(List<JobProcess> subProcesses) {
             Stack<JobProcess> subProcessStack = new Stack<>();
             subProcessStack.addAll(subProcesses);
+            Collections.reverse(subProcessStack);
 
             return subProcessStack;
         }
