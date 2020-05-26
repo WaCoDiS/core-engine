@@ -189,7 +189,8 @@ public class WacodisJobExecutionStarter {
         } else if (this.wpsConfig.isProcessInputsDelayed()) {
             long delay = (this.wpsConfig.getDelay_Milliseconds() >= 0) ? this.wpsConfig.getDelay_Milliseconds() : 0;
             long initDelay = (this.wpsConfig.getInitialDelay_Milliseconds() >= 0) ? this.wpsConfig.getInitialDelay_Milliseconds() : 0;
-            executor = new IntervalAsynchronousWacodisJobExecutor(initDelay, delay);
+            //threadpoolSize == 1 if processInputsSequentially
+            executor = (!this.wpsConfig.isProcessInputsSequentially()) ? new IntervalAsynchronousWacodisJobExecutor(initDelay, delay, this.wpsConfig.getMaxParallelWPSProcessPerJob()) : new IntervalAsynchronousWacodisJobExecutor(initDelay, delay, 1);
         } else {
             ExecutorService execService;
 
@@ -198,7 +199,7 @@ public class WacodisJobExecutionStarter {
             } else {
                 execService = Executors.newFixedThreadPool(this.wpsConfig.getMaxParallelWPSProcessPerJob());
             }
-
+            
             executor = new AsynchronousWacodisJobExecutor(execService);
         }
 
