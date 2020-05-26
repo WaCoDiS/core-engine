@@ -70,7 +70,8 @@ spring:
       #   name: GML3
       #   schemaLocation: http://schemas.opengis.net/gml/3.1.1/base/feature.xsd
       validateInputs: false
-      callWPSPerInput: true   
+      callWPSPerInput: true
+      #only applicable if processInputsSequentially is false
       maxParallelWPSProcessPerJob: 2
       #intialDelay and delay applicable if processInputDelayed is true
       processInputsDelayed: true
