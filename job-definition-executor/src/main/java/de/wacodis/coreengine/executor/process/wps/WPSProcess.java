@@ -12,12 +12,14 @@ import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ProcessContext;
 import de.wacodis.coreengine.executor.process.ProcessOutputDescription;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
+import de.wacodis.coreengine.executor.process.wps.exception.WPSException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.NotImplementedException;
 import org.n52.geoprocessing.wps.client.ExecuteRequestBuilder;
@@ -32,6 +34,7 @@ import org.n52.geoprocessing.wps.client.model.OWSExceptionElement;
 import org.n52.geoprocessing.wps.client.model.Process;
 import org.n52.geoprocessing.wps.client.model.Result;
 import org.n52.geoprocessing.wps.client.model.StatusInfo;
+import org.n52.geoprocessing.wps.client.model.async.FutureResult;
 import org.n52.geoprocessing.wps.client.model.execution.Execute;
 import org.slf4j.LoggerFactory;
 
@@ -89,6 +92,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
     @Override
     public ProcessOutputDescription execute(ProcessContext context) throws ExecutionException {
         long startTimeMillis, endTimeMillis;
+        String wpsProcessId = null;
 
         startTimeMillis = System.currentTimeMillis();
 
@@ -99,9 +103,9 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
             init();
         }
 
-        Optional<ExecutionException> preValidationResult = validatePreExecution(context);
+        Optional<WPSException> preValidationResult = validatePreExecution(context);
         if (preValidationResult.isPresent()) { //throw exception if provided inputs or expected outputs are not valid
-            throw preValidationResult.get();
+            throw new ExecutionException(UUID.fromString(context.getWacodisProcessID()), "invalid wps process input", preValidationResult.get());
         }
 
         LOGGER.debug(
@@ -115,14 +119,21 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         try {
             //exeute wps process
             LOGGER.debug("execute request for process {}: {}", context.getWacodisProcessID(), executeRequest);
-            Object wpsOutput = this.wpsClient.execute(this.wpsURL, executeRequest, this.wpsVersion); //submit process to wps and poll result periodically
+            FutureResult wpsOutputFuture = (FutureResult) this.wpsClient.execute(this.wpsURL, executeRequest, this.wpsVersion); //submit process to wps and poll result periodically
+            wpsProcessId = wpsOutputFuture.getJobId();
+            LOGGER.info("started wps process {} to execute wacodis job {}", wpsProcessId, context.getWacodisProcessID());
+            LOGGER.debug("waiting for result of wps process {}", wpsProcessId);
+            //wait until wps process return (blocking)
+            Object wpsOutput = wpsOutputFuture.getFutureResult().get();
+
+            LOGGER.debug("wps process {} returned result of type {}", wpsProcessId, wpsOutput.getClass().getSimpleName());
             LOGGER.info("processing result for process {}: {}", context.getWacodisProcessID(), wpsOutput);
             LOGGER.debug("start parsing result for process {}", context.getWacodisProcessID());
             //parse wps output
             Result wpsProcessResult = parseWPSOutput(wpsOutput); //throws exception if wps output contains errors
-            
-            Optional<ExecutionException> postValidationResult = validatePostExecution(wpsProcessResult, context);
-            if(postValidationResult.isPresent()){
+
+            Optional<WPSException> postValidationResult = validatePostExecution(wpsProcessResult, context);
+            if (postValidationResult.isPresent()) {
                 throw postValidationResult.get(); //throw exception if excepted outputs are missing in received result
             }
             LOGGER.debug("successfully parsed result for process {}", context.getWacodisProcessID());
@@ -132,15 +143,20 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
             LOGGER.info("successfully executed process " + context.getWacodisProcessID() + " after " + ((endTimeMillis - startTimeMillis) / 1000) + " seconds");
 
             return buildProcessOutput(wpsProcessResult, processInput.getOriginDataEnvelopes(), startTimeMillis, endTimeMillis);
-        } catch (WPSClientException | IOException ex) {
+        } catch (Exception ex) {
             endTimeMillis = System.currentTimeMillis();
-            throw new ExecutionException("execution of wps process for wacodis job " + this.wpsProcessID + " failed after " + ((endTimeMillis - startTimeMillis) / 1000) + " seconds", ex);
+            ExecutionException eEx = new ExecutionException(UUID.fromString(context.getWacodisProcessID()), "execution of wps process for wacodis job " + this.wpsProcessID + " failed after " + ((endTimeMillis - startTimeMillis) / 1000) + " seconds", ex);
+            if (wpsProcessId != null) {
+                eEx.setProcessId(wpsProcessId);
+            }
+            
+            throw eEx;
         }
     }
 
     private WPSProcessInput buildExecuteRequest(ProcessContext context) {
         ExecuteRequestBuilder executeRequestBuilder = new ExecuteRequestBuilder(this.wpsProcessDescription);
-        List <String> originDataEnvelopes = setWPSInputs(context.getInputResources(), executeRequestBuilder); //register inputs
+        List<String> originDataEnvelopes = setWPSInputs(context.getInputResources(), executeRequestBuilder); //register inputs
         setExpectedWPSOutputs(context.getExpectedOutputs(), executeRequestBuilder); //register expected outputs
         executeRequestBuilder.setAsynchronousExecute(); //make execute request asynchronous
         Execute execute = executeRequestBuilder.getExecute();
@@ -184,8 +200,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
             }
 
         }
-        
-        
+
         return removeDuplicates(removeNullorEmpty(originDataEnvelopes));
     }
 
@@ -193,7 +208,8 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
      * @param literalProcessInput
      * @param providedResources
      * @param executeRequestBuilder
-     * @return list of data envelope id's that correspond with the used input resources
+     * @return list of data envelope id's that correspond with the used input
+     * resources
      */
     private List<String> setLiteralInputData(LiteralInputDescription literalProcessInput, List<ResourceDescription> providedResources, ExecuteRequestBuilder executeRequestBuilder) {
         String literalValue;
@@ -209,10 +225,10 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
             providedResource = providedResources.get(i);
             literalValue = getValueFromResource(providedResource);
             executeRequestBuilder.addLiteralData(literalProcessInput.getId(), literalValue, "", "", providedResource.getMimeType()); //input id, value, schema, encoding, mime type 
-            
+
             originDataEnvelopes.add(providedResource.getResource().getDataEnvelopeId()); //add data envelope id to list of origins of process result
         }
-        
+
         return originDataEnvelopes;
     }
 
@@ -229,16 +245,16 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
 
             providedResource = providedResources.get(i);
             inputValue = getValueFromResource(providedResource);
-            
+
             try {
                 executeRequestBuilder.addComplexDataReference(complexProcessInput.getId(), inputValue, providedResource.getSchema().getSchemaLocation(), null, providedResource.getMimeType());
             } catch (MalformedURLException ex) {
                 throw new IllegalArgumentException("cannot add complex input " + complexProcessInput.getId() + " as reference, invalid reference, malformed url" + providedResource.getResource().getUrl(), ex);
             }
-            
+
             originDataEnvelopes.add(providedResource.getResource().getDataEnvelopeId());
         }
-        
+
         return originDataEnvelopes;
     }
 
@@ -273,7 +289,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
      * @throws ExecutionException if wps process raised exceptions during
      * processing or wps output is not unparsable
      */
-    private Result parseWPSOutput(Object wpsOutput) throws ExecutionException {
+    private Result parseWPSOutput(Object wpsOutput) throws WPSException {
         Result wpsProcessResult;
 
         if (wpsOutput instanceof StatusInfo) {
@@ -286,12 +302,12 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         } else if (wpsOutput instanceof ExceptionReport) {
             LOGGER.warn("wps output contains errors, raise ExecutionException");
             List<OWSExceptionElement> exceptions = ((ExceptionReport) wpsOutput).getExceptions();
-            throw new ExecutionException("executing process " + this.wpsProcessID + " raised exceptions:" + System.lineSeparator() + buildExceptionText(exceptions));
+            throw new WPSException("executing process " + this.wpsProcessID + " raised exceptions:" + System.lineSeparator() + buildExceptionText(exceptions));
         } else {
             if (wpsOutput != null) {
                 LOGGER.warn("unexpected response format for wps process " + this.wpsProcessID + ":" + System.lineSeparator() + wpsOutput.toString());
             }
-            throw new ExecutionException("unparsable response for wps process " + this.wpsProcessID);
+            throw new WPSException("unparsable response for wps process " + this.wpsProcessID);
         }
 
         LOGGER.debug("successfully parsed output of wps process " + this.wpsProcessID + ", WPS Job-ID: " + wpsProcessResult.getJobId() + ")");
@@ -352,7 +368,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         return literalValue;
     }
 
-    private Optional<ExecutionException> validatePreExecution(ProcessContext context) {
+    private Optional<WPSException> validatePreExecution(ProcessContext context) {
         WPSInputOutputValidator validator = new WPSInputOutputValidator(this.wpsProcessDescription);
 
         //check if mandatory inputs are provided and provided inputs and its mime types are supported by wps process
@@ -361,7 +377,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         Optional<Throwable> inputValidationResult = validator.validateProvidedInputResources(context.getInputResources());
 
         if (inputValidationResult.isPresent()) { //optional contains throwable if not valid
-            return Optional.of(new ExecutionException("unable to execute process " + context.getWacodisProcessID() + " because of unsupported provided inputs" + System.lineSeparator() + "wps url: " + this.wpsURL + ", wps version: " + this.wpsVersion + " wps process: " + this.wpsProcessID, inputValidationResult.get()));
+            return Optional.of(new WPSException("unable to execute process " + context.getWacodisProcessID() + " because of unsupported provided inputs" + System.lineSeparator() + "wps url: " + this.wpsURL + ", wps version: " + this.wpsVersion + " wps process: " + this.wpsProcessID, inputValidationResult.get()));
         }
 
         //check if expected outputs and its mime types are supported by wps process
@@ -370,44 +386,45 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         Optional<Throwable> expectedOutputValidationResult = validator.validateExpectedOutputs(context.getExpectedOutputs());
 
         if (expectedOutputValidationResult.isPresent()) { //optional contains throwable if not valid
-            return Optional.of(new ExecutionException("unable to execute process " + context.getWacodisProcessID() + " because of unsupported expected outputs" + System.lineSeparator() + "wps url: " + this.wpsURL + ", wps version: " + this.wpsVersion + " wps process: " + this.wpsProcessID, expectedOutputValidationResult.get()));
+            return Optional.of(new WPSException("unable to execute process " + context.getWacodisProcessID() + " because of unsupported expected outputs" + System.lineSeparator() + "wps url: " + this.wpsURL + ", wps version: " + this.wpsVersion + " wps process: " + this.wpsProcessID, expectedOutputValidationResult.get()));
         }
 
         return Optional.empty();
     }
 
-    private Optional<ExecutionException> validatePostExecution(Result receivedResult, ProcessContext context) {
+    private Optional<WPSException> validatePostExecution(Result receivedResult, ProcessContext context) {
         WPSResultValidator validator = new WPSResultValidator(this.wpsProcessDescription);
 
         Optional<Throwable> outputValidationResult = validator.validateProcessOutput(receivedResult, context); //contains exception if invalid
         if (outputValidationResult.isPresent()) {
-            return Optional.of(new ExecutionException("wps process" + this.wpsProcessDescription.getId() + " (wps job id: " + receivedResult.getJobId() + ") returned invalid output", outputValidationResult.get()));
+            return Optional.of(new WPSException("wps process" + this.wpsProcessDescription.getId() + " (wps job id: " + receivedResult.getJobId() + ") returned invalid output", outputValidationResult.get()));
         }
-        
+
         return Optional.empty();
     }
-    
+
     /**
      * @param <T>
      * @param list
      * @return list of unique items
      */
-    private <T> List<T> removeDuplicates(List<T> list){
+    private <T> List<T> removeDuplicates(List<T> list) {
         return list.stream().distinct().collect(Collectors.toList());
     }
-    
+
     /**
      * @param list
      * @return list of string without null references or empty strings
      */
-    private List<String> removeNullorEmpty(List<String> list){
-        return list.stream().filter( str -> str != null && !str.isEmpty()).collect(Collectors.toList());
+    private List<String> removeNullorEmpty(List<String> list) {
+        return list.stream().filter(str -> str != null && !str.isEmpty()).collect(Collectors.toList());
     }
-      
+
     /**
      * helper class to wrap execute request and origin data envelopes
      */
-    private class WPSProcessInput{
+    private class WPSProcessInput {
+
         private final Execute execute;
         private final List<String> originDataEnvelopes;
 

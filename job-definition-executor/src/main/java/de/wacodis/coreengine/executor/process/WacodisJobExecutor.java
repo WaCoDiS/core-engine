@@ -81,7 +81,7 @@ public class WacodisJobExecutor {
             LOGGER.warn(e.getMessage(), e);
 
             //publish message with the failure
-            ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFailure(), buildToolFailureMessage(e.getMessage()), this.messagePublishingTimeout_Millis);
+            ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFailure(), buildToolFailureMessage(e), this.messagePublishingTimeout_Millis);
 
             throw e;
         }
@@ -123,13 +123,12 @@ public class WacodisJobExecutor {
         return MessageBuilder.withPayload(msg).build();
     }
 
-    private Message<WacodisJobFailed> buildToolFailureMessage(String errorText) {
+    private Message<WacodisJobFailed> buildToolFailureMessage(ExecutionException error) {
         WacodisJobFailed msg = new WacodisJobFailed();
-        //TODO include wps job identifier (not wacodis job identifier)
-        msg.setWpsJobIdentifier(null);
+        msg.setWpsJobIdentifier(error.getProcessId());
         msg.setCreated(new DateTime());
-        msg.setReason(errorText);
-        msg.setWacodisJobIdentifier(jobDefinition.getId());
+        msg.setReason(error.getMessage());
+        msg.setWacodisJobIdentifier(error.getWacodisJobId());
         return MessageBuilder.withPayload(msg).build();
     }
 
