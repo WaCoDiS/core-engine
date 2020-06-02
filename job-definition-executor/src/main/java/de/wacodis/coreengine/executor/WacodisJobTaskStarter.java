@@ -27,7 +27,9 @@ import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
 import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ProcessOutputDescription;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import javax.annotation.PostConstruct;
@@ -89,7 +91,7 @@ public class WacodisJobTaskStarter {
     public void executeWacodisJob(WacodisJobWrapper job) {
         String toolProcessID = job.getJobDefinition().getProcessingTool();
         String wacodisJobID = job.getJobDefinition().getId().toString();
-        ProcessContext toolContext = this.contextBuilder.buildProcessContext(job, this.expectedProcessOutputs.toArray(new ExpectedProcessOutput[this.expectedProcessOutputs.size()]));
+        ProcessContext toolContext = this.contextBuilder.buildProcessContext(job, initProcessParameters(), this.expectedProcessOutputs.toArray(new ExpectedProcessOutput[this.expectedProcessOutputs.size()]));
 
         Process toolProcess = new WPSProcess(this.wpsClient, this.wpsConfig.getUri(), this.wpsConfig.getVersion(), toolProcessID);
 
@@ -161,5 +163,15 @@ public class WacodisJobTaskStarter {
             
             jobDef.setRetrySettings(defaultRetrySettings);
         }
+    }
+    
+    private Map<String, Object> initProcessParameters(){
+        Map<String, Object> processParams = new HashMap<>();
+        
+        if(this.wpsConfig.getTimeout_Millies() > 0){
+            processParams.put(WPSProcessContextBuilder.getTIMEOUT_MILLIES_KEY(), this.wpsConfig.getTimeout_Millies());
+        }
+        
+        return processParams;
     }
 }

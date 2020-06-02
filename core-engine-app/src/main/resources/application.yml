@@ -69,6 +69,8 @@ spring:
         #defaultResourceSchema:
       #   name: GML3
       #   schemaLocation: http://schemas.opengis.net/gml/3.1.1/base/feature.xsd
+      # no timeout for wps process if not set or <= 0, never cancels wps process only stops waiting for result
+      #timeout_Millies: 60000l
   datasource.core.quartz-data-source:
     name: quartzDataSource
     driverClassName: org.h2.Driver

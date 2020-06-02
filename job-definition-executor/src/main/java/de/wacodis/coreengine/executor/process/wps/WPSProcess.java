@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.NotImplementedException;
 import org.n52.geoprocessing.wps.client.ExecuteRequestBuilder;
@@ -123,9 +124,16 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
             wpsProcessId = wpsOutputFuture.getJobId();
             LOGGER.info("started wps process {} to execute wacodis job {}", wpsProcessId, context.getWacodisProcessID());
             LOGGER.debug("waiting for result of wps process {}", wpsProcessId);
-            //wait until wps process return (blocking)
-            Object wpsOutput = wpsOutputFuture.getFutureResult().get();
 
+            long timeout_Millies = (long) context.getAdditionalParameters().getOrDefault(WPSProcessContextBuilder.getTIMEOUT_MILLIES_KEY(), -1l);
+            Object wpsOutput;
+            //wait until wps process return (blocking)
+            if(timeout_Millies > 0){  //respect timeout
+               wpsOutput = wpsOutputFuture.getFutureResult().get(timeout_Millies, TimeUnit.MILLISECONDS);
+            }else{
+               wpsOutput =  wpsOutputFuture.getFutureResult().get();
+            }
+                    
             LOGGER.debug("wps process {} returned result of type {}", wpsProcessId, wpsOutput.getClass().getSimpleName());
             LOGGER.info("processing result for process {}: {}", context.getWacodisProcessID(), wpsOutput);
             LOGGER.debug("start parsing result for process {}", context.getWacodisProcessID());
@@ -149,7 +157,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
             if (wpsProcessId != null) {
                 eEx.setProcessId(wpsProcessId);
             }
-            
+
             throw eEx;
         }
     }

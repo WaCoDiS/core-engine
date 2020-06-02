@@ -16,6 +16,7 @@ import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
 import de.wacodis.coreengine.executor.process.Schema;
 import java.util.Arrays;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,61 +26,76 @@ import org.slf4j.LoggerFactory;
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 public class WPSProcessContextBuilder implements ProcessContextBuilder {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(WPSProcessContextBuilder.class);
-    
+
     private static final String DEFAULT_MIME_TYPE = "text/xml";
     private static final Schema DEFAULT_SCHEMA = Schema.GML3;
-    
+    private static final String TIMEOUT_MILLIES_KEY = "timeout_millies";
+
     private WebProcessingServiceConfiguration wpsConfig;
-    
+
     public WPSProcessContextBuilder(WebProcessingServiceConfiguration wpsConfig) {
         this.wpsConfig = wpsConfig;
     }
-    
+
     public WPSProcessContextBuilder() {
     }
-    
+
     public WebProcessingServiceConfiguration getWpsConfig() {
         return wpsConfig;
     }
-    
+
     public void setWpsConfig(WebProcessingServiceConfiguration wpsConfig) {
         this.wpsConfig = wpsConfig;
     }
-    
+
+    public static String getDEFAULT_MIME_TYPE() {
+        return DEFAULT_MIME_TYPE;
+    }
+
+    public static Schema getDEFAULT_SCHEMA() {
+        return DEFAULT_SCHEMA;
+    }
+
+    public static String getTIMEOUT_MILLIES_KEY() {
+        return TIMEOUT_MILLIES_KEY;
+    }
+
     @Override
-    public ProcessContext buildProcessContext(WacodisJobWrapper job, ExpectedProcessOutput... expectedProcessOutputs) {        
+    public ProcessContext buildProcessContext(WacodisJobWrapper job, Map<String, Object> additionalParameters, ExpectedProcessOutput... expectedProcessOutputs) {
         ProcessContext context = new ProcessContext();
-        
+
         context.setWacodisProcessID(job.getJobDefinition().getId().toString());
-        
+
         List<InputHelper> jobInputs = job.getInputs();
-        
+
         for (InputHelper jobInput : jobInputs) { //set inputs
             if (jobInput.hasResource()) {
                 String mimeType = getDefaultMimeType(); //mime type currently the same for every resource, no mime type information available
                 Schema schema = getDefaultSchema(); //schema type currently the same for every resource, no schema information available
-                
+
                 for (AbstractResource resource : jobInput.getResource().get()) {
                     context.setInputResource(jobInput.getSubsetDefinitionIdentifier(), new ResourceDescription(resource, mimeType, schema));
-                }                
-            }            
+                }
+            }
         }
-        
+
         context.setExpectedOutputs(Arrays.asList(expectedProcessOutputs)); //set expected outputs
+        context.setAdditionalParameters(additionalParameters); //carry over parameters
 
         LOG.info("built wps process context ({}) for wacodis job {}", this.getClass().getSimpleName(), job.getJobDefinition().getId());
         LOG.debug("wps process context for wacodis job {}:{}{}", job.getJobDefinition().getId(), System.lineSeparator(), context);
-        
+
         return context;
     }
-    
+
     private String getDefaultMimeType() {
         return (this.wpsConfig != null && this.wpsConfig.getDefaultResourceMimeType() != null && !this.wpsConfig.getDefaultResourceMimeType().isEmpty()) ? this.wpsConfig.getDefaultResourceMimeType() : DEFAULT_MIME_TYPE;
     }
-    
+
     private Schema getDefaultSchema() {
         return (this.wpsConfig != null && this.wpsConfig.getDefaultResourceSchema() != null) ? this.wpsConfig.getDefaultResourceSchema() : DEFAULT_SCHEMA;
     }
+
 }

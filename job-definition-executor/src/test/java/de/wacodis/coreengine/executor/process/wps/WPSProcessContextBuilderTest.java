@@ -16,7 +16,9 @@ import de.wacodis.coreengine.executor.process.ProcessContext;
 import de.wacodis.coreengine.executor.process.Schema;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -53,8 +55,8 @@ public class WPSProcessContextBuilderTest {
         jobWrapper.getInputs().get(0).setResource(resourceList);
 
         WPSProcessContextBuilder contextBuilder = new WPSProcessContextBuilder(getWPSConfig());
-        ProcessContext context = contextBuilder.buildProcessContext(jobWrapper);
-        
+        ProcessContext context = contextBuilder.buildProcessContext(jobWrapper, new HashMap<>());
+
         Set<String> contextInputs = context.getInputResources().keySet();
         List<String> jobWrapperInputs = jobWrapper.getInputs().stream().map(helper -> helper.getSubsetDefinitionIdentifier()).collect(Collectors.toList());
         assertTrue(context.getInputResources().keySet().containsAll(jobWrapperInputs));
@@ -69,9 +71,27 @@ public class WPSProcessContextBuilderTest {
         WacodisJobWrapper jobWrapper = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), DateTime.now(), 0), jobDef);
 
         WPSProcessContextBuilder contextBuilder = new WPSProcessContextBuilder();
-        ProcessContext context = contextBuilder.buildProcessContext(jobWrapper);
+        ProcessContext context = contextBuilder.buildProcessContext(jobWrapper, new HashMap<>());
 
         assertEquals(processID.toString(), context.getWacodisProcessID());
+    }
+
+    @Test
+    @DisplayName("assert additional parameters are carried over correctly")
+    public void testBuildProcessContext_AdditionalParameters(){
+        WacodisJobDefinition jobDef = new WacodisJobDefinition();
+        UUID processID = UUID.randomUUID();
+        jobDef.setId(processID);
+        WacodisJobWrapper jobWrapper = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), DateTime.now(), 0), jobDef);
+
+        WPSProcessContextBuilder contextBuilder = new WPSProcessContextBuilder();
+        
+        Map<String, Object> additionalParams = new HashMap<>();
+        //set timeout parameter
+        additionalParams.put(WPSProcessContextBuilder.getTIMEOUT_MILLIES_KEY(), getWPSConfig().getTimeout_Millies());
+        ProcessContext context = contextBuilder.buildProcessContext(jobWrapper, additionalParams);
+
+        assertEquals(getWPSConfig().getTimeout_Millies(), context.getAdditionalParameter(WPSProcessContextBuilder.getTIMEOUT_MILLIES_KEY()));
     }
 
     private WebProcessingServiceConfiguration getWPSConfig() {
@@ -84,6 +104,7 @@ public class WPSProcessContextBuilderTest {
         config.setDefaultResourceMimeType("text/xml");
         config.setDefaultResourceSchema(Schema.GML3);
         config.setExpectedProcessOutputs(Arrays.asList(new ExpectedProcessOutput[]{metadataOutput, productOutput}));
+        config.setTimeout_Millies(30000l);
 
         return config;
     }

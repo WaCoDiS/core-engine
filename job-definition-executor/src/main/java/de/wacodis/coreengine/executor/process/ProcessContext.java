@@ -21,10 +21,12 @@ public class ProcessContext {
     private Map<String, List<ResourceDescription>> inputResources;
     private List<ExpectedProcessOutput> expectedOutputs;
     private String wacodisProcessID;
+    private Map<String, Object> additionalParameters;
 
     public ProcessContext() {
         this.inputResources = new HashMap<>();
         this.expectedOutputs = new ArrayList<>();
+        this.additionalParameters = new HashMap<>();
     }
 
     public String getWacodisProcessID() {
@@ -61,7 +63,6 @@ public class ProcessContext {
         this.inputResources.putIfAbsent(inputID, currentInputResources);
     }
 
-
     public List<ExpectedProcessOutput> getExpectedOutputs() {
         return expectedOutputs;
     }
@@ -78,8 +79,24 @@ public class ProcessContext {
         this.expectedOutputs.remove(expectedOutput);
     }
 
+    public Map<String, Object> getAdditionalParameters() {
+        return additionalParameters;
+    }
+
+    public void setAdditionalParameters(Map<String, Object> additionalParameters) {
+        this.additionalParameters = additionalParameters;
+    }
+
+    public void addAdditionalParameter(String key, Object value) {
+        this.additionalParameters.put(key, value);
+    }
+
+    public Object getAdditionalParameter(String key) {
+        return this.additionalParameters.get(key);
+    }
+
     @Override
     public String toString() {
-        return "ProcessContext{" + "inputResources=" + inputResources + ", expectedOutputs=" + expectedOutputs + ", wacodisProcessID=" + wacodisProcessID + '}';
+        return "ProcessContext{" + "inputResources=" + inputResources + ", expectedOutputs=" + expectedOutputs + ", wacodisProcessID=" + wacodisProcessID + ", additionalParameters=" + additionalParameters + '}';
     }
 }

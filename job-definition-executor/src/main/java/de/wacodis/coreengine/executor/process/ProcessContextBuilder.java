@@ -6,6 +6,7 @@
 package de.wacodis.coreengine.executor.process;
 
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
+import java.util.Map;
 
 /**
  * build ProcessContext for a Wacodis Job
@@ -13,6 +14,6 @@ import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
  */
 public interface ProcessContextBuilder {
     
-    ProcessContext buildProcessContext(WacodisJobWrapper job, ExpectedProcessOutput... expectedProcessOutputIdentifiers);
+    ProcessContext buildProcessContext(WacodisJobWrapper job, Map<String, Object> additionalParameters, ExpectedProcessOutput... expectedProcessOutputIdentifiers);
     
 }

@@ -20,17 +20,17 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties
 @ConfigurationProperties("spring.executor.wps")
 public class WebProcessingServiceConfiguration {
-    
+
     private String uri;
     private String version;
     private List<ExpectedProcessOutput> expectedProcessOutputs;
     private String defaultResourceMimeType;
     private Schema defaultResourceSchema;
+    private long timeout_Millies;
 
     public WebProcessingServiceConfiguration() {
     }
 
-    
     public String getUri() {
         return uri;
     }
@@ -70,4 +70,13 @@ public class WebProcessingServiceConfiguration {
     public void setDefaultResourceSchema(Schema defaultResourceSchema) {
         this.defaultResourceSchema = defaultResourceSchema;
     }
+
+    public long getTimeout_Millies() {
+        return timeout_Millies;
+    }
+
+    public void setTimeout_Millies(long timeout_Millies) {
+        this.timeout_Millies = timeout_Millies;
+    }
+
 }
