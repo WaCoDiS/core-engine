@@ -5,7 +5,7 @@ WORKDIR /app
 RUN echo invalidate the cache2
 
 RUN git clone https://github.com/WaCoDiS/wps-client-lib.git wps-client-lib \
-	&& git -C ./wps-client-lib checkout 1.0.6-wacodis && git -C ./wps-client-lib log -1
+	&& git -C ./wps-client-lib checkout 1.0.8-wacodis && git -C ./wps-client-lib log -1
 RUN ls -la ./wps-client-lib/src/main/resources
 RUN cat ./wps-client-lib/src/main/resources/wps-client-default.properties
 RUN cat ./wps-client-lib/src/main/java/org/n52/geoprocessing/wps/client/WPSClientSession.java
