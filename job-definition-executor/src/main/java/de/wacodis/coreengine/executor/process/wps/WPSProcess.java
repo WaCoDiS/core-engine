@@ -120,7 +120,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
         try {
             //exeute wps process
             LOGGER.debug("execute request for process {}: {}", context.getWacodisProcessID(), executeRequest);
-            FutureResult wpsOutputFuture = (FutureResult) this.wpsClient.execute(this.wpsURL, executeRequest, this.wpsVersion); //submit process to wps and poll result periodically
+            FutureResult wpsOutputFuture = (FutureResult) this.wpsClient.executeAsync(this.wpsURL, executeRequest, this.wpsVersion); //submit process to wps and poll result periodically
             wpsProcessId = wpsOutputFuture.getJobId();
             LOGGER.info("started wps process {} to execute wacodis job {}", wpsProcessId, context.getWacodisProcessID());
             LOGGER.debug("waiting for result of wps process {}", wpsProcessId);
@@ -175,7 +175,7 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
     /**
      * register inputs for wps process
      *
-     * @param availableInputs
+     * @param providedInputResources
      * @param executeRequestBuilder
      */
     private List<String> setWPSInputs(Map<String, List<ResourceDescription>> providedInputResources, ExecuteRequestBuilder executeRequestBuilder) {
