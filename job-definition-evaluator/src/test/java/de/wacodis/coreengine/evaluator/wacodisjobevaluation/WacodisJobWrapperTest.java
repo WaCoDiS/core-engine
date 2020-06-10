@@ -5,6 +5,7 @@
  */
 package de.wacodis.coreengine.evaluator.wacodisjobevaluation;
 
+import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
 import de.wacodis.core.models.CatalogueSubsetDefinition;
 import de.wacodis.core.models.CopernicusSubsetDefinition;
@@ -12,8 +13,10 @@ import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionExecution;
 import de.wacodis.core.models.WacodisJobDefinitionTemporalCoverage;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import org.assertj.core.util.Arrays;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -57,18 +60,23 @@ public class WacodisJobWrapperTest {
     @Test
     public void testIsExecutable() {
         WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(),new DateTime(), 0), getJobDefinition());
+        InputHelper input = new InputHelper(new AbstractSubsetDefinition());
+        List<AbstractResource> resource = new ArrayList<>();
+        resource.add(new AbstractResource());
+
+        
         assertFalse(job.isExecutable());
 
-        job.getInputs().get(0).setResourceAvailable(true);
+        job.getInputs().get(0).setResource(resource);
         assertFalse(job.isExecutable());
 
-        job.getInputs().get(1).setResourceAvailable(true);
+        job.getInputs().get(1).setResource(resource);
         assertTrue(job.isExecutable());
 
-        job.getInputs().get(1).setResourceAvailable(false);
+        job.getInputs().get(1).removeResource(resource);
         assertFalse(job.isExecutable());
 
-        job.getInputs().get(0).setResourceAvailable(false);
+        job.getInputs().get(0).removeResource(resource);
         assertFalse(job.isExecutable());
     }
 

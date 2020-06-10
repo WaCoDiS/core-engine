@@ -32,7 +32,7 @@ public class InputHelperTest {
         resourceList.add(resource);
         InputHelper input = new InputHelper(subset, resourceList);
 
-        assertEquals(resourceList, input.getResource().get());
+        assertTrue(input.getResource().containsAll(resourceList));
     }
 
     /**
@@ -43,7 +43,7 @@ public class InputHelperTest {
         AbstractSubsetDefinition subset = new AbstractSubsetDefinition();
         InputHelper input = new InputHelper(subset);
 
-        assertFalse(input.getResource().isPresent());
+        assertTrue(input.getResource().isEmpty());
     }
 
     /**
@@ -55,10 +55,9 @@ public class InputHelperTest {
         AbstractResource resource = new AbstractResource();
         List<AbstractResource> resourceList = new ArrayList();
         resourceList.add(resource);
-        InputHelper input = new InputHelper(subset);
+        InputHelper input = new InputHelper(subset, resourceList);
 
-        input.setResource(resourceList);
-        assertEquals(resourceList, input.getResource().get());
+        assertTrue(input.getResource().containsAll(resourceList));
     }
 
     /**
@@ -94,6 +93,14 @@ public class InputHelperTest {
         assertFalse(input.hasResource());
     }
 
+    @Test
+    public void testGetSubsetDefinitionID() {
+        AbstractSubsetDefinition subset = new AbstractSubsetDefinition();
+        InputHelper input = new InputHelper(subset);
+
+        assertEquals(subset.getIdentifier(), input.getSubsetDefinitionIdentifier());
+    }
+
     /**
      * Test of hasResource method, of class InputHelper.
      */
@@ -107,23 +114,9 @@ public class InputHelperTest {
 
         input.setResource(resourceList);
         assertTrue(input.hasResource());
+
+        input.removeResource(resourceList);
+        assertFalse(input.hasResource());
     }
 
-    @Test
-    public void testSetResourceAvailable() {
-        AbstractSubsetDefinition subset = new AbstractSubsetDefinition();
-        InputHelper input = new InputHelper(subset);
-
-        input.setResourceAvailable(true);
-        assertTrue(input.isResourceAvailable());
-    }
-
-    @Test
-    public void testIsResourceAvailable() {
-        AbstractSubsetDefinition subset = new AbstractSubsetDefinition();
-        InputHelper input = new InputHelper(subset);
-
-        input.setResourceAvailable(false);
-        assertFalse(input.isResourceAvailable());
-    }
 }

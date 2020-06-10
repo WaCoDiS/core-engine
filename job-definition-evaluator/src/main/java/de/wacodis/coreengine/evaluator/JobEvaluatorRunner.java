@@ -159,7 +159,7 @@ public class JobEvaluatorRunner {
 
     private boolean editJobWrapperInputs(Map<String, List<AbstractResource>> response, WacodisJobWrapper job) {
         for (InputHelper input : job.getInputs()) {
-            String inputID = input.getSubsetDefinition().getIdentifier();
+            String inputID = input.getSubsetDefinitionIdentifier();
             List<AbstractResource> resourceList = response.get(inputID);
 
             updateInputResource(input, Optional.ofNullable(resourceList));
@@ -169,14 +169,14 @@ public class JobEvaluatorRunner {
     }
 
     private void updateInputResource(InputHelper input, Optional<List<AbstractResource>> resourceList) {
-        boolean inputAlreadyHasResources = (input.getResource().isPresent() && input.getResource().get().size() > 0);
+        boolean inputAlreadyHasResources = input.hasResource();
 
         if (resourceList.isPresent() && resourceList.get().size() > 0) {
             if (!inputAlreadyHasResources) {
-                input.setResource(resourceList);
+                input.setResource(resourceList.get());
             } else {
                 //combine existing and new resources
-                List<AbstractResource> currentResources = input.getResource().get();
+                List<AbstractResource> currentResources = input.getResource();
                 List<AbstractResource> newResources = resourceList.get();
                 List<AbstractResource> allResources = new ArrayList<>();
                 //do not add new resource if already existing
@@ -185,16 +185,7 @@ public class JobEvaluatorRunner {
                 allResources.addAll(currentResources);
                 allResources.addAll(newResources);
 
-                input.setResource(Optional.of(allResources));
-            }
-            input.setResourceAvailable(true);
-        } else {
-            //do not overwrite if resource is already set (e.g. StaticDummyResouces)
-            if (!inputAlreadyHasResources) {
-                input.setResource(Optional.empty());
-                input.setResourceAvailable(false);
-            } else {
-                input.setResourceAvailable(true);
+                input.setResource(allResources);
             }
         }
     }

@@ -68,7 +68,7 @@ public class WacodisJobWrapper {
      */
     public boolean isExecutable() {
         for (InputHelper input : this.inputs) {
-            if (!input.isResourceAvailable()) {
+            if (!input.hasResource()) {
                 return false;
             }
         }
@@ -102,18 +102,20 @@ public class WacodisJobWrapper {
         return new Interval(start, this.executionContext.getExecutionTime());
     }
     
+    /**
+     * @return incremented retry count
+     */
     public int incrementRetryCount(){
         this.executionContext = this.executionContext.createCopyWithIncrementedRetryCount();
         return this.executionContext.getRetryCount();
     }
 
     private void initInputs() {
-        for (AbstractSubsetDefinition subset : this.jobDefinition.getInputs()) {
-            InputHelper input = new InputHelper(subset);
+        for (AbstractSubsetDefinition inputDef : this.jobDefinition.getInputs()) {
+            InputHelper input = new InputHelper(inputDef);
 
-            if (StaticSubsetDefinition.class.isAssignableFrom(subset.getClass())) { //handle static inputs
-                input.setResourceAvailable(true); //static input always available 
-                input.setResource(createStaticDummyResource(((StaticSubsetDefinition) subset)));
+            if (StaticSubsetDefinition.class.isAssignableFrom(input.getClass())) { //handle static inputs
+                input.setResource(createStaticDummyResource(((StaticSubsetDefinition) inputDef)));
             }
 
             this.inputs.add(input);

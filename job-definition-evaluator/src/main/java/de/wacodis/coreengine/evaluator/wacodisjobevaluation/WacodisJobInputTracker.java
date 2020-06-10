@@ -128,7 +128,8 @@ public class WacodisJobInputTracker {
                 boolean isMatch = this.matcher.match(dataEnvelope, job, input.getSubsetDefinition());
 
                 if (isMatch) {
-                    updateInput(input, dataAvailable);
+                    //updateInput(input, dataAvailable);
+                    //ToDo set resource for input helper
                     updateExecutableWacodisJobs(job);
                 }
             }
@@ -151,10 +152,6 @@ public class WacodisJobInputTracker {
      */
     public List<WacodisJobWrapper> getScheduledJobs() {
         return Collections.unmodifiableList(this.scheduledWacodisJobs);
-    }
-
-    private void updateInput(InputHelper pair, boolean isResourceAvailable) {
-        pair.setResourceAvailable(isResourceAvailable);
     }
 
     private void updateExecutableWacodisJobs(WacodisJobWrapper job) {
@@ -182,10 +179,10 @@ public class WacodisJobInputTracker {
         sb.append("Resource Summary of Wacodis Job ").append(job.getJobDefinition().getId()).append(" {");
         for (InputHelper input : job.getInputs()) {
             sb.append(System.lineSeparator()).append("\t"); //line break + indent
-            sb.append(input.getSubsetDefinitionIdentifier()).append(": resources available = ").append(input.isResourceAvailable());
+            sb.append(input.getSubsetDefinitionIdentifier()).append(": resources available = ").append(input.hasResource());
 
-            if (input.isResourceAvailable() && input.getResource().isPresent()) {
-                sb.append(", number of resources = ").append(input.getResource().get().size());
+            if (input.hasResource()) {
+                sb.append(", number of resources = ").append(input.getResource().size());
             }
         }
 
