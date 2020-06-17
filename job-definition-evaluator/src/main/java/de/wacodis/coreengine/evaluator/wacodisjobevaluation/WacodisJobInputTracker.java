@@ -6,7 +6,6 @@
 package de.wacodis.coreengine.evaluator.wacodisjobevaluation;
 
 import de.wacodis.core.models.AbstractDataEnvelope;
-import de.wacodis.coreengine.evaluator.EvaluationStatus;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,9 +21,8 @@ public class WacodisJobInputTracker {
     private static final Logger LOGGER = LoggerFactory.getLogger(WacodisJobInputTracker.class);
 
     protected final List<WacodisJobWrapper> scheduledWacodisJobs;
-    protected final List<WacodisJobWrapper> executableWacodisJobs;
-    protected final List<JobIsExecutableChangeListener> listeners;
-
+    protected final JobEvaluatorService jobEvaluator;
+    protected boolean preselectCandidates;
     protected DataEnvelopeMatcher matcher;
 
     public DataEnvelopeMatcher getMatcher() {
@@ -33,15 +31,36 @@ public class WacodisJobInputTracker {
 
     /**
      *
+     * @param jobEvaluator
      * @param matcher
+     * @param preselectCandidates if true only evaluate candidates identifierd
+     * by matcher
      */
-    public WacodisJobInputTracker(DataEnvelopeMatcher matcher) {
+    public WacodisJobInputTracker(JobEvaluatorService jobEvaluator, DataEnvelopeMatcher matcher, boolean preselectCandidates) {
         this.matcher = matcher;
         this.scheduledWacodisJobs = new ArrayList<>();
-        this.executableWacodisJobs = new ArrayList<>();
-        this.listeners = new ArrayList<>();
+        this.jobEvaluator = jobEvaluator;
+        this.preselectCandidates = preselectCandidates;
 
         LOGGER.debug(WacodisJobInputTracker.class.getSimpleName() + " instance created with matcher " + this.matcher.getClass().getSimpleName());
+    }
+
+    /**
+     * preselectCandidates == true
+     *
+     * @param jobEvaluator
+     * @param matcher
+     */
+    public WacodisJobInputTracker(JobEvaluatorService jobEvaluator, DataEnvelopeMatcher matcher) {
+        this(jobEvaluator, matcher, true);
+    }
+
+    public boolean isPreselectCandidates() {
+        return preselectCandidates;
+    }
+
+    public void setPreselectCandidates(boolean preselectCandidates) {
+        this.preselectCandidates = preselectCandidates;
     }
 
     /**
@@ -51,14 +70,6 @@ public class WacodisJobInputTracker {
     public void addJob(WacodisJobWrapper job) {
         this.scheduledWacodisJobs.add(job);
         LOGGER.info("add wacodis job {} to input tracker", job.getJobDefinition().getId());
-
-        if (job.isExecutable() && !this.executableWacodisJobs.contains(job)) {
-            LOGGER.info("wacodis job {} is already executable", job.getJobDefinition().getId());
-            this.executableWacodisJobs.add(job);
-            this.notifyListeners(job, true);
-        } else {
-            LOGGER.info("wacodis job {} is waiting for new, accessible DataEnvelopes" + System.lineSeparator() + getResourceSummary(job), job.getJobDefinition().getId());
-        }
     }
 
     /**
@@ -68,11 +79,6 @@ public class WacodisJobInputTracker {
      */
     public boolean removeJob(WacodisJobWrapper job) {
         LOGGER.info("remove wacodis job {} from input tracker", job.getJobDefinition().getId());
-        if (this.executableWacodisJobs.contains(job)) {
-            LOGGER.debug("remove wacodis job {} from list of executable jobs", job.getJobDefinition().getId());
-            this.executableWacodisJobs.remove(job);
-        }
-
         return this.scheduledWacodisJobs.remove(job);
     }
 
@@ -81,7 +87,6 @@ public class WacodisJobInputTracker {
      */
     public void clearJobs() {
         LOGGER.info("clear all wacodis jobs from input tracker");
-        this.executableWacodisJobs.clear();
         this.scheduledWacodisJobs.clear();
     }
 
@@ -102,47 +107,40 @@ public class WacodisJobInputTracker {
         handleDataEnvelope(dataEnvelope, false);
     }
 
-    public void addJobIsExecutableChangeListener(JobIsExecutableChangeListener listener) {
-        if (!this.listeners.contains(listener)) {
-            this.listeners.add(listener);
-        }
-    }
-
-    public boolean removeJobIsExecutableChangeListener(JobIsExecutableChangeListener listener) {
-        return this.listeners.remove(listener);
-    }
-
-    public void clearJobIsExecutableChangeListeners() {
-        this.listeners.clear();
-    }
-
-    public boolean containsJobIsExecutableChangeListener(JobIsExecutableChangeListener listener) {
-        return this.listeners.contains(listener);
-    }
-
     private void handleDataEnvelope(AbstractDataEnvelope dataEnvelope, boolean dataAvailable) {
         LOGGER.info("received " + dataEnvelope.getClass().getSimpleName() + " " + dataEnvelope.getIdentifier() + " for job evaluation, dataAvailable: " + dataAvailable);
+        List<WacodisJobWrapper> candidates;
+        if (this.preselectCandidates) {
+            candidates = findCandidates(dataEnvelope);
+            LOGGER.info("found {} candidates (wacodis job) for job evaluation after receiving data envelope {}", candidates.size(), dataEnvelope.getIdentifier());
+        } else {
+            candidates = new ArrayList<>(this.scheduledWacodisJobs);
+            LOGGER.info("select all schedule wacodis jobs (count: {} ) for job evaluation after receiving data envelope {}", candidates.size(), dataEnvelope.getIdentifier());
+        }
 
+        for (WacodisJobWrapper candidate : candidates) {
+            LOGGER.info("(re-)evaluate candidate wacodis job {}", candidate.getJobDefinition().getId());
+            this.jobEvaluator.handleJobEvaluation(candidate, this);
+        }
+
+    }
+
+    private List<WacodisJobWrapper> findCandidates(AbstractDataEnvelope dataEnvelope) {
+        List<WacodisJobWrapper> candidates = new ArrayList<>();
+
+        //iterate each input of each scheduled job
         for (WacodisJobWrapper job : this.scheduledWacodisJobs) {
             for (InputHelper input : job.getInputs()) {
                 boolean isMatch = this.matcher.match(dataEnvelope, job, input.getSubsetDefinition());
 
                 if (isMatch) {
-                    //updateInput(input, dataAvailable);
-                    //ToDo set resource for input helper
-                    updateExecutableWacodisJobs(job);
+                    candidates.add(job);
+                    break; //add job only once
                 }
             }
         }
-    }
 
-    /**
-     * returns unmodifiable List of all jobs ready for execution
-     *
-     * @return
-     */
-    public List<WacodisJobWrapper> getExecutableJobs() {
-        return Collections.unmodifiableList(this.executableWacodisJobs);
+        return candidates;
     }
 
     /**
@@ -152,42 +150,5 @@ public class WacodisJobInputTracker {
      */
     public List<WacodisJobWrapper> getScheduledJobs() {
         return Collections.unmodifiableList(this.scheduledWacodisJobs);
-    }
-
-    private void updateExecutableWacodisJobs(WacodisJobWrapper job) {
-        if (job.isExecutable() && !this.executableWacodisJobs.contains(job)) {
-            this.executableWacodisJobs.add(job);
-            notifyListeners(job, true);
-        } else if (!job.isExecutable() && this.executableWacodisJobs.contains(job)) {
-            this.executableWacodisJobs.remove(job);
-            notifyListeners(job, false);
-        }
-    }
-
-    private void notifyListeners(WacodisJobWrapper job, boolean isExecutable) {
-        LOGGER.debug("Notify Listeners for wacodis job " + job.getJobDefinition().getName() + " (Id: " + job.getJobDefinition().getId() + "), isExecutable: " + isExecutable);
-        EvaluationStatus status = (isExecutable) ? EvaluationStatus.EXECUTABLE : EvaluationStatus.NOTEXECUTABLE;
-
-        for (JobIsExecutableChangeListener listener : this.listeners) {
-            listener.onJobIsExecutableChanged(this, job, status);
-        }
-    }
-
-    private String getResourceSummary(WacodisJobWrapper job) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("Resource Summary of Wacodis Job ").append(job.getJobDefinition().getId()).append(" {");
-        for (InputHelper input : job.getInputs()) {
-            sb.append(System.lineSeparator()).append("\t"); //line break + indent
-            sb.append(input.getSubsetDefinitionIdentifier()).append(": resources available = ").append(input.hasResource());
-
-            if (input.hasResource()) {
-                sb.append(", number of resources = ").append(input.getResource().size());
-            }
-        }
-
-        sb.append(System.lineSeparator()).append("}");
-
-        return sb.toString();
     }
 }

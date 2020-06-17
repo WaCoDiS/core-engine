@@ -75,7 +75,7 @@ public class WPSProcessContextBuilder implements ProcessContextBuilder {
                 String mimeType = getDefaultMimeType(); //mime type currently the same for every resource, no mime type information available
                 Schema schema = getDefaultSchema(); //schema type currently the same for every resource, no schema information available
 
-                for (AbstractResource resource : jobInput.getResource().get()) {
+                for (AbstractResource resource : jobInput.getResource()) {
                     context.setInputResource(jobInput.getSubsetDefinitionIdentifier(), new ResourceDescription(resource, mimeType, schema));
                 }
             }

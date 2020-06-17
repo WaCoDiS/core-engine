@@ -5,29 +5,34 @@
  */
 package de.wacodis.coreengine.evaluator;
 
+import de.wacodis.coreengine.evaluator.configuration.DataEnvelopeMatchingConfiguration;
+import de.wacodis.coreengine.evaluator.wacodisjobevaluation.SourceTypeDataEnvelopeMatcher;
+import de.wacodis.coreengine.evaluator.wacodisjobevaluation.JobEvaluatorService;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobInputTracker;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  *
- * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
+ * @author Arne
  */
-@Component
+@Service
 public class WacodisJobInputTrackerProvider {
 
     private WacodisJobInputTracker inputTracker;
-    
-    public WacodisJobInputTrackerProvider() {}
 
-    public WacodisJobInputTrackerProvider(WacodisJobInputTracker inputTracker) {
-        this.inputTracker = inputTracker;
-    }
+    @Autowired
+    JobEvaluatorService jobEvaluator;
+
+    @Autowired
+    DataEnvelopeMatchingConfiguration matchingConfig;
 
     public WacodisJobInputTracker getInputTracker() {
+        if (this.inputTracker == null) {
+            this.inputTracker = new WacodisJobInputTracker(jobEvaluator, new SourceTypeDataEnvelopeMatcher());
+        }
+
         return inputTracker;
     }
 
-    public void setInputTracker(WacodisJobInputTracker inputTracker) {
-        this.inputTracker = inputTracker;
-    }
 }

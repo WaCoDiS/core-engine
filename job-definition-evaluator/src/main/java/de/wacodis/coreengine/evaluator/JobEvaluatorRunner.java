@@ -10,25 +10,25 @@ import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
 import de.wacodis.core.models.DataAccessResourceSearchBody;
 import de.wacodis.core.models.StaticSubsetDefinition;
+import de.wacodis.coreengine.evaluator.configuration.DataAccessConfiguration;
+import de.wacodis.coreengine.evaluator.http.dataaccess.DataAccessConnector;
 import de.wacodis.coreengine.evaluator.http.dataaccess.DataAccessResourceProvider;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
-import de.wacodis.coreengine.evaluator.wacodisjobevaluation.JobIsExecutableChangeListener;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobInputTracker;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+import de.wacodis.coreengine.evaluator.wacodisjobevaluation.JobEvaluatorService;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  *
@@ -41,14 +41,23 @@ public class JobEvaluatorRunner {
 
     private DataAccessResourceProvider<Map<String, List<AbstractResource>>, DataAccessResourceSearchBody> dataAccessConnector;
     private WacodisJobInputTracker inputTracker;
-    private EvaluatorListener executableJobListener;
 
     @Autowired
-    private ApplicationEventPublisher jobExecutablePublisher;
+    WacodisJobInputTrackerProvider inputTrackerProvider;
+
+    @Autowired
+    private DataAccessConfiguration dataAccessConfiguration;
 
     @PostConstruct
-    private void initListener() {
-        this.executableJobListener = new EvaluatorListener(this.jobExecutablePublisher, this);
+    private void initialize() throws MalformedURLException {
+        //init DataAccessConnector
+        DataAccessConnector dataAccess = new DataAccessConnector();
+        //ToDo runtime changes of dataaccess configuration are not reflected
+        URL dataAccessURL = new URL(this.dataAccessConfiguration.getUri());
+        dataAccess.setUrl(dataAccessURL);
+
+        this.setDataAccessConnector(dataAccessConnector);
+        this.inputTracker = inputTrackerProvider.getInputTracker();
     }
 
     public JobEvaluatorRunner() {
@@ -68,20 +77,6 @@ public class JobEvaluatorRunner {
 
     public WacodisJobInputTracker getInputTracker() {
         return inputTracker;
-    }
-
-    public void setInputTracker(WacodisJobInputTracker inputTracker) {
-        if (this.inputTracker != null) {
-            this.inputTracker.removeJobIsExecutableChangeListener(this.executableJobListener);
-        }
-
-        this.inputTracker = inputTracker;
-
-        this.inputTracker.addJobIsExecutableChangeListener(executableJobListener);
-    }
-
-    public JobIsExecutableChangeListener getExecutableJobListener() {
-        return executableJobListener;
     }
 
     /**
@@ -105,10 +100,12 @@ public class JobEvaluatorRunner {
      */
     public EvaluationStatus evaluateJob(WacodisJobWrapper job, boolean addJobToInputTracker) {
         try {
-            DataAccessResourceSearchBody query = generateDataAccessQuery(job);
-            Map<String, List<AbstractResource>> searchResult = this.dataAccessConnector.searchResources(query);
+            Map<String, List<AbstractResource>> searchResult = this.retrieveAvailableResourcesFromDataAccess(job);
             LOGGER.info("retrieved available resources for wacodis job {} from Data Access, response contained {} resources", job.getJobDefinition().getId(), getResourceCount(searchResult));
-            boolean isExecutable = editJobWrapperInputs(searchResult, job);
+            editJobWrapperInputs(searchResult, job);
+            boolean isExecutable = job.isExecutable();
+
+            LOGGER.debug(getResourceSummary(job));
 
             if (addJobToInputTracker) {
                 this.inputTracker.addJob(job);
@@ -157,35 +154,13 @@ public class JobEvaluatorRunner {
         return relevancyTimeFrameConverted;
     }
 
-    private boolean editJobWrapperInputs(Map<String, List<AbstractResource>> response, WacodisJobWrapper job) {
+    private void editJobWrapperInputs(Map<String, List<AbstractResource>> response, WacodisJobWrapper job) {
         for (InputHelper input : job.getInputs()) {
             String inputID = input.getSubsetDefinitionIdentifier();
             List<AbstractResource> resourceList = response.get(inputID);
-
-            updateInputResource(input, Optional.ofNullable(resourceList));
-        }
-
-        return job.isExecutable();
-    }
-
-    private void updateInputResource(InputHelper input, Optional<List<AbstractResource>> resourceList) {
-        boolean inputAlreadyHasResources = input.hasResource();
-
-        if (resourceList.isPresent() && resourceList.get().size() > 0) {
-            if (!inputAlreadyHasResources) {
-                input.setResource(resourceList.get());
-            } else {
-                //combine existing and new resources
-                List<AbstractResource> currentResources = input.getResource();
-                List<AbstractResource> newResources = resourceList.get();
-                List<AbstractResource> allResources = new ArrayList<>();
-                //do not add new resource if already existing
-                newResources.removeAll(currentResources);
-                // combine resource lists
-                allResources.addAll(currentResources);
-                allResources.addAll(newResources);
-
-                input.setResource(allResources);
+            //set resources, override current resources
+            if (resourceList != null) {
+                input.setResource(resourceList);
             }
         }
     }
@@ -200,54 +175,22 @@ public class JobEvaluatorRunner {
         return count;
     }
 
-    private class EvaluatorListener implements JobIsExecutableChangeListener {
+    private String getResourceSummary(WacodisJobWrapper job) {
+        StringBuilder sb = new StringBuilder();
 
-        private ApplicationEventPublisher publisher;
-        private Object eventOrigin;
+        sb.append("Resource Summary of Wacodis Job ").append(job.getJobDefinition().getId()).append(" {");
+        for (InputHelper input : job.getInputs()) {
+            sb.append(System.lineSeparator()).append("\t"); //line break + indent
+            sb.append(input.getSubsetDefinitionIdentifier()).append(": resources available = ").append(input.hasResource());
 
-        public EvaluatorListener(ApplicationEventPublisher publisher, Object eventSource) {
-            this.publisher = publisher;
-            this.eventOrigin = eventSource;
-        }
-
-        public EvaluatorListener() {
-        }
-
-        public ApplicationEventPublisher getPublisher() {
-            return publisher;
-        }
-
-        public void setPublisher(ApplicationEventPublisher publisher) {
-            this.publisher = publisher;
-        }
-
-        public Object getEventOrigin() {
-            return eventOrigin;
-        }
-
-        public void setEventOrigin(Object eventOrigin) {
-            this.eventOrigin = eventOrigin;
-        }
-
-        @Override
-        public void onJobIsExecutableChanged(WacodisJobInputTracker eventSource, WacodisJobWrapper job, EvaluationStatus status) {
-            if (status.equals(EvaluationStatus.EXECUTABLE)) {
-                LOGGER.info("Received notification on executable WacodisJob " + job.getJobDefinition().getName() + " (Id: " + job.getJobDefinition().getId() + "), initiating final validity check");
-                //check again (items might have been removed from DataAccess during waiting time)
-                EvaluationStatus validityCheck = evaluateJob(job);
-
-                if (validityCheck.equals(EvaluationStatus.EXECUTABLE)) {
-                    LOGGER.info("Validity Check for WacodisJob " + job.getJobDefinition().getName() + " (Id: " + job.getJobDefinition().getId() + ")  succeeded, publishing WacodisJobExecutableEvent");
-                    WacodisJobExecutableEvent event = new WacodisJobExecutableEvent(this.eventOrigin, job, validityCheck);
-                    this.publisher.publishEvent(event);
-                    //remove from InputTracker
-                    eventSource.removeJob(job);
-                } else {
-                    //wait for further DataEnvelopes     
-                    LOGGER.info("Validity Check for WacodisJob " + job.getJobDefinition().getName() + " (Id: " + job.getJobDefinition().getId() + ") failed, wait for further accessible DataEnvelopes");
-                }
+            if (input.hasResource()) {
+                sb.append(", number of resources = ").append(input.getResource().size());
             }
         }
 
+        sb.append(System.lineSeparator()).append("}");
+
+        return sb.toString();
     }
+
 }

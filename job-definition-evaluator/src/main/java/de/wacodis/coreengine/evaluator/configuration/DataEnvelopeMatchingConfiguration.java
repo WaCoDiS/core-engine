@@ -22,18 +22,16 @@ public class DataEnvelopeMatchingConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataEnvelopeMatchingConfiguration.class);
 
-    private float minimumOverlapPercentage;
+    private boolean preselectCandidates;
 
-    public float getMinimumOverlapPercentage() {
-        return minimumOverlapPercentage;
+    public boolean isPreselectCandidates() {
+        return preselectCandidates;
     }
 
-    public void setMinimumOverlapPercentage(float minimumOverlapPercentage) {
-        if (minimumOverlapPercentage > 100.0f) {
-            throw new IllegalArgumentException("minimumOverlapPercentage is " + minimumOverlapPercentage + " but must not be bigger than 100.0");
-        }
-
-        this.minimumOverlapPercentage = minimumOverlapPercentage;
-        LOGGER.info("minimumOverlapPercentage set to: " + this.minimumOverlapPercentage);
+    public void setPreselectCandidates(boolean preselectCandidates) {
+        this.preselectCandidates = preselectCandidates;
+        LOGGER.debug("set preselectCandidates to " + preselectCandidates);
     }
+
+    
 }
