@@ -116,7 +116,7 @@ public class JobEvaluatorRunner {
 
             if (addJobToInputTracker) {
                 this.inputTracker.addJob(job);
-                LOGGER.warn("Wacodis-Job {} could not be evaluated and might not be executed, add Wacodis-Job to InputTracker to wait for new, accessible DataEnvelopes");
+                LOGGER.warn("Wacodis-Job {} could not be evaluated, add Wacodis-Job to InputTracker to wait for new, accessible DataEnvelopes", job.getJobDefinition().getId());
             } else {
                 LOGGER.error("Wacodis-Job " + job.getJobDefinition().getId() + "could not be evaluated and will not be executed!");
             }
