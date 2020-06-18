@@ -25,7 +25,7 @@ public class EvaluatorService implements JobEvaluatorService {
 
     @Autowired
     private ApplicationEventPublisher publisher;
-    
+
     @Autowired
     private JobEvaluatorRunner jobEvaluator;
 
@@ -55,23 +55,39 @@ public class EvaluatorService implements JobEvaluatorService {
 
     @Override
     public void handleJobEvaluation(WacodisJobWrapper job, WacodisJobInputTracker inputTracker) {
-        LOGGER.info("evaluate WacodisJob " + job.getJobDefinition().getName() + " (Id: " + job.getJobDefinition().getId() + ")");
-        //check for accesible resources and update job status
-        EvaluationStatus evaluationStatus = this.jobEvaluator.evaluateJob(job);
-
-        if (evaluationStatus.equals(EvaluationStatus.EXECUTABLE)) {
-            LOGGER.info("WacodisJob " + job.getJobDefinition().getName() + " (Id: " + job.getJobDefinition().getId() + ")  is executable, publishing WacodisJobExecutableEvent");
-            //publish execution event
-            WacodisJobExecutableEvent event = new WacodisJobExecutableEvent(this, job, evaluationStatus);
-            this.publisher.publishEvent(event);
-            //remove from InputTracker
-            inputTracker.removeJob(job);
-
+        if (job.isExecutable()) {
+            LOGGER.info("WacodisJob " + job.getJobDefinition().getName() + " (Id: " + job.getJobDefinition().getId() + ") already executable, publishing WacodisJobExecutableEvent");
+            //publish event and remove job from input tracker
+            handleExecutableJob(inputTracker, job);
         } else {
-            //wait for further DataEnvelopes     
-            LOGGER.info("WacodisJob " + job.getJobDefinition().getName() + " (Id: " + job.getJobDefinition().getId() + ") is not yet executable, wait for further accessible DataEnvelopes");
+
+            LOGGER.info("evaluate WacodisJob " + job.getJobDefinition().getName() + " (Id: " + job.getJobDefinition().getId() + ")");
+            //check for accesible resources and update job status, publishing WacodisJobExecutableEvent
+            EvaluationStatus evaluationStatus = this.jobEvaluator.evaluateJob(job);
+
+            if (evaluationStatus.equals(EvaluationStatus.EXECUTABLE)) {
+                LOGGER.info("WacodisJob " + job.getJobDefinition().getName() + " (Id: " + job.getJobDefinition().getId() + ")  is executable, publishing WacodisJobExecutableEvent");
+                //publish event and remove job from input tracker
+                handleExecutableJob(inputTracker, job);
+            } else {
+                //wait for further DataEnvelopes     
+                LOGGER.info("WacodisJob " + job.getJobDefinition().getName() + " (Id: " + job.getJobDefinition().getId() + ") is not yet executable, wait for further accessible DataEnvelopes");
+            }
         }
     }
 
-}
+    private void handleExecutableJob(WacodisJobInputTracker tracker, WacodisJobWrapper job) {
+        publishExecutableEvent(job, EvaluationStatus.EXECUTABLE);
+        removeJobFromInputTracker(tracker, job);
+    }
 
+    private void publishExecutableEvent(WacodisJobWrapper job, EvaluationStatus evaluationStatus) {
+        WacodisJobExecutableEvent event = new WacodisJobExecutableEvent(this, job, evaluationStatus);
+        this.publisher.publishEvent(event);
+    }
+
+    private void removeJobFromInputTracker(WacodisJobInputTracker tracker, WacodisJobWrapper job) {
+        tracker.removeJob(job);
+    }
+
+}
