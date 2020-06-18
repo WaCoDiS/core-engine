@@ -115,7 +115,7 @@ public class WacodisJobInputTracker {
             LOGGER.info("found {} candidates (wacodis job) for job evaluation after receiving data envelope {}", candidates.size(), dataEnvelope.getIdentifier());
         } else {
             candidates = new ArrayList<>(this.scheduledWacodisJobs);
-            LOGGER.info("select all schedule wacodis jobs (count: {} ) for job evaluation after receiving data envelope {}", candidates.size(), dataEnvelope.getIdentifier());
+            LOGGER.info("select all scheduled wacodis jobs (count: {} ) for job evaluation after receiving data envelope {}", candidates.size(), dataEnvelope.getIdentifier());
         }
 
         for (WacodisJobWrapper candidate : candidates) {

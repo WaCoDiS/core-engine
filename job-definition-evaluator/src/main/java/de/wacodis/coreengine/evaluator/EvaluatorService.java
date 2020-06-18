@@ -56,11 +56,11 @@ public class EvaluatorService implements JobEvaluatorService {
     @Override
     public void handleJobEvaluation(WacodisJobWrapper job, WacodisJobInputTracker inputTracker) {
         LOGGER.info("evaluate WacodisJob " + job.getJobDefinition().getName() + " (Id: " + job.getJobDefinition().getId() + ")");
-        //check again (items might have been removed from DataAccess during waiting time)
+        //check for accesible resources and update job status
         EvaluationStatus evaluationStatus = this.jobEvaluator.evaluateJob(job);
 
         if (evaluationStatus.equals(EvaluationStatus.EXECUTABLE)) {
-            LOGGER.info("evaluation of WacodisJob " + job.getJobDefinition().getName() + " (Id: " + job.getJobDefinition().getId() + ")  is executable, publishing WacodisJobExecutableEvent");
+            LOGGER.info("WacodisJob " + job.getJobDefinition().getName() + " (Id: " + job.getJobDefinition().getId() + ")  is executable, publishing WacodisJobExecutableEvent");
             //publish execution event
             WacodisJobExecutableEvent event = new WacodisJobExecutableEvent(this, job, evaluationStatus);
             this.publisher.publishEvent(event);

@@ -29,7 +29,7 @@ public class WacodisJobInputTrackerProvider {
 
     public WacodisJobInputTracker getInputTracker() {
         if (this.inputTracker == null) {
-            this.inputTracker = new WacodisJobInputTracker(jobEvaluator, new SourceTypeDataEnvelopeMatcher());
+            this.inputTracker = new WacodisJobInputTracker(jobEvaluator, new SourceTypeDataEnvelopeMatcher(), matchingConfig.isPreselectCandidates());
         }
 
         return inputTracker;
