@@ -5,6 +5,7 @@
  */
 package de.wacodis.coreengine.evaluator;
 
+import de.wacodis.core.models.AbstractSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.SourceTypeDataEnvelopeMatcher;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionContext;
@@ -37,9 +38,17 @@ public class EvaluatorServiceTest {
 
         WacodisJobDefinition jobDef = new WacodisJobDefinition();
         jobDef.setId(UUID.randomUUID());
+        
+        //need at least one input item, otherwise job would be already executable
+        AbstractSubsetDefinition input = new AbstractSubsetDefinition();
+        input.setIdentifier("testInput");
+        jobDef.addInputsItem(input);
+        
         WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), DateTime.now(), 0), jobDef);
         WacodisJobInputTracker inputTracker = new WacodisJobInputTracker(evaluatorService, new SourceTypeDataEnvelopeMatcher());
 
+        inputTracker.addJob(job);
+        
         evaluatorService.setJobEvaluator(new JobEvaluatorRunner() {
             @Override
             public EvaluationStatus evaluateJob(WacodisJobWrapper job) {
@@ -48,7 +57,7 @@ public class EvaluatorServiceTest {
         });
         //do not remove job from tracker if job is not executable
         evaluatorService.handleJobEvaluation(job, inputTracker);
-        assertFalse(inputTracker.containsJob(job));
+        assertTrue(inputTracker.containsJob(job));
 
         evaluatorService.setJobEvaluator(new JobEvaluatorRunner() {
             @Override

@@ -50,7 +50,7 @@ spring:
     matching:
       preselectCandidates: true
     dataaccess:
-      uri: http://localhost:8081/resources/search
+      uri: http://localhost:8081/dataAccess/resources/search
   executor:
     wps:
       uri: http://localhost:8083/wps
