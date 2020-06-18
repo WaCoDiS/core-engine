@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import de.wacodis.coreengine.evaluator.wacodisjobevaluation.JobEvaluatorService;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -43,7 +42,7 @@ public class JobEvaluatorRunner {
     private WacodisJobInputTracker inputTracker;
 
     @Autowired
-    WacodisJobInputTrackerProvider inputTrackerProvider;
+    private WacodisJobInputTrackerProvider inputTrackerProvider;
 
     @Autowired
     private DataAccessConfiguration dataAccessConfiguration;
