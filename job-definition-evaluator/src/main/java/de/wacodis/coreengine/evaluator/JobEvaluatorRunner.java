@@ -55,7 +55,7 @@ public class JobEvaluatorRunner {
         URL dataAccessURL = new URL(this.dataAccessConfiguration.getUri());
         dataAccess.setUrl(dataAccessURL);
 
-        this.setDataAccessConnector(dataAccessConnector);
+        this.setDataAccessConnector(dataAccess);
         this.inputTracker = inputTrackerProvider.getInputTracker();
     }
 
