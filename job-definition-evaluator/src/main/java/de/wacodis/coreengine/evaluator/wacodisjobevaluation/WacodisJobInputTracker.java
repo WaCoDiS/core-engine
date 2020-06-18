@@ -70,6 +70,10 @@ public class WacodisJobInputTracker {
     public void addJob(WacodisJobWrapper job) {
         this.scheduledWacodisJobs.add(job);
         LOGGER.info("add wacodis job {} to input tracker", job.getJobDefinition().getId());
+        if(job.isExecutable()){
+            LOGGER.info(" wacodis job {} is already executable, validate evaluation status", job.getJobDefinition().getId());
+            this.jobEvaluator.handleJobEvaluation(job, this);
+        }
     }
 
     /**
