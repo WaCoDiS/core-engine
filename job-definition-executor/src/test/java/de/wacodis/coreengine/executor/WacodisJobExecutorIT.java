@@ -93,7 +93,6 @@ public class WacodisJobExecutorIT {
         input1ResourceList.add(staticResource);
         input1ResourceList.add(abstractResource);
         literalInputHelper.setResource(input1ResourceList);
-        literalInputHelper.setResourceAvailable(true);
         
         return jobWrapper;
     }
