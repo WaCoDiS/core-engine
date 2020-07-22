@@ -27,6 +27,7 @@ public class WebProcessingServiceConfiguration {
     private String defaultResourceMimeType;
     private Schema defaultResourceSchema;
     private boolean callWPSPerInput;
+    private boolean pickBestInput;
     private boolean processInputsSequentially;
     private int maxParallelWPSProcessPerJob;
     private boolean processInputsDelayed;
@@ -133,5 +134,13 @@ public class WebProcessingServiceConfiguration {
 
     public void setValidateInputs(boolean validateInputs) {
         this.validateInputs = validateInputs;
+    }
+
+    public boolean isPickBestInput() {
+        return pickBestInput;
+    }
+
+    public void setPickBestInput(boolean pickBestInput) {
+        this.pickBestInput = pickBestInput;
     }
 }

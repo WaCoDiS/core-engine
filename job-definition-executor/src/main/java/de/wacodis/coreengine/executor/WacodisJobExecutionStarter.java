@@ -10,7 +10,6 @@ import de.wacodis.core.models.WacodisJobDefinitionRetrySettings;
 import de.wacodis.core.models.WacodisJobFailed;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
-import de.wacodis.coreengine.executor.exception.JobProcessCompletionException;
 import de.wacodis.coreengine.executor.exception.JobProcessCreationException;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisher;
 import de.wacodis.coreengine.executor.process.wps.WPSProcess;
@@ -25,6 +24,7 @@ import de.wacodis.coreengine.executor.process.ProcessContextBuilder;
 import de.wacodis.coreengine.executor.process.wps.WPSProcessContextBuilder;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
 import de.wacodis.coreengine.executor.process.AsynchronousWacodisJobExecutor;
+import de.wacodis.coreengine.executor.process.BestCopernicusInputJobProcessBuilder;
 import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.IntervalAsynchronousWacodisJobExecutor;
 import de.wacodis.coreengine.executor.process.JobProcess;
@@ -119,9 +119,16 @@ public class WacodisJobExecutionStarter {
 
         JobProcessBuilder subProcessCreator;
 
-        if (this.wpsConfig.isCallWPSPerInput()) { //call wps proess for each copernicus input
-            //create separate input for each copernicus input
-            subProcessCreator = new SplitByCopernicusSubsetJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs);
+        if (this.wpsConfig.isCallWPSPerInput()) {
+
+            if (this.wpsConfig.isPickBestInput()) {
+                //only use best copernicus resource provided by data access
+                subProcessCreator = new BestCopernicusInputJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs);
+            } else {
+                //call wps proess for each copernicus input
+                //create separate input for each copernicus input
+                subProcessCreator = new SplitByCopernicusSubsetJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs);
+            }
         } else { //call wps process only once with all inputs
             subProcessCreator = new SingleJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs);
         }
@@ -149,7 +156,7 @@ public class WacodisJobExecutionStarter {
                 //publish failure message if unable to build subprocesses and throw exception
                 IllegalArgumentException iae = new IllegalArgumentException("unable to execute wacodis job " + job.getJobDefinition().getId().toString() + ", could not create sub process, fallback to single sub process also failed ", ex2);
                 ToolMessagePublisher.publishMessageSync(this.processMessagePublisher.toolFailure(), buildUnableToProcessMessage(job.getJobDefinition(), iae.getMessage(), DateTime.now()));
-            
+
                 throw iae;
             }
         }
@@ -199,7 +206,7 @@ public class WacodisJobExecutionStarter {
             } else {
                 execService = Executors.newFixedThreadPool(this.wpsConfig.getMaxParallelWPSProcessPerJob());
             }
-            
+
             executor = new AsynchronousWacodisJobExecutor(execService);
         }
 
@@ -207,8 +214,8 @@ public class WacodisJobExecutionStarter {
 
         return executor;
     }
-    
-        private Message<WacodisJobFailed> buildUnableToProcessMessage(WacodisJobDefinition jobDef,  String reason, DateTime timestamp) {
+
+    private Message<WacodisJobFailed> buildUnableToProcessMessage(WacodisJobDefinition jobDef, String reason, DateTime timestamp) {
         WacodisJobFailed msg = new WacodisJobFailed();
         msg.setCreated(timestamp);
         msg.setReason(reason);
