@@ -71,6 +71,9 @@ spring:
       #   schemaLocation: http://schemas.opengis.net/gml/3.1.1/base/feature.xsd
       validateInputs: false
       callWPSPerInput: true
+      #only applicable if callWPSPerInput is true, only applies to first found copernicus input
+      #best resource is supposed to be the first resource returned by Data Access
+      pickBestResources: true
       #only applicable if processInputsSequentially is false
       maxParallelWPSProcessPerJob: 2
       #intialDelay and delay applicable if processInputDelayed is true
