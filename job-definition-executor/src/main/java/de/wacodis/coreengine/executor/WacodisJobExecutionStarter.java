@@ -121,7 +121,7 @@ public class WacodisJobExecutionStarter {
 
         if (this.wpsConfig.isCallWPSPerInput()) {
 
-            if (this.wpsConfig.isPickBestInput()) {
+            if (this.wpsConfig.isPickBestResources()) {
                 //only use best copernicus resource provided by data access
                 subProcessCreator = new BestCopernicusInputJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs);
             } else {
