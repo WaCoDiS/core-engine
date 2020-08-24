@@ -48,12 +48,12 @@ spring:
       uri: http://localhost:8081
   evaluator:
     matching:
-      preselectCandidates: true
+      minimumOverlapPercentage: 50.0
     dataaccess:
-      uri: http://localhost:8081/resources/search
+      uri: http://localhost:8082
   executor:
     wps:
-      uri: http://localhost:8083/wps
+      uri: http://geoprocessing.demo.52north.org:8080/wps/WebProcessingService
       version: 2.0.0
         #define expected process outputs, otherwise defaults (PRODUCT, METADATA) are used
         #expectedProcessOutputs:
@@ -69,17 +69,18 @@ spring:
         #defaultResourceSchema:
       #   name: GML3
       #   schemaLocation: http://schemas.opengis.net/gml/3.1.1/base/feature.xsd
-      # no timeout for wps process if not set or <= 0, never cancels wps process only stops waiting for result
-      #timeout_Millies: 60000l
-      validateInputs: true
-      callWPSPerInput: true 
+      validateInputs: false
+      callWPSPerInput: true
+      #only applicable if callWPSPerInput is true, only applies to first found copernicus input
+      #best resource is supposed to be the first resource returned by Data Access
+      pickBestResources: true
       #only applicable if processInputsSequentially is false
-      maxParallelWPSProcessPerJob: 3
+      maxParallelWPSProcessPerJob: 2
       #intialDelay and delay applicable if processInputDelayed is true
-      processInputsDelayed: false
-      initialDelay_Milliseconds: 0 
-      delay_Milliseconds: 900000
-      processInputsSequentially: true
+      processInputsDelayed: true
+      initialDelay_Milliseconds: 1000 
+      delay_Milliseconds: 40000
+      processInputsSequentially: false
   datasource.core.quartz-data-source:
     name: quartzDataSource
     driverClassName: org.h2.Driver
