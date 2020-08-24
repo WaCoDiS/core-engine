@@ -72,7 +72,7 @@ public class BestCopernicusInputJobProcessBuilder implements JobProcessBuilder {
         LOGGER.info("build single job process for wacodis job {} with best resources for input {}", job.getJobDefinition().getId(), copernicusInput.getSubsetDefinitionIdentifier());
 
         List<AbstractResource> allResources = copernicusInput.getResource();
-        if (allResources.isEmpty()) { //only keep best resources
+        if (!allResources.isEmpty()) { //only keep best resources
             List<AbstractResource> bestResource = new ArrayList<>();
             bestResource.add(allResources.get(0)); //first resource is supposed to be the best resource (provided by data access)
 
