@@ -5,6 +5,8 @@
  */
 package de.wacodis.coreengine.scheduling.job;
 
+import de.wacodis.core.models.AbstractWacodisJobExecutionEvent;
+import de.wacodis.core.models.SingleJobExecutionEvent;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.coreengine.evaluator.JobEvaluatorRunner;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionContext;
@@ -44,7 +46,6 @@ public class WacodisJob extends QuartzJobBean {
         String id = jobData.getString(JOB_KEY_ID);
         //jobData contains retryCount and orig. execution time if retry
         int retryCount = (jobData.containsKey(RETRY_COUNT_KEY)) ? jobData.getIntFromString(RETRY_COUNT_KEY) : 0; //zero retries happened if not present (regular execution)
-        DateTime executionTime = (jobData.containsKey(RETRY_FIRST_EXECUTION_TIME_KEY)) ? DateTime.parse(jobData.getString(RETRY_FIRST_EXECUTION_TIME_KEY)) : new DateTime(context.getFireTime()); //keep execution time of first (regular) execution if retry
 
         try {
             UUID executionID;
@@ -56,6 +57,7 @@ public class WacodisJob extends QuartzJobBean {
             }
 
             WacodisJobDefinition job = jobRepositoryProvider.getJobDefinitionForId(id);
+            DateTime executionTime = getTemporalCoverageEndDate(job, jobData, context); //(original) fire time or temporalCoverageEndDate (in case of SingleJobExecuionEvent)
             WacodisJobExecutionContext execContext = new WacodisJobExecutionContext(executionID, executionTime, retryCount);
             WacodisJobWrapper jobWrapper = new WacodisJobWrapper(execContext, job);
             evaluator.evaluateJob(jobWrapper, true);
@@ -63,6 +65,35 @@ public class WacodisJob extends QuartzJobBean {
             LOGGER.error(ex.getMessage());
             LOGGER.debug("Error while requesting JobDefinition.", ex);
         }
+    }
+
+    private DateTime getTemporalCoverageEndDate(WacodisJobDefinition jobDef, JobDataMap quartzJobData, JobExecutionContext quartzContext) {
+        AbstractWacodisJobExecutionEvent event = jobDef.getExecution().getEvent();
+        DateTime tempCovEndDate;
+
+        //use specified end date in case job is single execution job
+        if (event != null && event instanceof SingleJobExecutionEvent) {
+            tempCovEndDate = ((SingleJobExecutionEvent) event).getTemporalCoverageEndDate();
+        } else { //else use trigger date as end date
+            tempCovEndDate = (quartzJobData.containsKey(RETRY_FIRST_EXECUTION_TIME_KEY)) ? DateTime.parse(quartzJobData.getString(RETRY_FIRST_EXECUTION_TIME_KEY)) : new DateTime(quartzContext.getFireTime()); //keep execution time of first (regular) execution if retry
+        }
+
+        return tempCovEndDate;
+    }
+
+    private void handleEventBasedExecution(WacodisJobDefinition jobDef) {
+        AbstractWacodisJobExecutionEvent event = jobDef.getExecution().getEvent();
+
+        if (event != null) {
+            if (event instanceof SingleJobExecutionEvent) {
+                handleSingleJobExecutionEvent((SingleJobExecutionEvent) event);
+            }
+
+        }
+    }
+
+    private void handleSingleJobExecutionEvent(SingleJobExecutionEvent event) {
+
     }
 
 }

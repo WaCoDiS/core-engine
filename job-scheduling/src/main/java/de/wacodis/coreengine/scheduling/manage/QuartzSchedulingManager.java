@@ -5,10 +5,14 @@
  */
 package de.wacodis.coreengine.scheduling.manage;
 
-import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.coreengine.scheduling.job.JobContext;
 import de.wacodis.coreengine.scheduling.job.JobContextFactory;
-import org.quartz.*;
+import de.wacodis.core.models.WacodisJobDefinition;
+import org.quartz.JobDetail;
+import org.quartz.JobKey;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +53,32 @@ public class QuartzSchedulingManager implements SchedulingManager {
 
     @Override
     public Date scheduleNewJob(WacodisJobDefinition jobDefinition, String timeZoneId) {
+        Date firstFiringTime = null;
+        try {
+            JobContext jobContext = jCFactory.createJobContext(jobDefinition, timeZoneId);
+            firstFiringTime = scheduleNewJob(jobContext.getJobDetails(), jobContext.getTrigger());
+        } catch (ParseException ex) {
+            LOGGER.error(ex.getMessage());
+            LOGGER.debug("Error while parsing job definition", ex);
+        }
+        return firstFiringTime;
+    }
+
+    @Override
+    public Date scheduleNewJob(WacodisJobDefinition jobDefinition, Date startAt) {
+        Date firstFiringTime = null;
+        try {
+            JobContext jobContext = jCFactory.createJobContext(jobDefinition);
+            firstFiringTime = scheduleNewJob(jobContext.getJobDetails(), jobContext.getTrigger());
+        } catch (ParseException ex) {
+            LOGGER.error(ex.getMessage());
+            LOGGER.debug("Error while parsing job definition", ex);
+        }
+        return firstFiringTime;
+    }
+
+    @Override
+    public Date scheduleNewJob(WacodisJobDefinition jobDefinition, Date startAt, String timeZoneId) {
         Date firstFiringTime = null;
         try {
             JobContext jobContext = jCFactory.createJobContext(jobDefinition, timeZoneId);

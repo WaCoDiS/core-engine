@@ -11,26 +11,21 @@ import com.cronutils.model.CronType;
 import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.parser.CronParser;
 import de.wacodis.core.models.WacodisJobDefinition;
-
+import de.wacodis.core.models.WacodisJobDefinitionExecution;
 import static de.wacodis.coreengine.scheduling.configuration.WacodisSchedulingConstants.*;
-
 import java.text.ParseException;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.TimeZone;
-import java.util.UUID;
-
-import de.wacodis.coreengine.scheduling.configuration.SchedulerConfig;
 import org.quartz.CronExpression;
-
 import static org.quartz.CronScheduleBuilder.cronSchedule;
-
+import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Trigger;
-
+import org.quartz.TriggerBuilder;
 import static org.quartz.TriggerBuilder.newTrigger;
-
 import org.quartz.TriggerKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,7 +49,8 @@ public class JobContextFactory {
         return timeZone;
     }
 
-    /**
+    
+        /**
      * Creates a job context with default timezone trigger from a job definition
      *
      * @param jobDefinition contains defintions for the job
@@ -84,20 +80,16 @@ public class JobContextFactory {
         return jobContext;
     }
 
-    /**
-     * Creates a trigger that will be scheduled based in the configured default timezone
+        /**
+     * Creates a trigger that will be scheduled based in the configured default
+     * timezone
      *
      * @param jobDefinition contains defintions for the job
      * @return a job trigger that is based in the default timezone
      * @throws ParseException
      */
     public Trigger createTrigger(WacodisJobDefinition jobDefinition) throws ParseException {
-        Trigger trigger = newTrigger()
-                .withIdentity(createTriggerKey(jobDefinition))
-                .withSchedule(cronSchedule(createCronSchedule(jobDefinition.getExecution().getPattern()))
-                        .inTimeZone(TimeZone.getTimeZone(checkTimeZone(timeZone))))
-                .build();
-        return trigger;
+        return createTrigger(jobDefinition, timeZone);
     }
 
     /**
@@ -110,12 +102,28 @@ public class JobContextFactory {
      * @throws ParseException
      */
     public Trigger createTrigger(WacodisJobDefinition jobDefinition, String timeZoneId) throws ParseException {
-        Trigger trigger = newTrigger()
+                TriggerBuilder<CronTrigger> triggerBuilder = newTrigger()
                 .withIdentity(createTriggerKey(jobDefinition))
                 .withSchedule(cronSchedule(createCronSchedule(jobDefinition.getExecution().getPattern()))
-                        .inTimeZone(TimeZone.getTimeZone(checkTimeZone(timeZoneId))))
-                .build();
-        return trigger;
+                        .inTimeZone(TimeZone.getTimeZone(checkTimeZone(timeZoneId))));
+                
+                handleStartDate(jobDefinition, triggerBuilder);
+
+        return triggerBuilder.build();
+    }
+
+
+        
+    
+    private void handleStartDate(WacodisJobDefinition jobDefinition, TriggerBuilder<CronTrigger> triggerBuilder){
+        WacodisJobDefinitionExecution exec = jobDefinition.getExecution();
+        
+        if(exec.getStartAt() != null){
+            Date startAtDate = exec.getStartAt().toDate();
+            triggerBuilder.startAt(startAtDate);
+        }else{
+            triggerBuilder.startNow();
+        }
     }
 
     /**
@@ -182,7 +190,8 @@ public class JobContextFactory {
     }
 
     /**
-     * Creates a Quartz cron expression from a unix UNIX cron expression pattern in the default system timezone
+     * Creates a Quartz cron expression from a unix UNIX cron expression pattern
+     * in the default system timezone
      *
      * @param executionPattern the UNIX cron expression
      * @return cron expression for Quartz that matches the UNIX cron expression
