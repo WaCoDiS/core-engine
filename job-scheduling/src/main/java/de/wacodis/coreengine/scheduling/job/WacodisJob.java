@@ -80,20 +80,4 @@ public class WacodisJob extends QuartzJobBean {
 
         return tempCovEndDate;
     }
-
-    private void handleEventBasedExecution(WacodisJobDefinition jobDef) {
-        AbstractWacodisJobExecutionEvent event = jobDef.getExecution().getEvent();
-
-        if (event != null) {
-            if (event instanceof SingleJobExecutionEvent) {
-                handleSingleJobExecutionEvent((SingleJobExecutionEvent) event);
-            }
-
-        }
-    }
-
-    private void handleSingleJobExecutionEvent(SingleJobExecutionEvent event) {
-
-    }
-
 }
