@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import de.wacodis.core.models.AbstractSubsetDefinition;
+import de.wacodis.core.models.AbstractSubsetDefinitionTemporalCoverage;
 import de.wacodis.core.models.ProductBackend;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -16,7 +17,7 @@ import javax.validation.constraints.*;
  * contains information for defining a subset definition for WaCoDiS product process inputs
  */
 @ApiModel(description = "contains information for defining a subset definition for WaCoDiS product process inputs")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-08-26T18:14:26.553+02:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-09-09T12:32:19.982+02:00[Europe/Berlin]")
 
 public class WacodisProductSubsetDefinition extends AbstractSubsetDefinition implements Serializable {
   private static final long serialVersionUID = 1L;

@@ -13,7 +13,7 @@ import javax.validation.constraints.*;
  * definition of temporal coverage for which input data (see SubsetDefinitions) is of relevancy. Only one of the properties shall be provided. 
  */
 @ApiModel(description = "definition of temporal coverage for which input data (see SubsetDefinitions) is of relevancy. Only one of the properties shall be provided. ")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-08-26T18:14:26.553+02:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-09-09T12:32:19.982+02:00[Europe/Berlin]")
 
 public class WacodisJobDefinitionTemporalCoverage  implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -24,16 +24,19 @@ public class WacodisJobDefinitionTemporalCoverage  implements Serializable {
   @JsonProperty("previousExecution")
   private Boolean previousExecution = null;
 
+  @JsonProperty("offset")
+  private String offset = null;
+
   public WacodisJobDefinitionTemporalCoverage duration(String duration) {
     this.duration = duration;
     return this;
   }
 
   /**
-   * the duration in ISO8601 duration format (https://en.wikipedia.org/wiki/ISO_8601#Durations) the processing component will treat the duration as backwards. A duration of \"P1M\" will cover the last month before execution 
+   * the duration in ISO8601 duration format (https://en.wikipedia.org/wiki/ISO_8601#Durations) the processing component will treat the duration as backwards considering optional offset. A duration of \"P1M\" will cover the last month before execution (without offset). This temporal coverage might be overriden by input specifc temporal coverage (see AbstractSubsetDefinition) 
    * @return duration
   **/
-  @ApiModelProperty(value = "the duration in ISO8601 duration format (https://en.wikipedia.org/wiki/ISO_8601#Durations) the processing component will treat the duration as backwards. A duration of \"P1M\" will cover the last month before execution ")
+  @ApiModelProperty(value = "the duration in ISO8601 duration format (https://en.wikipedia.org/wiki/ISO_8601#Durations) the processing component will treat the duration as backwards considering optional offset. A duration of \"P1M\" will cover the last month before execution (without offset). This temporal coverage might be overriden by input specifc temporal coverage (see AbstractSubsetDefinition) ")
 
 
   public String getDuration() {
@@ -64,6 +67,26 @@ public class WacodisJobDefinitionTemporalCoverage  implements Serializable {
     this.previousExecution = previousExecution;
   }
 
+  public WacodisJobDefinitionTemporalCoverage offset(String offset) {
+    this.offset = offset;
+    return this;
+  }
+
+  /**
+   * the duration in ISO8601 duration format (https://en.wikipedia.org/wiki/ISO_8601#Durations) the processing component will treat the duration as backwards. A duration of \"P1M\" will cover the last month before execution 
+   * @return offset
+  **/
+  @ApiModelProperty(value = "the duration in ISO8601 duration format (https://en.wikipedia.org/wiki/ISO_8601#Durations) the processing component will treat the duration as backwards. A duration of \"P1M\" will cover the last month before execution ")
+
+
+  public String getOffset() {
+    return offset;
+  }
+
+  public void setOffset(String offset) {
+    this.offset = offset;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -75,12 +98,13 @@ public class WacodisJobDefinitionTemporalCoverage  implements Serializable {
     }
     WacodisJobDefinitionTemporalCoverage wacodisJobDefinitionTemporalCoverage = (WacodisJobDefinitionTemporalCoverage) o;
     return Objects.equals(this.duration, wacodisJobDefinitionTemporalCoverage.duration) &&
-        Objects.equals(this.previousExecution, wacodisJobDefinitionTemporalCoverage.previousExecution);
+        Objects.equals(this.previousExecution, wacodisJobDefinitionTemporalCoverage.previousExecution) &&
+        Objects.equals(this.offset, wacodisJobDefinitionTemporalCoverage.offset);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(duration, previousExecution);
+    return Objects.hash(duration, previousExecution, offset);
   }
 
   @Override
@@ -90,6 +114,7 @@ public class WacodisJobDefinitionTemporalCoverage  implements Serializable {
     
     sb.append("    duration: ").append(toIndentedString(duration)).append("\n");
     sb.append("    previousExecution: ").append(toIndentedString(previousExecution)).append("\n");
+    sb.append("    offset: ").append(toIndentedString(offset)).append("\n");
     sb.append("}");
     return sb.toString();
   }
