@@ -24,7 +24,7 @@ import javax.validation.constraints.*;
  * contains information about a WaCoDiS Job that will be used for scheduling, preparing and executing certain processes
  */
 @ApiModel(description = "contains information about a WaCoDiS Job that will be used for scheduling, preparing and executing certain processes")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-09-09T12:32:19.982+02:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-09-16T18:02:07.609+02:00[Europe/Berlin]")
 
 public class WacodisJobDefinition  implements Serializable {
   private static final long serialVersionUID = 1L;

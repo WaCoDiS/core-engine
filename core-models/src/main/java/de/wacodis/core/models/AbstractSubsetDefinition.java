@@ -17,7 +17,7 @@ import javax.validation.constraints.*;
  * abstract type for job input subsets
  */
 @ApiModel(description = "abstract type for job input subsets")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-09-09T12:32:19.982+02:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-09-16T18:02:07.609+02:00[Europe/Berlin]")
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "sourceType", visible = true)
 @JsonSubTypes({

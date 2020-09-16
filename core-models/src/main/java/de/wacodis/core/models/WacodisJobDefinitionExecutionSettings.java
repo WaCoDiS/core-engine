@@ -13,7 +13,7 @@ import javax.validation.constraints.*;
 /**
  * WacodisJobDefinitionExecutionSettings
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-09-09T12:32:19.982+02:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-09-16T18:02:07.609+02:00[Europe/Berlin]")
 
 public class WacodisJobDefinitionExecutionSettings  implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -57,6 +57,9 @@ public class WacodisJobDefinitionExecutionSettings  implements Serializable {
   @JsonProperty("pivotalInput")
   private String pivotalInput = null;
 
+  @JsonProperty("timeout_millies")
+  private Long timeoutMillies = null;
+
   public WacodisJobDefinitionExecutionSettings executionMode(ExecutionModeEnum executionMode) {
     this.executionMode = executionMode;
     return this;
@@ -97,6 +100,26 @@ public class WacodisJobDefinitionExecutionSettings  implements Serializable {
     this.pivotalInput = pivotalInput;
   }
 
+  public WacodisJobDefinitionExecutionSettings timeoutMillies(Long timeoutMillies) {
+    this.timeoutMillies = timeoutMillies;
+    return this;
+  }
+
+  /**
+   * optional timeout (in milliseconds) for process execution, no timeout if not provided or <= 0 
+   * @return timeoutMillies
+  **/
+  @ApiModelProperty(value = "optional timeout (in milliseconds) for process execution, no timeout if not provided or <= 0 ")
+
+
+  public Long getTimeoutMillies() {
+    return timeoutMillies;
+  }
+
+  public void setTimeoutMillies(Long timeoutMillies) {
+    this.timeoutMillies = timeoutMillies;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -108,12 +131,13 @@ public class WacodisJobDefinitionExecutionSettings  implements Serializable {
     }
     WacodisJobDefinitionExecutionSettings wacodisJobDefinitionExecutionSettings = (WacodisJobDefinitionExecutionSettings) o;
     return Objects.equals(this.executionMode, wacodisJobDefinitionExecutionSettings.executionMode) &&
-        Objects.equals(this.pivotalInput, wacodisJobDefinitionExecutionSettings.pivotalInput);
+        Objects.equals(this.pivotalInput, wacodisJobDefinitionExecutionSettings.pivotalInput) &&
+        Objects.equals(this.timeoutMillies, wacodisJobDefinitionExecutionSettings.timeoutMillies);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(executionMode, pivotalInput);
+    return Objects.hash(executionMode, pivotalInput, timeoutMillies);
   }
 
   @Override
@@ -123,6 +147,7 @@ public class WacodisJobDefinitionExecutionSettings  implements Serializable {
     
     sb.append("    executionMode: ").append(toIndentedString(executionMode)).append("\n");
     sb.append("    pivotalInput: ").append(toIndentedString(pivotalInput)).append("\n");
+    sb.append("    timeoutMillies: ").append(toIndentedString(timeoutMillies)).append("\n");
     sb.append("}");
     return sb.toString();
   }
