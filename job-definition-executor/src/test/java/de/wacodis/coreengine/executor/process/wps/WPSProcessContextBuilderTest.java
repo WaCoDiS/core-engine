@@ -8,6 +8,7 @@ package de.wacodis.coreengine.executor.process.wps;
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinition;
+import de.wacodis.core.models.WacodisJobDefinitionExecutionSettings;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionContext;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
@@ -82,16 +83,19 @@ public class WPSProcessContextBuilderTest {
         WacodisJobDefinition jobDef = new WacodisJobDefinition();
         UUID processID = UUID.randomUUID();
         jobDef.setId(processID);
+        WacodisJobDefinitionExecutionSettings execSettings = new WacodisJobDefinitionExecutionSettings();
+        jobDef.setExecutionSettings(execSettings);
+        execSettings.setTimeoutMillies(Long.MAX_VALUE);
         WacodisJobWrapper jobWrapper = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), DateTime.now(), 0), jobDef);
 
         WPSProcessContextBuilder contextBuilder = new WPSProcessContextBuilder();
         
         Map<String, Object> additionalParams = new HashMap<>();
         //set timeout parameter
-        additionalParams.put(WPSProcessContextBuilder.getTIMEOUT_MILLIES_KEY(), getWPSConfig().getTimeout_Millies());
+        additionalParams.put(WPSProcessContextBuilder.getTIMEOUT_MILLIES_KEY(),jobDef.getExecutionSettings().getTimeoutMillies());
         ProcessContext context = contextBuilder.buildProcessContext(jobWrapper, additionalParams);
 
-        assertEquals(getWPSConfig().getTimeout_Millies(), context.getAdditionalParameter(WPSProcessContextBuilder.getTIMEOUT_MILLIES_KEY()));
+        assertEquals(jobDef.getExecutionSettings().getTimeoutMillies(), context.getAdditionalParameter(WPSProcessContextBuilder.getTIMEOUT_MILLIES_KEY()));
     }
 
     private WebProcessingServiceConfiguration getWPSConfig() {
@@ -104,7 +108,6 @@ public class WPSProcessContextBuilderTest {
         config.setDefaultResourceMimeType("text/xml");
         config.setDefaultResourceSchema(Schema.GML3);
         config.setExpectedProcessOutputs(Arrays.asList(new ExpectedProcessOutput[]{metadataOutput, productOutput}));
-        config.setTimeout_Millies(30000l);
 
         return config;
     }

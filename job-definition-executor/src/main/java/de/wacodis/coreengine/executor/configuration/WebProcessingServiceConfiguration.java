@@ -78,15 +78,6 @@ public class WebProcessingServiceConfiguration {
     public void setDefaultResourceSchema(Schema defaultResourceSchema) {
         this.defaultResourceSchema = defaultResourceSchema;
     }
-
-    public long getTimeout_Millies() {
-        return timeout_Millies;
-    }
-
-    public void setTimeout_Millies(long timeout_Millies) {
-        this.timeout_Millies = timeout_Millies;
-    }
-
     public boolean isCallWPSPerInput() {
         return callWPSPerInput;
     }

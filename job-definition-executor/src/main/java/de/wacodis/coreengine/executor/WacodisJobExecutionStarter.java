@@ -125,14 +125,14 @@ public class WacodisJobExecutionStarter {
 
             if (this.wpsConfig.isPickBestResources()) {
                 //only use best copernicus resource provided by data access
-                subProcessCreator = new BestCopernicusInputJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters());
+                subProcessCreator = new BestCopernicusInputJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters(job.getJobDefinition()));
             } else {
                 //call wps proess for each copernicus input
                 //create separate input for each copernicus input
-                subProcessCreator = new SplitByCopernicusSubsetJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters());
+                subProcessCreator = new SplitByCopernicusSubsetJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters(job.getJobDefinition()));
             }
         } else { //call wps process only once with all inputs
-            subProcessCreator = new SingleJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters());
+            subProcessCreator = new SingleJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters(job.getJobDefinition()));
         }
 
         setDefaultRetrySettingsIfAbsent(job.getJobDefinition()); //use defaults if retry settings are not set in job definition
@@ -225,11 +225,15 @@ public class WacodisJobExecutionStarter {
         return MessageBuilder.withPayload(msg).build();
     }
 
-    private Map<String, Object> initProcessParameters() {
+    private Map<String, Object> initProcessParameters(WacodisJobDefinition jobDef) {
         Map<String, Object> processParams = new HashMap<>();
 
-        if (this.wpsConfig.getTimeout_Millies() > 0) {
-            processParams.put(WPSProcessContextBuilder.getTIMEOUT_MILLIES_KEY(), this.wpsConfig.getTimeout_Millies());
+        //set process timeout
+        if(jobDef.getExecutionSettings() != null && jobDef.getExecutionSettings().getTimeoutMillies() != null){
+            long timeout = jobDef.getExecutionSettings().getTimeoutMillies();
+            processParams.put(WPSProcessContextBuilder.getTIMEOUT_MILLIES_KEY(), timeout);
+
+            
         }
 
         return processParams;
