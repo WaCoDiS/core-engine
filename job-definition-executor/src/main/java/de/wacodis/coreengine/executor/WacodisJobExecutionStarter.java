@@ -6,6 +6,7 @@
 package de.wacodis.coreengine.executor;
 
 import de.wacodis.core.models.WacodisJobDefinition;
+import de.wacodis.core.models.WacodisJobDefinitionExecutionSettings;
 import de.wacodis.core.models.WacodisJobDefinitionRetrySettings;
 import de.wacodis.core.models.WacodisJobFailed;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
@@ -116,23 +117,27 @@ public class WacodisJobExecutionStarter {
     public void executeWacodisJob(WacodisJobWrapper job) {
         String toolProcessID = job.getJobDefinition().getProcessingTool();
         String wacodisJobID = job.getJobDefinition().getId().toString();
+        WacodisJobDefinitionExecutionSettings execSettings = job.getJobDefinition().getExecutionSettings();
 
         LOGGER.info("execute Wacodis Job " + wacodisJobID + " using processing tool " + toolProcessID);
 
         JobProcessBuilder subProcessCreator;
 
-        if (this.wpsConfig.isCallWPSPerInput()) {
-
-            if (this.wpsConfig.isPickBestResources()) {
+        switch(execSettings.getExecutionMode()){
+            case BEST:
                 //only use best copernicus resource provided by data access
                 subProcessCreator = new BestCopernicusInputJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters(job.getJobDefinition()));
-            } else {
-                //call wps proess for each copernicus input
-                //create separate input for each copernicus input
+                break;
+            case SPLIT:
                 subProcessCreator = new SplitByCopernicusSubsetJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters(job.getJobDefinition()));
-            }
-        } else { //call wps process only once with all inputs
-            subProcessCreator = new SingleJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters(job.getJobDefinition()));
+                break;
+            case ALL:
+                subProcessCreator = new SingleJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters(job.getJobDefinition()));
+                break;
+            default:
+                LOGGER.warn("unkown execution mode {}, process all inputs in a single process", execSettings.getExecutionMode());
+                subProcessCreator = new SingleJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters(job.getJobDefinition()));
+                break;
         }
 
         setDefaultRetrySettingsIfAbsent(job.getJobDefinition()); //use defaults if retry settings are not set in job definition
@@ -232,8 +237,6 @@ public class WacodisJobExecutionStarter {
         if(jobDef.getExecutionSettings() != null && jobDef.getExecutionSettings().getTimeoutMillies() != null){
             long timeout = jobDef.getExecutionSettings().getTimeoutMillies();
             processParams.put(WPSProcessContextBuilder.getTIMEOUT_MILLIES_KEY(), timeout);
-
-            
         }
 
         return processParams;

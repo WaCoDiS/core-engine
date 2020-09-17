@@ -26,9 +26,6 @@ public class WebProcessingServiceConfiguration {
     private List<ExpectedProcessOutput> expectedProcessOutputs;
     private String defaultResourceMimeType;
     private Schema defaultResourceSchema;
-    private long timeout_Millies;
-    private boolean callWPSPerInput;
-    private boolean pickBestResources;
     private boolean processInputsSequentially;
     private int maxParallelWPSProcessPerJob;
     private boolean processInputsDelayed;
@@ -78,13 +75,6 @@ public class WebProcessingServiceConfiguration {
     public void setDefaultResourceSchema(Schema defaultResourceSchema) {
         this.defaultResourceSchema = defaultResourceSchema;
     }
-    public boolean isCallWPSPerInput() {
-        return callWPSPerInput;
-    }
-
-    public void setCallWPSPerInput(boolean callWPSPerInput) {
-        this.callWPSPerInput = callWPSPerInput;
-    }
 
     public boolean isProcessInputsSequentially() {
         return processInputsSequentially;
@@ -132,13 +122,5 @@ public class WebProcessingServiceConfiguration {
 
     public void setValidateInputs(boolean validateInputs) {
         this.validateInputs = validateInputs;
-    }
-
-    public boolean isPickBestResources() {
-        return pickBestResources;
-    }
-
-    public void setPickBestResources(boolean pickBestResources) {
-        this.pickBestResources = pickBestResources;
     }
 }
