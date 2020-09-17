@@ -15,6 +15,7 @@ import de.wacodis.coreengine.evaluator.wacodisjobevaluation.cron.CronExecutionTi
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -82,7 +83,7 @@ public class WacodisJobWrapper {
      */
     public Interval calculateInputRelevancyTimeFrame() {
         WacodisJobDefinitionTemporalCoverage tempCov = this.jobDefinition.getTemporalCoverage();
-        DateTime start;
+        DateTime start, end;
 
         if (tempCov.getPreviousExecution() != null && tempCov.getPreviousExecution()) { //previousExecution (data since last job execution is relevant)
             try {
@@ -96,16 +97,30 @@ public class WacodisJobWrapper {
 
         } else { //duration (data since a specified point in time is relevant)
             Period period = Period.parse(tempCov.getDuration()); //terms duration and period are mixed up
+
+            //consider optional offset
+            if (tempCov.getOffset() != null && !tempCov.getOffset().isEmpty()) {
+                Period offsetPeriod = Period.parse(tempCov.getOffset());
+                period = period.plus(offsetPeriod);
+            }
+
             start = this.executionContext.getExecutionTime().minus(period);
         }
 
-        return new Interval(start, this.executionContext.getExecutionTime());
+        //consider optional offset
+        end = this.executionContext.getExecutionTime();
+        if (tempCov.getOffset() != null && !tempCov.getOffset().isEmpty()) {
+            Period offsetPeriod = Period.parse(tempCov.getOffset());
+            end = end.minus(offsetPeriod);
+        }
+
+        return new Interval(start, end);
     }
-    
+
     /**
      * @return incremented retry count
      */
-    public int incrementRetryCount(){
+    public int incrementRetryCount() {
         this.executionContext = this.executionContext.createCopyWithIncrementedRetryCount();
         return this.executionContext.getRetryCount();
     }
