@@ -25,14 +25,14 @@ import de.wacodis.coreengine.executor.process.ProcessContextBuilder;
 import de.wacodis.coreengine.executor.process.wps.WPSProcessContextBuilder;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
 import de.wacodis.coreengine.executor.process.AsynchronousWacodisJobExecutor;
-import de.wacodis.coreengine.executor.process.BestCopernicusInputJobProcessBuilder;
+import de.wacodis.coreengine.executor.process.BestInputJobProcessBuilder;
 import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.IntervalAsynchronousWacodisJobExecutor;
 import de.wacodis.coreengine.executor.process.JobProcess;
 import de.wacodis.coreengine.executor.process.JobProcessBuilder;
 import de.wacodis.coreengine.executor.process.SequentialWacodisJobExecutor;
 import de.wacodis.coreengine.executor.process.SingleJobProcessBuilder;
-import de.wacodis.coreengine.executor.process.SplitByCopernicusSubsetJobProcessBuilder;
+import de.wacodis.coreengine.executor.process.SplitByInputJobProcessBuilder;
 import de.wacodis.coreengine.executor.process.WacodisJobExecutor;
 import de.wacodis.coreengine.executor.process.events.JobExecutionEventHandler;
 import de.wacodis.coreengine.executor.process.events.JobProcessEventHandler;
@@ -126,10 +126,20 @@ public class WacodisJobExecutionStarter {
         switch(execSettings.getExecutionMode()){
             case BEST:
                 //only use best copernicus resource provided by data access
-                subProcessCreator = new BestCopernicusInputJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters(job.getJobDefinition()));
+                BestInputJobProcessBuilder bestInputProcessCreator = new BestInputJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters(job.getJobDefinition()));
+                //set pivotal input if provided
+                if(execSettings.getPivotalInput() != null){
+                    bestInputProcessCreator.setSplitInputIdentifier(execSettings.getPivotalInput());
+                }
+                subProcessCreator = bestInputProcessCreator;
                 break;
             case SPLIT:
-                subProcessCreator = new SplitByCopernicusSubsetJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters(job.getJobDefinition()));
+                SplitByInputJobProcessBuilder splitInputProcessBuilder = new SplitByInputJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters(job.getJobDefinition()));
+                //set pivotal input if provided
+                if(execSettings.getPivotalInput() != null){
+                    splitInputProcessBuilder.setSplitInputIdentifier(execSettings.getPivotalInput());
+                }
+                subProcessCreator = splitInputProcessBuilder;
                 break;
             case ALL:
                 subProcessCreator = new SingleJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters(job.getJobDefinition()));
