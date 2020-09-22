@@ -5,13 +5,12 @@
  */
 package de.wacodis.coreengine.evaluator;
 
+import de.wacodis.core.models.AbstractDataEnvelopeAreaOfInterest;
 import de.wacodis.core.models.AbstractDataEnvelopeTimeFrame;
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
-import de.wacodis.core.models.AbstractSubsetDefinitionTemporalCoverage;
 import de.wacodis.core.models.DataAccessResourceSearchBody;
 import de.wacodis.core.models.StaticSubsetDefinition;
-import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.coreengine.evaluator.configuration.DataAccessConfiguration;
 import de.wacodis.coreengine.evaluator.http.dataaccess.DataAccessConnector;
 import de.wacodis.coreengine.evaluator.http.dataaccess.DataAccessResourceProvider;
@@ -30,8 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.net.MalformedURLException;
 import java.net.URL;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  *
@@ -103,15 +102,22 @@ public class JobEvaluatorRunner {
      */
     public EvaluationStatus evaluateJob(WacodisJobWrapper job, boolean addJobToInputTracker) {
         try {
-            //handle inputs with temporal coverage separately
-            List<InputHelper> inputsTempCov = this.getInputsWithTemporalCoverage(job);
-            List<InputHelper> inputsNoneTempCov = this.getInputsWithoutTemporalCoverage(job);
+            //generate multiple queries for inputs with and without input-specific temporal coverage
+            List<DataAccessResourceSearchBody> dataAccessQueries = generateDataAccessQueries(job);
+            //retrieve resources from data access for each query
+            LOGGER.info("retrieve available resources for wacodis job {}, total number of requests is {}", job.getJobDefinition().getId(), dataAccessQueries.size());
+            //call data access for each query
+            for (int i = 0; i < dataAccessQueries.size(); i++) {
+                LOGGER.debug("initiate data access query {} of {} for wacodis job", i, dataAccessQueries.size(), job.getJobDefinition().getId());
+                //call data access
+                Map<String, List<AbstractResource>> availableResources = retrieveAvailableResourcesFromDataAccess(dataAccessQueries.get(i));
+                LOGGER.debug("successfully retrieved available resources for query {} of {} of wacodis job {} from Data Access, response contained {} resources", i, dataAccessQueries.size(), job.getJobDefinition().getId(), getResourceCount(availableResources));
+                //register available resources
+                editJobWrapperInputs(availableResources, job);
+            }
+            LOGGER.info("successfully retrieved all available resources from data access for wacodis job, executed {} data access requests", job.getJobDefinition().getId(), dataAccessQueries.size());
 
-            Map< String, List<AbstractResource>> searchResult = this.retrieveAvailableResourcesFromDataAccess(job);
-            LOGGER.info("retrieved available resources for wacodis job {} from Data Access, response contained {} resources", job.getJobDefinition().getId(), getResourceCount(searchResult));
-            editJobWrapperInputs(searchResult, job);
             boolean isExecutable = job.isExecutable();
-
             LOGGER.debug(getResourceSummary(job));
 
             if (addJobToInputTracker) {
@@ -132,38 +138,62 @@ public class JobEvaluatorRunner {
         }
     }
 
-    private Map<String, List<AbstractResource>> retrieveAvailableResourcesFromDataAccess(WacodisJobWrapper job) throws IOException {
-        DataAccessResourceSearchBody query = generateDataAccessQuery(job);
+    private Map<String, List<AbstractResource>> retrieveAvailableResourcesFromDataAccess(DataAccessResourceSearchBody query) throws IOException {
         Map<String, List<AbstractResource>> response = this.dataAccessConnector.searchResources(query);
 
         return response;
     }
 
-    private DataAccessResourceSearchBody generateDataAccessQuery(WacodisJobWrapper job) {
+    private DataAccessResourceSearchBody generateDataAccessQuery(List<AbstractSubsetDefinition> inputs, AbstractDataEnvelopeAreaOfInterest areaOfInterest, AbstractDataEnvelopeTimeFrame timeFrame) {
         DataAccessResourceSearchBody query = new DataAccessResourceSearchBody();
-        query.setAreaOfInterest(job.getJobDefinition().getAreaOfInterest());
+        query.setAreaOfInterest(areaOfInterest);
         //exclude static inputs from data access query
-        List<AbstractSubsetDefinition> nonStaticInputs = job.getJobDefinition().getInputs().stream().filter(input -> !StaticSubsetDefinition.class.isAssignableFrom(input.getClass())).collect(Collectors.toList());
-        query.setInputs(nonStaticInputs);
-        query.setTimeFrame(calculateTimeFrame(job));
+        query.setInputs(inputs);
+        query.setTimeFrame(timeFrame);
 
         return query;
     }
 
-    private AbstractDataEnvelopeTimeFrame calculateTimeFrame(WacodisJobWrapper job) {
-        Interval relevancyTimeFrame = job.calculateInputRelevancyTimeFrame();
+    ;
 
-        AbstractDataEnvelopeTimeFrame relevancyTimeFrameConverted = new AbstractDataEnvelopeTimeFrame();
-        relevancyTimeFrameConverted.setStartTime(relevancyTimeFrame.getStart());
-        relevancyTimeFrameConverted.setEndTime(relevancyTimeFrame.getEnd());
+    private AbstractDataEnvelopeTimeFrame getIntervalAsAbstractDataEnvelopeTimeFrame(Interval interval) {
+        AbstractDataEnvelopeTimeFrame timeFrame = new AbstractDataEnvelopeTimeFrame();
+        timeFrame.setStartTime(interval.getStart());
+        timeFrame.setEndTime(interval.getEnd());
 
-        return relevancyTimeFrameConverted;
+        return timeFrame;
     }
 
-    private void editJobWrapperInputs(Map<String, List<AbstractResource>> response, WacodisJobWrapper job) {
+    private List<DataAccessResourceSearchBody> generateDataAccessQueries(WacodisJobWrapper job) {
+        Interval inputRelevancyTimeFrame;
+        DataAccessResourceSearchBody query;
+        List<DataAccessResourceSearchBody> queries = new ArrayList<>();
+        //do not include static inputs in data access queries
+        List<AbstractSubsetDefinition> nonStaticInputs = getNonStaticInputs(job);
+
+        //single query for all inputs without separate temporal coverage
+        List<AbstractSubsetDefinition> inputsNoneTempCov = this.getInputsWithoutTemporalCoverage(nonStaticInputs);
+        inputRelevancyTimeFrame = job.calculateInputRelevancyTimeFrame();
+        query = generateDataAccessQuery(inputsNoneTempCov, job.getJobDefinition().getAreaOfInterest(), getIntervalAsAbstractDataEnvelopeTimeFrame(inputRelevancyTimeFrame));
+        queries.add(query);
+        LOGGER.debug("generated data access query for {} of {} (non-static) inputs with common temporal coverage of wacodis job {}", inputsNoneTempCov.size(), nonStaticInputs.size(), job.getJobDefinition().getId());
+
+        //generate separate query for each input with temporal coverage
+        List<AbstractSubsetDefinition> inputsTempCov = this.getInputsWithTemporalCoverage(nonStaticInputs);
+        for (AbstractSubsetDefinition input : inputsTempCov) {
+            inputRelevancyTimeFrame = job.calculateInputRelevancyTimeFrameForInput(input);
+            query = generateDataAccessQuery(Arrays.asList(input), job.getJobDefinition().getAreaOfInterest(), getIntervalAsAbstractDataEnvelopeTimeFrame(inputRelevancyTimeFrame));
+            queries.add(query);
+        }
+        LOGGER.debug("generated data access query for {} of {} (non-static) inputs with input-specific temporal coverage of wacodis job {}", inputsTempCov.size(), nonStaticInputs.size(), job.getJobDefinition().getId());
+
+        return queries;
+    }
+
+    private void editJobWrapperInputs(Map<String, List<AbstractResource>> availableResources, WacodisJobWrapper job) {
         for (InputHelper input : job.getInputs()) {
             String inputID = input.getSubsetDefinitionIdentifier();
-            List<AbstractResource> resourceList = response.get(inputID);
+            List<AbstractResource> resourceList = availableResources.get(inputID);
             //set resources, override current resources
             if (resourceList != null) {
                 input.setResource(resourceList);
@@ -199,16 +229,20 @@ public class JobEvaluatorRunner {
         return sb.toString();
     }
 
-    private List<InputHelper> getInputsWithTemporalCoverage(WacodisJobWrapper job) {
+    private List<AbstractSubsetDefinition> getInputsWithTemporalCoverage(List<AbstractSubsetDefinition> inputs) {
         //find all inputs with temporal coverage and duration not null
-        List<InputHelper> inputsTempCov = job.getInputs().stream().filter(input -> input.getSubsetDefinition().getTemporalCoverage() != null && input.getSubsetDefinition().getTemporalCoverage().getDuration() != null).collect(Collectors.toList());
+        List<AbstractSubsetDefinition> inputsTempCov = inputs.stream().filter(input -> input.getTemporalCoverage() != null && input.getTemporalCoverage().getDuration() != null).collect(Collectors.toList());
         return inputsTempCov;
     }
 
-    private List<InputHelper> getInputsWithoutTemporalCoverage(WacodisJobWrapper job) {
+    private List<AbstractSubsetDefinition> getInputsWithoutTemporalCoverage(List<AbstractSubsetDefinition> inputs) {
         //find all inputs without specific temporal coverage
-        List<InputHelper> inputsNoneTempCov = job.getInputs().stream().filter(input -> input.getSubsetDefinition().getTemporalCoverage() == null || input.getSubsetDefinition().getTemporalCoverage().getDuration() == null).collect(Collectors.toList());
+        List<AbstractSubsetDefinition> inputsNoneTempCov = inputs.stream().filter(input -> input.getTemporalCoverage() == null || input.getTemporalCoverage().getDuration() == null).collect(Collectors.toList());
         return inputsNoneTempCov;
+    }
+
+    private List<AbstractSubsetDefinition> getNonStaticInputs(WacodisJobWrapper job) {
+        return job.getInputs().stream().map(input -> input.getSubsetDefinition()).filter(input -> !StaticSubsetDefinition.class.isAssignableFrom(input.getClass())).collect(Collectors.toList());
     }
 
 }
