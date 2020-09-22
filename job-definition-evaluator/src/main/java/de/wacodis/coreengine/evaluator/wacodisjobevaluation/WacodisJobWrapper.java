@@ -7,6 +7,7 @@ package de.wacodis.coreengine.evaluator.wacodisjobevaluation;
 
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
+import de.wacodis.core.models.AbstractSubsetDefinitionTemporalCoverage;
 import de.wacodis.core.models.StaticSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionTemporalCoverage;
@@ -15,7 +16,6 @@ import de.wacodis.coreengine.evaluator.wacodisjobevaluation.cron.CronExecutionTi
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -73,7 +73,6 @@ public class WacodisJobWrapper {
                 return false;
             }
         }
-
         return true;
     }
 
@@ -115,6 +114,33 @@ public class WacodisJobWrapper {
         }
 
         return new Interval(start, end);
+    }
+
+    public Interval calculateInputRelevancyTimeFrameForInput(AbstractSubsetDefinition input) {
+        DateTime start, end;
+        Interval relevancyTimeFrameInput;
+        AbstractSubsetDefinitionTemporalCoverage tempCov;
+        Interval relevancyTimeFrameJob = this.calculateInputRelevancyTimeFrame();
+
+        //return if input has no temporal coverage
+        if (input.getTemporalCoverage() != null && input.getTemporalCoverage().getDuration() != null) {
+            tempCov = input.getTemporalCoverage();
+        } else {
+            return relevancyTimeFrameJob;
+        }
+
+        //consider offset if provided
+        end = relevancyTimeFrameJob.getEnd();
+        if (tempCov.getOffset() != null && !tempCov.getOffset().isEmpty()) {
+            Period offset = Period.parse(tempCov.getOffset());
+            end = end.minus(offset);
+        }
+
+        start = end.minus(Period.parse(tempCov.getDuration()));
+
+        relevancyTimeFrameInput = new Interval(start, end);
+
+        return relevancyTimeFrameInput;
     }
 
     /**

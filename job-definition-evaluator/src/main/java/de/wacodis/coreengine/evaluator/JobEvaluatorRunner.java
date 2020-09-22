@@ -8,8 +8,10 @@ package de.wacodis.coreengine.evaluator;
 import de.wacodis.core.models.AbstractDataEnvelopeTimeFrame;
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
+import de.wacodis.core.models.AbstractSubsetDefinitionTemporalCoverage;
 import de.wacodis.core.models.DataAccessResourceSearchBody;
 import de.wacodis.core.models.StaticSubsetDefinition;
+import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.coreengine.evaluator.configuration.DataAccessConfiguration;
 import de.wacodis.coreengine.evaluator.http.dataaccess.DataAccessConnector;
 import de.wacodis.coreengine.evaluator.http.dataaccess.DataAccessResourceProvider;
@@ -28,6 +30,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
 
 /**
  *
@@ -99,7 +103,11 @@ public class JobEvaluatorRunner {
      */
     public EvaluationStatus evaluateJob(WacodisJobWrapper job, boolean addJobToInputTracker) {
         try {
-            Map<String, List<AbstractResource>> searchResult = this.retrieveAvailableResourcesFromDataAccess(job);
+            //handle inputs with temporal coverage separately
+            List<InputHelper> inputsTempCov = this.getInputsWithTemporalCoverage(job);
+            List<InputHelper> inputsNoneTempCov = this.getInputsWithoutTemporalCoverage(job);
+
+            Map< String, List<AbstractResource>> searchResult = this.retrieveAvailableResourcesFromDataAccess(job);
             LOGGER.info("retrieved available resources for wacodis job {} from Data Access, response contained {} resources", job.getJobDefinition().getId(), getResourceCount(searchResult));
             editJobWrapperInputs(searchResult, job);
             boolean isExecutable = job.isExecutable();
@@ -119,7 +127,7 @@ public class JobEvaluatorRunner {
                 LOGGER.warn("Wacodis-Job {} could not be evaluated, add Wacodis-Job to InputTracker to wait for new, accessible DataEnvelopes", job.getJobDefinition().getId());
             }
             LOGGER.error("Wacodis-Job " + job.getJobDefinition().getId() + "could not be evaluated", ex);
-            
+
             return EvaluationStatus.UNEVALUATED;
         }
     }
@@ -189,6 +197,18 @@ public class JobEvaluatorRunner {
         sb.append(System.lineSeparator()).append("}");
 
         return sb.toString();
+    }
+
+    private List<InputHelper> getInputsWithTemporalCoverage(WacodisJobWrapper job) {
+        //find all inputs with temporal coverage and duration not null
+        List<InputHelper> inputsTempCov = job.getInputs().stream().filter(input -> input.getSubsetDefinition().getTemporalCoverage() != null && input.getSubsetDefinition().getTemporalCoverage().getDuration() != null).collect(Collectors.toList());
+        return inputsTempCov;
+    }
+
+    private List<InputHelper> getInputsWithoutTemporalCoverage(WacodisJobWrapper job) {
+        //find all inputs without specific temporal coverage
+        List<InputHelper> inputsNoneTempCov = job.getInputs().stream().filter(input -> input.getSubsetDefinition().getTemporalCoverage() == null || input.getSubsetDefinition().getTemporalCoverage().getDuration() == null).collect(Collectors.toList());
+        return inputsNoneTempCov;
     }
 
 }
