@@ -8,6 +8,7 @@ package de.wacodis.coreengine.evaluator;
 import de.wacodis.core.models.AbstractDataEnvelope;
 import de.wacodis.core.models.AbstractDataEnvelopeAreaOfInterest;
 import de.wacodis.core.models.AbstractSubsetDefinition;
+import de.wacodis.core.models.AbstractSubsetDefinitionTemporalCoverage;
 import de.wacodis.core.models.CopernicusDataEnvelope;
 import de.wacodis.core.models.CopernicusSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinition;
@@ -60,10 +61,23 @@ public class JobEvaluatorExample {
         WacodisJobDefinition jobDef = new WacodisJobDefinition();
         jobDef.setId(jobID);
 
-        AbstractSubsetDefinition input1 = new CopernicusSubsetDefinition();
-        input1.setIdentifier("exampleInput");
+        CopernicusSubsetDefinition input1 = new CopernicusSubsetDefinition();
+        input1.setIdentifier("exampleInputA");
         input1.setSourceType(AbstractSubsetDefinition.SourceTypeEnum.COPERNICUSSUBSETDEFINITION);
+        input1.setSatellite(CopernicusSubsetDefinition.SatelliteEnum._2);
+        input1.setMaximumCloudCoverage(100f);
         jobDef.addInputsItem(input1);
+
+        CopernicusSubsetDefinition input2 = new CopernicusSubsetDefinition();
+        input2.setIdentifier("exampleInputB");
+        input2.setSourceType(AbstractSubsetDefinition.SourceTypeEnum.COPERNICUSSUBSETDEFINITION);
+        input2.setSatellite(CopernicusSubsetDefinition.SatelliteEnum._2);
+        input2.setMaximumCloudCoverage(100f);
+        AbstractSubsetDefinitionTemporalCoverage tempCovInput = new AbstractSubsetDefinitionTemporalCoverage();
+        tempCovInput.setDuration("P12M");
+        tempCovInput.setOffset("P1M");
+        input2.setTemporalCoverage(tempCovInput);
+        jobDef.addInputsItem(input2);
 
         jobDef.setProcessingTool("exampleTool");
         jobDef.setProductCollection("testMosaic");
@@ -71,12 +85,13 @@ public class JobEvaluatorExample {
         WacodisJobDefinitionExecution execution = new WacodisJobDefinitionExecution();
         execution.setPattern("0 0 1 * *"); //executes on the 1st day of each month (00:00:00)
         WacodisJobDefinitionTemporalCoverage tempCov = new WacodisJobDefinitionTemporalCoverage();
-        tempCov.setPreviousExecution(Boolean.TRUE);
+        tempCov.setPreviousExecution(Boolean.FALSE);
+        tempCov.setDuration("P12M");
         jobDef.setTemporalCoverage(tempCov);
         jobDef.setExecution(execution);
 
         AbstractDataEnvelopeAreaOfInterest aoi = new AbstractDataEnvelopeAreaOfInterest();
-        aoi.setExtent(Arrays.asList(new Float[]{0f, 1f, 0f, 1f}));
+        aoi.setExtent(Arrays.asList(new Float[]{0f, 0f, 90f, 90f}));
         jobDef.areaOfInterest(aoi);
 
         WacodisJobWrapper jobWrapper = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), DateTime.now(), 0), jobDef);
@@ -87,13 +102,13 @@ public class JobEvaluatorExample {
     private AbstractDataEnvelope createDataEnvelope() {
         CopernicusDataEnvelope env = new CopernicusDataEnvelope();
         AbstractDataEnvelopeAreaOfInterest aoi = new AbstractDataEnvelopeAreaOfInterest();
-        aoi.setExtent(Arrays.asList(new Float[]{0f, 1f, 0f, 1f}));
+        aoi.setExtent(Arrays.asList(new Float[]{0f, 0f, 90f, 90f}));
         env.setAreaOfInterest(aoi);
         env.setIdentifier("testEnvelope");
         env.setSourceType(AbstractDataEnvelope.SourceTypeEnum.COPERNICUSDATAENVELOPE);
-        
+
         return env;
-        
+
     }
 
 }
