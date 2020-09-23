@@ -89,7 +89,7 @@ public class InputHelper {
      * @return
      */
     public boolean hasResource() {
-        return (this.resourceList.size() > 0);
+        return (this.resourceList != null && this.resourceList.size() > 0);
     }
 
     /**
