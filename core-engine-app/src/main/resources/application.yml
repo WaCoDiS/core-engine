@@ -70,7 +70,6 @@ spring:
       #   name: GML3
       #   schemaLocation: http://schemas.opengis.net/gml/3.1.1/base/feature.xsd
       validateInputs: true
-      callWPSPerInput: true 
       #only applicable if wacodis job is splitted in multiple processes (see WacodisJobDefinition.executionSettings.executionMode)
       maxParallelWPSProcessPerJob: 3
       #intialDelay and delay applicable if processInputDelayed is true
