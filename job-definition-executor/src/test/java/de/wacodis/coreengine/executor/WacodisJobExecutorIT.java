@@ -82,6 +82,7 @@ public class WacodisJobExecutorIT {
         WacodisJobDefinitionExecutionSettings execSettings = new WacodisJobDefinitionExecutionSettings();
         execSettings.setExecutionMode(WacodisJobDefinitionExecutionSettings.ExecutionModeEnum.ALL);
         execSettings.setTimeoutMillies(50000l);
+        //execSettings.setPivotalInput("LiteralInputData");
         jobDef.setExecutionSettings(execSettings);
         StaticDummyResource staticResource = new StaticDummyResource();
         staticResource.setValue("this is a static resource");
