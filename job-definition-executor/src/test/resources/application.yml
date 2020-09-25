@@ -48,12 +48,12 @@ spring:
       uri: http://localhost:8081
   evaluator:
     matching:
-      minimumOverlapPercentage: 50.0
+      preselectCandidates: true
     dataaccess:
-      uri: http://localhost:8082
+      uri: http://localhost:8081/resources/search
   executor:
     wps:
-      uri: http://geoprocessing.demo.52north.org:8080/wps/WebProcessingService
+      uri: http://localhost:8083/wps
       version: 2.0.0
         #define expected process outputs, otherwise defaults (PRODUCT, METADATA) are used
         #expectedProcessOutputs:
@@ -69,18 +69,15 @@ spring:
         #defaultResourceSchema:
       #   name: GML3
       #   schemaLocation: http://schemas.opengis.net/gml/3.1.1/base/feature.xsd
-      validateInputs: false
-      callWPSPerInput: true
-      #only applicable if callWPSPerInput is true, only applies to first found copernicus input
-      #best resource is supposed to be the first resource returned by Data Access
-      pickBestResources: true
-      #only applicable if processInputsSequentially is false
-      maxParallelWPSProcessPerJob: 2
+      validateInputs: true
+      #only applicable if wacodis job is splitted in multiple processes (see WacodisJobDefinition.executionSettings.executionMode)
+      maxParallelWPSProcessPerJob: 3
       #intialDelay and delay applicable if processInputDelayed is true
-      processInputsDelayed: true
-      initialDelay_Milliseconds: 1000 
-      delay_Milliseconds: 40000
-      processInputsSequentially: false
+      processInputsDelayed: false
+      initialDelay_Milliseconds: 0 
+      delay_Milliseconds: 900000
+      #overrides maxParallelWPSProcessPerJob (effectively same as maxParallelWPSProcessPerJob = 1)
+      processInputsSequentially: true
   datasource.core.quartz-data-source:
     name: quartzDataSource
     driverClassName: org.h2.Driver

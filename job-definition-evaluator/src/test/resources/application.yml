@@ -50,7 +50,7 @@ spring:
     matching:
       preselectCandidates: true
     dataaccess:
-      uri: http://localhost:8081/dataAccess/resources/search
+      uri: http://localhost:8081/resources/search
   executor:
     wps:
       uri: http://localhost:8083/wps
@@ -69,8 +69,15 @@ spring:
         #defaultResourceSchema:
       #   name: GML3
       #   schemaLocation: http://schemas.opengis.net/gml/3.1.1/base/feature.xsd
-      # no timeout for wps process if not set or <= 0, never cancels wps process only stops waiting for result
-      #timeout_Millies: 60000l
+      validateInputs: true
+      #only applicable if wacodis job is splitted in multiple processes (see WacodisJobDefinition.executionSettings.executionMode)
+      maxParallelWPSProcessPerJob: 3
+      #intialDelay and delay applicable if processInputDelayed is true
+      processInputsDelayed: false
+      initialDelay_Milliseconds: 0 
+      delay_Milliseconds: 900000
+      #overrides maxParallelWPSProcessPerJob (effectively same as maxParallelWPSProcessPerJob = 1)
+      processInputsSequentially: true
   datasource.core.quartz-data-source:
     name: quartzDataSource
     driverClassName: org.h2.Driver
