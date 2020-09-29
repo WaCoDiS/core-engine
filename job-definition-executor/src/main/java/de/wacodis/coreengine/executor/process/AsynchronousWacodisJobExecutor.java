@@ -103,20 +103,17 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
             processFuture.thenAccept((JobProcessOutputDescription processOutput)
                     -> {
                 processOutput.getJobProcess().setProcessOutput(processOutput);
-                JobProcessExecutedEvent succesfulExecutionEvent = new JobProcessExecutedEvent(processOutput.getJobProcess(), processOutput, this, getExecutionFinishedTimestamp(processOutput));
-                JobExecutionEventHelper.fireProcessExecutedEvent(succesfulExecutionEvent, this.processExecutedHandler);
-
-                //raise event if final sub process
-                handleFinalSubProcess(subProcesses, processOutput.getJobProcess());
-
+                JobProcessExecutedEvent successfulExecutionEvent = new JobProcessExecutedEvent(processOutput.getJobProcess(), processOutput, this, getExecutionFinishedTimestamp(processOutput));
+                
+                //raise event(s)
+                handleSuccessfulSubProcess(subProcesses, processOutput.getJobProcess(), successfulExecutionEvent);
             }).exceptionally((Throwable t) -> { //handle exceptions that were raised by async job
                 JobProcessCompletionException e = (JobProcessCompletionException) t; //cast is safe since only JobProcessCompletionException can be thrown in supplyAsync
                 e.getJobProcess().setException(e);
                 JobProcessFailedEvent processFailedEvent = new JobProcessFailedEvent(e.getJobProcess(), e, this);
-                JobExecutionEventHelper.fireProcessFailedEvent(processFailedEvent, this.processFailedHandler);
 
-                //raise event if final sub process
-                handleFinalSubProcess(subProcesses, e.getJobProcess());
+                //raise event(s)
+                handleFailedSubProcess(subProcesses, e.getJobProcess(), processFailedEvent);
 
                 return null; //satisfy return type
             });
@@ -153,18 +150,51 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
 
     /**
      * raise event if final subProcess
+     *
      * @param subProcesses
-     * @param subProcess 
+     * @param subProcess
      */
-    private void handleFinalSubProcess(List<JobProcess> subProcesses, JobProcess subProcess) {
+    private void handleSuccessfulSubProcess(List<JobProcess> subProcesses, JobProcess subProcess, JobProcessExecutedEvent event) {
         synchronized (this.lockObj) {
             //make sure event is only fired once
-            if (getUnfinishedJobProcesses(subProcesses).isEmpty() && !this.firedFinalSubProcessEvent) {
-                WacodisJobExecutionEvent finalProcessFinishedEvent = new WacodisJobExecutionEvent(subProcess, subProcesses, WacodisJobExecutionEvent.ProcessExecutionEventType.FINALPROCESSFINISHED, this.subProcessExecutorService, this);
-                JobExecutionEventHelper.fireWacodisJobExecutionEvent(finalProcessFinishedEvent, this.lastProcessFinishedHandler);
+            //check if final job process
+            if (isFinalJobProcess(subProcesses)) {
+                //is final job process
+                //fire process execution event
+                JobExecutionEventHelper.fireProcessExecutedEvent(event, this.processExecutedHandler, true);
+                //fire job completed event
+                fireJobExecutionCompletedEvent(subProcess, subProcesses);
                 this.firedFinalSubProcessEvent = true;
+            } else {
+                //not final job process
+                //only fire process execution event
+                JobExecutionEventHelper.fireProcessExecutedEvent(event, this.processExecutedHandler, false);
             }
         }
+    }
+
+    private void handleFailedSubProcess(List<JobProcess> subProcesses, JobProcess subProcess, JobProcessFailedEvent event) {
+        synchronized (this.lockObj) {
+            //make sure event is only fired once
+            //check if final job process
+            if (isFinalJobProcess(subProcesses)) {
+                //is final job process
+                //fire process failed event
+                JobExecutionEventHelper.fireProcessFailedEvent(event, this.processFailedHandler, true);
+                //fire job completed event
+                fireJobExecutionCompletedEvent(subProcess, subProcesses);
+                this.firedFinalSubProcessEvent = true;
+            } else {
+                //not final job process
+                //only fire process failed event
+                JobExecutionEventHelper.fireProcessFailedEvent(event, this.processFailedHandler, true);
+            }
+        }
+    }
+
+    private void fireJobExecutionCompletedEvent(JobProcess finalJobProcess, List<JobProcess> allJobProcesses) {
+        WacodisJobExecutionEvent finalProcessFinishedEvent = new WacodisJobExecutionEvent(finalJobProcess, allJobProcesses, WacodisJobExecutionEvent.ProcessExecutionEventType.FINALPROCESSFINISHED, this.subProcessExecutorService, this);
+        JobExecutionEventHelper.fireWacodisJobExecutionEvent(finalProcessFinishedEvent, this.lastProcessFinishedHandler);
     }
 
     /**
@@ -175,6 +205,10 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
      */
     private List<JobProcess> getUnfinishedJobProcesses(List<JobProcess> jobProcesses) {
         return jobProcesses.stream().filter(p -> (!p.getStatus().equals(JobProcess.Status.SUCCESSFUL) && !p.getStatus().equals(JobProcess.Status.FAILED))).collect(Collectors.toList());
+    }
+    
+    private boolean isFinalJobProcess(List<JobProcess> jobProcesses){
+        return getUnfinishedJobProcesses(jobProcesses).isEmpty() && !this.firedFinalSubProcessEvent;
     }
 
 }

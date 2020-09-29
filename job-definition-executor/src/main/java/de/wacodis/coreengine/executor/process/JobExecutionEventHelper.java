@@ -35,25 +35,25 @@ public class JobExecutionEventHelper {
         }
     }
 
-    public static void fireProcessExecutedEvent(JobProcessExecutedEvent e, JobProcessExecutedEventHandler processExecutedHandler) {
+    public static void fireProcessExecutedEvent(JobProcessExecutedEvent e, JobProcessExecutedEventHandler processExecutedHandler, boolean isFinalJobProcess) {
         String subProcessId = e.getJobProcess().getJobProcessIdentifier();
         String wacodisJobId = e.getJobProcess().getJobDefinition().getId().toString();
 
         if (processExecutedHandler != null) {
             LOGGER.debug("fire event of type {} for job process {} of wacodis job {}", e.getClass().getSimpleName(), subProcessId, wacodisJobId);
-            processExecutedHandler.onJobProcessFinished(e);
+            processExecutedHandler.onJobProcessFinished(e, isFinalJobProcess);
         } else {
             LOGGER.warn("cannot fire event of type {}, event handler is null", e.getClass().getSimpleName());
         }
     }
 
-    public static void fireProcessFailedEvent(JobProcessFailedEvent e, JobProcessFailedEventHandler processFailedHandler) {
+    public static void fireProcessFailedEvent(JobProcessFailedEvent e, JobProcessFailedEventHandler processFailedHandler, boolean isFinalJobProcess) {
         String subProcessId = e.getJobProcess().getJobProcessIdentifier();
         String wacodisJobId = e.getJobProcess().getJobDefinition().getId().toString();
 
         if (processFailedHandler != null) {
             LOGGER.debug("fire event of type {} for job process {} of wacodis job {}", e.getClass().getSimpleName(), subProcessId, wacodisJobId);
-            processFailedHandler.onJobProcessFailed(e);
+            processFailedHandler.onJobProcessFailed(e, isFinalJobProcess);
         } else {
             LOGGER.warn("cannot fire event of type {}, event handler is null", e.getClass().getSimpleName());
         }

@@ -20,7 +20,7 @@ public class JobProcessExecutedEvent {
     private final JobProcessOutputDescription output;
     private final WacodisJobExecutor executor;
     private final DateTime timestamp;
-
+    
     public JobProcessExecutedEvent(JobProcess jobProcess, JobProcessOutputDescription output, WacodisJobExecutor executor) {
         this(jobProcess, output, executor, DateTime.now());
     }

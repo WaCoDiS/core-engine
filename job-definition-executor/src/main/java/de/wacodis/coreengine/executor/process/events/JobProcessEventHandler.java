@@ -6,6 +6,7 @@
 package de.wacodis.coreengine.executor.process.events;
 
 import de.wacodis.core.models.ProductDescription;
+import de.wacodis.core.models.SingleJobExecutionEvent;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobFailed;
 import de.wacodis.core.models.WacodisJobFinished;
@@ -59,23 +60,25 @@ public class JobProcessEventHandler implements JobProcessExecutedEventHandler, J
     }
 
     @Override
-    public void onJobProcessFinished(JobProcessExecutedEvent e) {
+    public void onJobProcessFinished(JobProcessExecutedEvent e, boolean isFinalJobProcess) {
         JobProcess subProcess = e.getJobProcess();
         WacodisJobDefinition jobDefinition = subProcess.getJobDefinition();
+        boolean isSingleExecutionJob = isSingleExecutionJob(jobDefinition);
 
         //publish message on succesful processing
-        ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFinished(), buildProcessFinishedMessage(e.getOutput(), e.getTimestamp()), this.messagePublishingTimeout_Millis);
+        ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFinished(), buildProcessFinishedMessage(e.getOutput(), e.getTimestamp(), isFinalJobProcess, isSingleExecutionJob), this.messagePublishingTimeout_Millis);
 
         LOGGER.info("sub process {} of wacodis job {} finished sucessfully", subProcess.getJobProcessIdentifier(), jobDefinition.getId());
     }
 
     @Override
-    public void onJobProcessFailed(JobProcessFailedEvent e) {
+    public void onJobProcessFailed(JobProcessFailedEvent e, boolean isFinalJobProcess) {
         JobProcess subProcess = e.getJobProcess();
         WacodisJobDefinition jobDefinition = subProcess.getJobDefinition();
+        boolean isSingleExecutionJob = isSingleExecutionJob(jobDefinition);
 
         //publish message on failed processing
-        ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFailure(), buildToolFailureMessage(e.getException(), e.getTimestamp()), this.messagePublishingTimeout_Millis);
+        ToolMessagePublisher.publishMessageSync(this.toolMessagePublisher.toolFailure(), buildToolFailureMessage(e.getException(), e.getTimestamp(), isFinalJobProcess, isSingleExecutionJob), this.messagePublishingTimeout_Millis);
 
         LOGGER.error("execution of  sub process " + subProcess.getJobProcessIdentifier() + " of wacodis job " + jobDefinition.getId() + " failed", e.getException());
     }
@@ -88,7 +91,7 @@ public class JobProcessEventHandler implements JobProcessExecutedEventHandler, J
         LOGGER.info("execution of sub process {} of wacodis job {} started", subProcess.getJobProcessIdentifier(), jobDefinition.getId());
     }
 
-    private Message<WacodisJobFinished> buildProcessFinishedMessage(JobProcessOutputDescription processOuput, DateTime timestamp) {
+    private Message<WacodisJobFinished> buildProcessFinishedMessage(JobProcessOutputDescription processOuput, DateTime timestamp, boolean isFinalJobProcess, boolean isSingleExecutionJob) {
         WacodisJobDefinition jobDefinition = processOuput.getJobProcess().getJobDefinition();
         WacodisJobFinished msg = new WacodisJobFinished();
         ProductDescription pd = new ProductDescription();
@@ -104,17 +107,22 @@ public class JobProcessEventHandler implements JobProcessExecutedEventHandler, J
         msg.setExecutionFinished(timestamp); //set to time of tool finished message publication
         msg.setWacodisJobIdentifier(jobDefinition.getId());
         msg.setProductDescription(pd);
+        msg.setFinalJobProcess(isFinalJobProcess);
+        msg.setSingleExecutionJob(isSingleExecutionJob);
 
         return MessageBuilder.withPayload(msg).build();
     }
 
-    private Message<WacodisJobFailed> buildToolFailureMessage(JobProcessCompletionException exception, DateTime timestamp) {
+    private Message<WacodisJobFailed> buildToolFailureMessage(JobProcessCompletionException exception, DateTime timestamp, boolean isFinalJobProcess, boolean isSingleExecutionJob) {
         WacodisJobFailed msg = new WacodisJobFailed();
         //TODO include wps job identifier (not wacodis job identifier)
         msg.setWpsJobIdentifier(null);
         msg.setCreated(timestamp);
         msg.setReason(exception.getMessage());
         msg.setWacodisJobIdentifier(exception.getJobProcess().getJobDefinition().getId());
+        msg.setFinalJobProcess(isFinalJobProcess);
+        msg.setSingleExecutionJob(isSingleExecutionJob);
+        
         return MessageBuilder.withPayload(msg).build();
     }
 
@@ -133,5 +141,9 @@ public class JobProcessEventHandler implements JobProcessExecutedEventHandler, J
                     .map(expectedOuputIdentifier -> expectedOuputIdentifier.getIdentifier())
                     .collect(Collectors.toList());
         }
+    }
+
+    private boolean isSingleExecutionJob(WacodisJobDefinition jobDefinition) {
+        return (jobDefinition.getExecution().getEvent() != null && jobDefinition.getExecution().getEvent() instanceof SingleJobExecutionEvent);
     }
 }

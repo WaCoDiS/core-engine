@@ -10,6 +10,5 @@ package de.wacodis.coreengine.executor.process.events;
  * @author Arne
  */
 public interface JobProcessExecutedEventHandler {
-    
-    void onJobProcessFinished(JobProcessExecutedEvent e);
+    void onJobProcessFinished(JobProcessExecutedEvent e, boolean isFinalJobProcess);
 }

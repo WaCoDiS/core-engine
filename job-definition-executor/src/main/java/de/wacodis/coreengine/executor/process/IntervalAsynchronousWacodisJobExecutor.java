@@ -107,7 +107,7 @@ public class IntervalAsynchronousWacodisJobExecutor implements WacodisJobExecuto
          * @param subProcesses
          * @param subProcessSchedulerService
          * @param threadpoolSize max parallel sub processes
-         * @param jobExecutor 
+         * @param jobExecutor
          */
         public SubProcessExecutionTask(List<JobProcess> subProcesses, ExecutorService subProcessSchedulerService, int threadpoolSize, IntervalAsynchronousWacodisJobExecutor jobExecutor) {
             this.subProcessStack = getSubProcessesAsStack(subProcesses);
@@ -148,21 +148,17 @@ public class IntervalAsynchronousWacodisJobExecutor implements WacodisJobExecuto
                     subProcess.setProcessOutput(output);
                     subProcess.setStatus(JobProcess.Status.SUCCESSFUL);
                     JobProcessExecutedEvent executedEvent = new JobProcessExecutedEvent(subProcess, output, this.jobExecutor);
-                    JobExecutionEventHelper.fireProcessExecutedEvent(executedEvent, processExecutedHandler);
 
-                    //raise event if final sub process
-                    handleFinalSubProcess(subProcesses, output.getJobProcess(), this.subProcessExecutorService);
+                    handleSuccessfulSubProcess(subProcesses, output.getJobProcess(), executedEvent, this.subProcessExecutorService);
 
                 } catch (JobProcessException ex) {
                     ex.getJobProcess().setException(ex);
                     ex.getJobProcess().setStatus(JobProcess.Status.FAILED);
                     JobProcessFailedEvent failedEvent = new JobProcessFailedEvent(ex.getJobProcess(), new JobProcessCompletionException(ex.getJobProcess(), ex), this.jobExecutor);
-                    JobExecutionEventHelper.fireProcessFailedEvent(failedEvent, processFailedHandler);
-
-                    //raise event if final sub process
-                    handleFinalSubProcess(subProcesses, ex.getJobProcess(), this.subProcessExecutorService);
+                    //raise event(s)
+                    handleFailedSubProcess(subProcesses, ex.getJobProcess(), failedEvent, this.subProcessExecutorService);
                 }
-                
+
             });
 
         }
@@ -187,15 +183,42 @@ public class IntervalAsynchronousWacodisJobExecutor implements WacodisJobExecuto
          * @param subProcesses
          * @param subProcess
          */
-        private void handleFinalSubProcess(List<JobProcess> subProcesses, JobProcess subProcess, ExecutorService subProcessExecutorService) {
+        private void handleSuccessfulSubProcess(List<JobProcess> subProcesses, JobProcess subProcess, JobProcessExecutedEvent event, ExecutorService subProcessExecutorService) {
             synchronized (this.lockObj) {
                 //make sure event is only fired once
-                if (getUnfinishedJobProcesses(subProcesses).isEmpty() && !this.firedFinalSubProcessEvent) {
-                    WacodisJobExecutionEvent finalProcessFinishedEvent = new WacodisJobExecutionEvent(subProcess, subProcesses, WacodisJobExecutionEvent.ProcessExecutionEventType.FINALPROCESSFINISHED, this.subProcessSchedulerService, this.jobExecutor);
-                    JobExecutionEventHelper.fireWacodisJobExecutionEvent(finalProcessFinishedEvent, lastProcessFinishedHandler);
+                //check if final sub process
+                if (isFinalJobProcess(subProcesses)) {
+                    //is final sub process
+                    //fire process execution event
+                    JobExecutionEventHelper.fireProcessExecutedEvent(event, processExecutedHandler, true);
+                    //fire job completed event and shutdown threadpool
+                    fireJobExecutionCompletedEvent(subProcess, subProcesses);
                     this.firedFinalSubProcessEvent = true;
-                    
                     shutdownExecutorService(subProcessExecutorService);
+                } else {
+                    //not final sub process
+                    //only fire process execution event
+                    JobExecutionEventHelper.fireProcessExecutedEvent(event, processExecutedHandler, false);
+                }
+            }
+        }
+
+        private void handleFailedSubProcess(List<JobProcess> subProcesses, JobProcess subProcess, JobProcessFailedEvent event, ExecutorService subProcessExecutorService) {
+            synchronized (this.lockObj) {
+                //make sure event is only fired once
+                //check if final sub process
+                if (isFinalJobProcess(subProcesses)) {
+                    //is final sub process
+                    //fire process failed event
+                    JobExecutionEventHelper.fireProcessFailedEvent(event, processFailedHandler, true);
+                    //fire job completed event and shutdown threadpool
+                    fireJobExecutionCompletedEvent(subProcess, subProcesses);
+                    this.firedFinalSubProcessEvent = true;
+                    shutdownExecutorService(subProcessExecutorService);
+                } else {
+                    //not final sub process
+                    //only fire process failed event
+                    JobExecutionEventHelper.fireProcessFailedEvent(event, processFailedHandler, false);
                 }
             }
         }
@@ -210,6 +233,14 @@ public class IntervalAsynchronousWacodisJobExecutor implements WacodisJobExecuto
             return jobProcesses.stream().filter(p -> (!p.getStatus().equals(JobProcess.Status.SUCCESSFUL) && !p.getStatus().equals(JobProcess.Status.FAILED))).collect(Collectors.toList());
         }
 
+        private boolean isFinalJobProcess(List<JobProcess> jobProcesses) {
+            return getUnfinishedJobProcesses(jobProcesses).isEmpty() && !this.firedFinalSubProcessEvent;
+        }
+
+        private void fireJobExecutionCompletedEvent(JobProcess finalJobProcess, List<JobProcess> allJobProcesses) {
+            WacodisJobExecutionEvent finalProcessFinishedEvent = new WacodisJobExecutionEvent(finalJobProcess, allJobProcesses, WacodisJobExecutionEvent.ProcessExecutionEventType.FINALPROCESSFINISHED, this.subProcessExecutorService, IntervalAsynchronousWacodisJobExecutor.this);
+            JobExecutionEventHelper.fireWacodisJobExecutionEvent(finalProcessFinishedEvent, lastProcessFinishedHandler);
+        }
     }
 
 }

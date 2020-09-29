@@ -5,6 +5,7 @@
  */
 package de.wacodis.coreengine.executor;
 
+import de.wacodis.core.models.SingleJobExecutionEvent;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionExecutionSettings;
 import de.wacodis.core.models.WacodisJobDefinitionRetrySettings;
@@ -123,12 +124,12 @@ public class WacodisJobExecutionStarter {
 
         JobProcessBuilder subProcessCreator;
 
-        switch(execSettings.getExecutionMode()){
+        switch (execSettings.getExecutionMode()) {
             case BEST:
                 //only use best copernicus resource provided by data access
                 BestInputJobProcessBuilder bestInputProcessCreator = new BestInputJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters(job.getJobDefinition()));
                 //set pivotal input if provided
-                if(execSettings.getPivotalInput() != null){
+                if (execSettings.getPivotalInput() != null) {
                     bestInputProcessCreator.setSplitInputIdentifier(execSettings.getPivotalInput());
                 }
                 subProcessCreator = bestInputProcessCreator;
@@ -136,7 +137,7 @@ public class WacodisJobExecutionStarter {
             case SPLIT:
                 SplitByInputJobProcessBuilder splitInputProcessBuilder = new SplitByInputJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters(job.getJobDefinition()));
                 //set pivotal input if provided
-                if(execSettings.getPivotalInput() != null){
+                if (execSettings.getPivotalInput() != null) {
                     splitInputProcessBuilder.setSplitInputIdentifier(execSettings.getPivotalInput());
                 }
                 subProcessCreator = splitInputProcessBuilder;
@@ -237,6 +238,9 @@ public class WacodisJobExecutionStarter {
         msg.setCreated(timestamp);
         msg.setReason(reason);
         msg.setWacodisJobIdentifier(jobDef.getId());
+        msg.setFinalJobProcess(true);
+        msg.setSingleExecutionJob(isSingleExecutionJob(jobDef));
+
         return MessageBuilder.withPayload(msg).build();
     }
 
@@ -244,11 +248,15 @@ public class WacodisJobExecutionStarter {
         Map<String, Object> processParams = new HashMap<>();
 
         //set process timeout
-        if(jobDef.getExecutionSettings() != null && jobDef.getExecutionSettings().getTimeoutMillies() != null){
+        if (jobDef.getExecutionSettings() != null && jobDef.getExecutionSettings().getTimeoutMillies() != null) {
             long timeout = jobDef.getExecutionSettings().getTimeoutMillies();
             processParams.put(WPSProcessContextBuilder.getTIMEOUT_MILLIES_KEY(), timeout);
         }
 
         return processParams;
+    }
+
+    private boolean isSingleExecutionJob(WacodisJobDefinition jobDefinition) {
+        return (jobDefinition.getExecution().getEvent() != null && jobDefinition.getExecution().getEvent() instanceof SingleJobExecutionEvent);
     }
 }

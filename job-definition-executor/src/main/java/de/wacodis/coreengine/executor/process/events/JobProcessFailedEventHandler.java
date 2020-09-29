@@ -11,6 +11,6 @@ package de.wacodis.coreengine.executor.process.events;
  */
 public interface JobProcessFailedEventHandler {
     
-    void onJobProcessFailed(JobProcessFailedEvent e);
+    void onJobProcessFailed(JobProcessFailedEvent e, boolean isFinalJobProcess);
     
 }
