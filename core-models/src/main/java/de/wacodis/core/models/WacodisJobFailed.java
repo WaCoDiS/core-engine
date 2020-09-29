@@ -15,7 +15,7 @@ import javax.validation.constraints.*;
  * message to indicate a job execution failed 
  */
 @ApiModel(description = "message to indicate a job execution failed ")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-09-16T18:02:07.609+02:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-09-29T15:53:35.626+02:00[Europe/Berlin]")
 
 public class WacodisJobFailed  implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -31,6 +31,12 @@ public class WacodisJobFailed  implements Serializable {
 
   @JsonProperty("wacodisJobIdentifier")
   private UUID wacodisJobIdentifier = null;
+
+  @JsonProperty("singleExecutionJob")
+  private Boolean singleExecutionJob = false;
+
+  @JsonProperty("finalJobProcess")
+  private Boolean finalJobProcess = true;
 
   public WacodisJobFailed wpsJobIdentifier(String wpsJobIdentifier) {
     this.wpsJobIdentifier = wpsJobIdentifier;
@@ -118,6 +124,48 @@ public class WacodisJobFailed  implements Serializable {
     this.wacodisJobIdentifier = wacodisJobIdentifier;
   }
 
+  public WacodisJobFailed singleExecutionJob(Boolean singleExecutionJob) {
+    this.singleExecutionJob = singleExecutionJob;
+    return this;
+  }
+
+  /**
+   * indicates if finished wacodis job is single execution job (SingleJobExecutionEvent) 
+   * @return singleExecutionJob
+  **/
+  @ApiModelProperty(required = true, value = "indicates if finished wacodis job is single execution job (SingleJobExecutionEvent) ")
+  @NotNull
+
+
+  public Boolean getSingleExecutionJob() {
+    return singleExecutionJob;
+  }
+
+  public void setSingleExecutionJob(Boolean singleExecutionJob) {
+    this.singleExecutionJob = singleExecutionJob;
+  }
+
+  public WacodisJobFailed finalJobProcess(Boolean finalJobProcess) {
+    this.finalJobProcess = finalJobProcess;
+    return this;
+  }
+
+  /**
+   * indicates if last (sub-) process of Wacodis Job execution 
+   * @return finalJobProcess
+  **/
+  @ApiModelProperty(required = true, value = "indicates if last (sub-) process of Wacodis Job execution ")
+  @NotNull
+
+
+  public Boolean getFinalJobProcess() {
+    return finalJobProcess;
+  }
+
+  public void setFinalJobProcess(Boolean finalJobProcess) {
+    this.finalJobProcess = finalJobProcess;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -131,12 +179,14 @@ public class WacodisJobFailed  implements Serializable {
     return Objects.equals(this.wpsJobIdentifier, wacodisJobFailed.wpsJobIdentifier) &&
         Objects.equals(this.reason, wacodisJobFailed.reason) &&
         Objects.equals(this.created, wacodisJobFailed.created) &&
-        Objects.equals(this.wacodisJobIdentifier, wacodisJobFailed.wacodisJobIdentifier);
+        Objects.equals(this.wacodisJobIdentifier, wacodisJobFailed.wacodisJobIdentifier) &&
+        Objects.equals(this.singleExecutionJob, wacodisJobFailed.singleExecutionJob) &&
+        Objects.equals(this.finalJobProcess, wacodisJobFailed.finalJobProcess);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(wpsJobIdentifier, reason, created, wacodisJobIdentifier);
+    return Objects.hash(wpsJobIdentifier, reason, created, wacodisJobIdentifier, singleExecutionJob, finalJobProcess);
   }
 
   @Override
@@ -148,6 +198,8 @@ public class WacodisJobFailed  implements Serializable {
     sb.append("    reason: ").append(toIndentedString(reason)).append("\n");
     sb.append("    created: ").append(toIndentedString(created)).append("\n");
     sb.append("    wacodisJobIdentifier: ").append(toIndentedString(wacodisJobIdentifier)).append("\n");
+    sb.append("    singleExecutionJob: ").append(toIndentedString(singleExecutionJob)).append("\n");
+    sb.append("    finalJobProcess: ").append(toIndentedString(finalJobProcess)).append("\n");
     sb.append("}");
     return sb.toString();
   }

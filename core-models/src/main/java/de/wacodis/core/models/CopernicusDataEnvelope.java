@@ -18,13 +18,16 @@ import javax.validation.constraints.*;
  * describes specific metadata information about a Copernicus dataset
  */
 @ApiModel(description = "describes specific metadata information about a Copernicus dataset")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-09-16T18:02:07.609+02:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-09-29T15:53:35.626+02:00[Europe/Berlin]")
 
 public class CopernicusDataEnvelope extends AbstractDataEnvelope implements Serializable {
   private static final long serialVersionUID = 1L;
 
   @JsonProperty("datasetId")
   private Object datasetId = null;
+
+  @JsonProperty("footprint")
+  private String footprint = null;
 
   /**
    * Gets or Sets satellite
@@ -130,6 +133,26 @@ public class CopernicusDataEnvelope extends AbstractDataEnvelope implements Seri
 
   public void setDatasetId(Object datasetId) {
     this.datasetId = datasetId;
+  }
+
+  public CopernicusDataEnvelope footprint(String footprint) {
+    this.footprint = footprint;
+    return this;
+  }
+
+  /**
+   * the footprint representing the spatial coverage without NODATA values of the Copernicus dataset as GeoJSON string 
+   * @return footprint
+  **/
+  @ApiModelProperty(value = "the footprint representing the spatial coverage without NODATA values of the Copernicus dataset as GeoJSON string ")
+
+
+  public String getFootprint() {
+    return footprint;
+  }
+
+  public void setFootprint(String footprint) {
+    this.footprint = footprint;
   }
 
   public CopernicusDataEnvelope satellite(SatelliteEnum satellite) {
@@ -286,6 +309,7 @@ public class CopernicusDataEnvelope extends AbstractDataEnvelope implements Seri
     }
     CopernicusDataEnvelope copernicusDataEnvelope = (CopernicusDataEnvelope) o;
     return Objects.equals(this.datasetId, copernicusDataEnvelope.datasetId) &&
+        Objects.equals(this.footprint, copernicusDataEnvelope.footprint) &&
         Objects.equals(this.satellite, copernicusDataEnvelope.satellite) &&
         Objects.equals(this.instrument, copernicusDataEnvelope.instrument) &&
         Objects.equals(this.sensorMode, copernicusDataEnvelope.sensorMode) &&
@@ -298,7 +322,7 @@ public class CopernicusDataEnvelope extends AbstractDataEnvelope implements Seri
 
   @Override
   public int hashCode() {
-    return Objects.hash(datasetId, satellite, instrument, sensorMode, productType, productLevel, cloudCoverage, portal, super.hashCode());
+    return Objects.hash(datasetId, footprint, satellite, instrument, sensorMode, productType, productLevel, cloudCoverage, portal, super.hashCode());
   }
 
   @Override
@@ -307,6 +331,7 @@ public class CopernicusDataEnvelope extends AbstractDataEnvelope implements Seri
     sb.append("class CopernicusDataEnvelope {\n");
     sb.append("    ").append(toIndentedString(super.toString())).append("\n");
     sb.append("    datasetId: ").append(toIndentedString(datasetId)).append("\n");
+    sb.append("    footprint: ").append(toIndentedString(footprint)).append("\n");
     sb.append("    satellite: ").append(toIndentedString(satellite)).append("\n");
     sb.append("    instrument: ").append(toIndentedString(instrument)).append("\n");
     sb.append("    sensorMode: ").append(toIndentedString(sensorMode)).append("\n");
