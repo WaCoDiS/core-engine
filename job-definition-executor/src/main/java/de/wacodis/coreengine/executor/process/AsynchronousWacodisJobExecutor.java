@@ -187,7 +187,7 @@ public class AsynchronousWacodisJobExecutor implements WacodisJobExecutor {
             } else {
                 //not final job process
                 //only fire process failed event
-                JobExecutionEventHelper.fireProcessFailedEvent(event, this.processFailedHandler, true);
+                JobExecutionEventHelper.fireProcessFailedEvent(event, this.processFailedHandler, false);
             }
         }
     }
