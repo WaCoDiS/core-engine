@@ -238,6 +238,7 @@ public class WacodisJobExecutionStarter {
         msg.setCreated(timestamp);
         msg.setReason(reason);
         msg.setWacodisJobIdentifier(jobDef.getId());
+        //considers as final job process if not even started
         msg.setFinalJobProcess(true);
         msg.setSingleExecutionJob(isSingleExecutionJob(jobDef));
 

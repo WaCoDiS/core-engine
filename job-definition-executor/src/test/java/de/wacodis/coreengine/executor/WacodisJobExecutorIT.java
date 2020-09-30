@@ -9,6 +9,7 @@ import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
 import de.wacodis.core.models.CopernicusSubsetDefinition;
 import de.wacodis.core.models.GetResource;
+import de.wacodis.core.models.SingleJobExecutionEvent;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionExecution;
 import de.wacodis.core.models.WacodisJobDefinitionExecutionSettings;
@@ -84,6 +85,12 @@ public class WacodisJobExecutorIT {
         execSettings.setTimeoutMillies(50000l);
         //execSettings.setPivotalInput("LiteralInputData");
         jobDef.setExecutionSettings(execSettings);
+        
+        WacodisJobDefinitionExecution exec = new WacodisJobDefinitionExecution();
+        //exec.setPattern("*/1 * * * *");
+        exec.setEvent(new SingleJobExecutionEvent());
+        jobDef.setExecution(exec);
+        
         StaticDummyResource staticResource = new StaticDummyResource();
         staticResource.setValue("this is a static resource");
         staticResource.setDataEnvelopeId("someDataEnvelopeID");
