@@ -73,7 +73,22 @@ public class WacodisJob extends QuartzJobBean {
 
         //use specified end date in case job is single execution job
         if (event != null && event instanceof SingleJobExecutionEvent) {
-            tempCovEndDate = ((SingleJobExecutionEvent) event).getTemporalCoverageEndDate();
+            SingleJobExecutionEvent singleExecEvent = (SingleJobExecutionEvent) event;
+            
+            if(singleExecEvent.getTemporalCoverageEndDate() != null){
+                tempCovEndDate = singleExecEvent.getTemporalCoverageEndDate();
+            }else{
+                if(jobDef.getExecution() != null && jobDef.getExecution().getStartAt() != null){
+                    //use startAt parameter if temporalCoverageEndDate is missing
+                    tempCovEndDate = jobDef.getExecution().getStartAt();
+                }else if(jobDef.getCreated() != null){
+                    //use job creation date if temporalCoverageEndDate is missing and startAt is not 
+                    tempCovEndDate = jobDef.getCreated();
+                }else{
+                    // use current DateTime as fallback
+                    tempCovEndDate = DateTime.now();
+                }
+            }
         } else { //else use trigger date as end date
             tempCovEndDate = (quartzJobData.containsKey(RETRY_FIRST_EXECUTION_TIME_KEY)) ? DateTime.parse(quartzJobData.getString(RETRY_FIRST_EXECUTION_TIME_KEY)) : new DateTime(quartzContext.getFireTime()); //keep execution time of first (regular) execution if retry
         }
