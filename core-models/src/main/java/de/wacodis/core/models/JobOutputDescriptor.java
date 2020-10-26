@@ -13,7 +13,7 @@ import javax.validation.constraints.*;
  * specifies an expected job output 
  */
 @ApiModel(description = "specifies an expected job output ")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-10-26T17:30:08.688+01:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-10-26T17:56:55.611+01:00[Europe/Berlin]")
 
 public class JobOutputDescriptor  implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -26,6 +26,9 @@ public class JobOutputDescriptor  implements Serializable {
 
   @JsonProperty("publishedOutput")
   private Boolean publishedOutput = true;
+
+  @JsonProperty("asReference")
+  private Boolean asReference = true;
 
   public JobOutputDescriptor identifier(String identifier) {
     this.identifier = identifier;
@@ -89,6 +92,26 @@ public class JobOutputDescriptor  implements Serializable {
     this.publishedOutput = publishedOutput;
   }
 
+  public JobOutputDescriptor asReference(Boolean asReference) {
+    this.asReference = asReference;
+    return this;
+  }
+
+  /**
+   * specifies whether output can be obtained as reference (true, default) or 'inline' (false) 
+   * @return asReference
+  **/
+  @ApiModelProperty(value = "specifies whether output can be obtained as reference (true, default) or 'inline' (false) ")
+
+
+  public Boolean getAsReference() {
+    return asReference;
+  }
+
+  public void setAsReference(Boolean asReference) {
+    this.asReference = asReference;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -101,12 +124,13 @@ public class JobOutputDescriptor  implements Serializable {
     JobOutputDescriptor jobOutputDescriptor = (JobOutputDescriptor) o;
     return Objects.equals(this.identifier, jobOutputDescriptor.identifier) &&
         Objects.equals(this.mimeType, jobOutputDescriptor.mimeType) &&
-        Objects.equals(this.publishedOutput, jobOutputDescriptor.publishedOutput);
+        Objects.equals(this.publishedOutput, jobOutputDescriptor.publishedOutput) &&
+        Objects.equals(this.asReference, jobOutputDescriptor.asReference);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(identifier, mimeType, publishedOutput);
+    return Objects.hash(identifier, mimeType, publishedOutput, asReference);
   }
 
   @Override
@@ -117,6 +141,7 @@ public class JobOutputDescriptor  implements Serializable {
     sb.append("    identifier: ").append(toIndentedString(identifier)).append("\n");
     sb.append("    mimeType: ").append(toIndentedString(mimeType)).append("\n");
     sb.append("    publishedOutput: ").append(toIndentedString(publishedOutput)).append("\n");
+    sb.append("    asReference: ").append(toIndentedString(asReference)).append("\n");
     sb.append("}");
     return sb.toString();
   }
