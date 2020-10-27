@@ -5,7 +5,7 @@
  */
 package de.wacodis.coreengine.executor.process.wps;
 
-import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
+import de.wacodis.core.models.JobOutputDescriptor;
 import de.wacodis.coreengine.executor.process.ProcessContext;
 import java.util.List;
 import java.util.Optional;
@@ -59,7 +59,7 @@ public class WPSResultValidator {
      * @param wpsProcessResult
      * @return
      */
-    private Set<String> getMissingProcessOutputs(Result wpsProcessResult, List<ExpectedProcessOutput> expectedOutputs) {
+    private Set<String> getMissingProcessOutputs(Result wpsProcessResult, List<JobOutputDescriptor> expectedOutputs) {
         List<Data> availableOutputs = wpsProcessResult.getOutputs();
         Set<String> availableOutputIdentifiers = availableOutputs.stream().map(availableOutput -> availableOutput.getId()).collect(Collectors.toSet());
         Set<String> expectedOutputIdentifiers = expectedOutputs.stream().map(expectedOutput -> expectedOutput.getIdentifier()).collect(Collectors.toSet());

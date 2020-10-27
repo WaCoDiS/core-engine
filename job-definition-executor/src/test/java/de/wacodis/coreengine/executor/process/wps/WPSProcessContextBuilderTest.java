@@ -12,11 +12,9 @@ import de.wacodis.core.models.WacodisJobDefinitionExecutionSettings;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionContext;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
-import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ProcessContext;
 import de.wacodis.coreengine.executor.process.Schema;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,15 +97,12 @@ public class WPSProcessContextBuilderTest {
     }
 
     private WebProcessingServiceConfiguration getWPSConfig() {
-        ExpectedProcessOutput productOutput = new ExpectedProcessOutput("PRODUCT", "image/geotiff");
-        ExpectedProcessOutput metadataOutput = new ExpectedProcessOutput("METADATA", "text/json", false);
         WebProcessingServiceConfiguration config = new WebProcessingServiceConfiguration();
 
         config.setVersion("2.0.0");
         config.setUri("localhost:8080");
         config.setDefaultResourceMimeType("text/xml");
         config.setDefaultResourceSchema(Schema.GML3);
-        config.setExpectedProcessOutputs(Arrays.asList(new ExpectedProcessOutput[]{metadataOutput, productOutput}));
 
         return config;
     }

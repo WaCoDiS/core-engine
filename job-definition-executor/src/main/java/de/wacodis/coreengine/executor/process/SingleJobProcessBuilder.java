@@ -5,6 +5,7 @@
  */
 package de.wacodis.coreengine.executor.process;
 
+import de.wacodis.core.models.JobOutputDescriptor;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.exception.JobProcessCreationException;
 import java.util.Arrays;
@@ -22,26 +23,26 @@ public class SingleJobProcessBuilder implements JobProcessBuilder {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(SingleJobProcessBuilder.class);
 
     private final ProcessContextBuilder contextBuilder;
-    private final List<ExpectedProcessOutput> expectedOutputs;
+    private final List<JobOutputDescriptor> expectedOutputs;
     private final ProcessContextToJobProcessConverter contextConverter;
     private Map<String, Object> additionalProcessParameters;
 
-    public SingleJobProcessBuilder(ProcessContextBuilder contextBuilder, List<ExpectedProcessOutput> expectedOutputs, ProcessContextToJobProcessConverter contextConverter) {
+    public SingleJobProcessBuilder(ProcessContextBuilder contextBuilder, List<JobOutputDescriptor> expectedOutputs, ProcessContextToJobProcessConverter contextConverter) {
         this(contextBuilder, expectedOutputs, contextConverter, new HashMap<>());
     }
 
-    public SingleJobProcessBuilder(ProcessContextBuilder contextBuilder, List<ExpectedProcessOutput> expectedOutputs) {
+    public SingleJobProcessBuilder(ProcessContextBuilder contextBuilder, List<JobOutputDescriptor> expectedOutputs) {
         this(contextBuilder, expectedOutputs, new DefaultProcessContextToJobProcessConverter());
     }
 
-    public SingleJobProcessBuilder(ProcessContextBuilder contextBuilder, List<ExpectedProcessOutput> expectedOutputs, ProcessContextToJobProcessConverter contextConverter, Map<String, Object> additionalProcessParameters) {
+    public SingleJobProcessBuilder(ProcessContextBuilder contextBuilder, List<JobOutputDescriptor> expectedOutputs, ProcessContextToJobProcessConverter contextConverter, Map<String, Object> additionalProcessParameters) {
         this.contextBuilder = contextBuilder;
         this.expectedOutputs = expectedOutputs;
         this.contextConverter = contextConverter;
         this.additionalProcessParameters = additionalProcessParameters;
     }
 
-    public SingleJobProcessBuilder(ProcessContextBuilder contextBuilder, List<ExpectedProcessOutput> expectedOutputs, Map<String, Object> additionalProcessParameters) {
+    public SingleJobProcessBuilder(ProcessContextBuilder contextBuilder, List<JobOutputDescriptor> expectedOutputs, Map<String, Object> additionalProcessParameters) {
         this(contextBuilder, expectedOutputs, new DefaultProcessContextToJobProcessConverter(), additionalProcessParameters);
     }
 
@@ -55,7 +56,7 @@ public class SingleJobProcessBuilder implements JobProcessBuilder {
 
     @Override
     public List<JobProcess> getJobProcessesForWacodisJob(WacodisJobWrapper job, Process tool) throws JobProcessCreationException {
-        ExpectedProcessOutput[] expectedOutputArr = this.expectedOutputs.toArray(new ExpectedProcessOutput[this.expectedOutputs.size()]);
+        JobOutputDescriptor[] expectedOutputArr = this.expectedOutputs.toArray(new JobOutputDescriptor[this.expectedOutputs.size()]);
         ProcessContext completeContext = this.contextBuilder.buildProcessContext(job, this.additionalProcessParameters, expectedOutputArr);
         
         LOGGER.debug("retain complete context of wacodis job {}, create single job process", job.getJobDefinition().getId());

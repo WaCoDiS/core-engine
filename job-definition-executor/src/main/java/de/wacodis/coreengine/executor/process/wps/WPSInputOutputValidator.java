@@ -5,7 +5,7 @@
  */
 package de.wacodis.coreengine.executor.process.wps;
 
-import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
+import de.wacodis.core.models.JobOutputDescriptor;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
 import java.util.List;
 import java.util.Map;
@@ -47,9 +47,9 @@ public class WPSInputOutputValidator {
      * @return returns Optional.of(Throwable t) if a expected output or a
      * MimeType of a expected output is not supported, Optinal.empty() if valid
      */
-    public Optional<Throwable> validateExpectedOutputs(List<ExpectedProcessOutput> expectedOutputs) {
+    public Optional<Throwable> validateExpectedOutputs(List<JobOutputDescriptor> expectedOutputs) {
 
-        for (ExpectedProcessOutput expectedOutput : expectedOutputs) {
+        for (JobOutputDescriptor expectedOutput : expectedOutputs) {
             Optional<OutputDescription> supportedOutput = getOutputDescriptionByID(expectedOutput.getIdentifier());
 
             if (supportedOutput.isPresent()) { //output supported

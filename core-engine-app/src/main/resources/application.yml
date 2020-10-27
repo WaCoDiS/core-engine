@@ -55,14 +55,6 @@ spring:
     wps:
       uri: http://localhost:8083/wps
       version: 2.0.0
-        #define expected process outputs, otherwise defaults (PRODUCT, METADATA) are used
-        #expectedProcessOutputs:
-        #   - identifier: PRODUCT
-        #     mimeType: image/geotiff
-        #     publishedOutput: TRUE
-        #   - identifier: METADATA
-        #     mimeType: text/json
-        #     publishedOutput: FALSE
         #define mime type for every input resource, otherwise defaults to text/xml
         #defaultResourceMimeType: text/xml
         #define schema for every input resource, otherwise defaults to GML3

@@ -6,9 +6,9 @@
 package de.wacodis.coreengine.executor.process.wps;
 
 import de.wacodis.core.models.AbstractResource;
+import de.wacodis.core.models.JobOutputDescriptor;
 import de.wacodis.core.models.extension.staticresource.StaticDummyResource;
 import de.wacodis.coreengine.executor.exception.ExecutionException;
-import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ProcessContext;
 import de.wacodis.coreengine.executor.process.ProcessOutputDescription;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
@@ -295,10 +295,10 @@ public class WPSProcess implements de.wacodis.coreengine.executor.process.Proces
      * @param executeRequestBuilder
      * @param expectedOutputs
      */
-    private void setExpectedWPSOutputs(List<ExpectedProcessOutput> expectedOutputs, ExecuteRequestBuilder executeRequestBuilder) {
-        for (ExpectedProcessOutput expectedOutput : expectedOutputs) {
+    private void setExpectedWPSOutputs(List<JobOutputDescriptor> expectedOutputs, ExecuteRequestBuilder executeRequestBuilder) {
+        for (JobOutputDescriptor expectedOutput : expectedOutputs) {
             executeRequestBuilder.setResponseDocument(expectedOutput.getIdentifier(), "", "", expectedOutput.getMimeType() /*mime type*/);
-            executeRequestBuilder.setAsReference(expectedOutput.getIdentifier(), expectedOutput.isByReference());
+            executeRequestBuilder.setAsReference(expectedOutput.getIdentifier(), expectedOutput.getAsReference());
         }
     }
     

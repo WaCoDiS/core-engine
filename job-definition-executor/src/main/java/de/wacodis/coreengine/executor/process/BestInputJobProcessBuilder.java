@@ -7,6 +7,7 @@ package de.wacodis.coreengine.executor.process;
 
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.CopernicusSubsetDefinition;
+import de.wacodis.core.models.JobOutputDescriptor;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.exception.JobProcessCreationException;
@@ -30,27 +31,27 @@ public class BestInputJobProcessBuilder implements JobProcessBuilder {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(BestInputJobProcessBuilder.class);
 
     private final ProcessContextBuilder contextBuilder;
-    private final List<ExpectedProcessOutput> expectedOutputs;
+    private final List<JobOutputDescriptor> expectedOutputs;
     private final ProcessContextToJobProcessConverter contextConverter;
     private String splitInputIdentifier;
     private Map<String, Object> additionalProcessParameters;
 
-    public BestInputJobProcessBuilder(ProcessContextBuilder contextBuilder, List<ExpectedProcessOutput> expectedOutputs, ProcessContextToJobProcessConverter contextConverter) {
+    public BestInputJobProcessBuilder(ProcessContextBuilder contextBuilder, List<JobOutputDescriptor> expectedOutputs, ProcessContextToJobProcessConverter contextConverter) {
         this(contextBuilder, expectedOutputs, contextConverter, new HashMap<>());
     }
 
-    public BestInputJobProcessBuilder(ProcessContextBuilder contextBuilder, List<ExpectedProcessOutput> expectedOutputs) {
+    public BestInputJobProcessBuilder(ProcessContextBuilder contextBuilder, List<JobOutputDescriptor> expectedOutputs) {
         this(contextBuilder, expectedOutputs, new DefaultProcessContextToJobProcessConverter());
     }
 
-    public BestInputJobProcessBuilder(ProcessContextBuilder contextBuilder, List<ExpectedProcessOutput> expectedOutputs, ProcessContextToJobProcessConverter contextConverter, Map<String, Object> additionalProcessParameters) {
+    public BestInputJobProcessBuilder(ProcessContextBuilder contextBuilder, List<JobOutputDescriptor> expectedOutputs, ProcessContextToJobProcessConverter contextConverter, Map<String, Object> additionalProcessParameters) {
         this.contextBuilder = contextBuilder;
         this.expectedOutputs = expectedOutputs;
         this.contextConverter = contextConverter;
         this.additionalProcessParameters = additionalProcessParameters;
     }
 
-    public BestInputJobProcessBuilder(ProcessContextBuilder contextBuilder, List<ExpectedProcessOutput> expectedOutputs, Map<String, Object> additionalProcessParameters) {
+    public BestInputJobProcessBuilder(ProcessContextBuilder contextBuilder, List<JobOutputDescriptor> expectedOutputs, Map<String, Object> additionalProcessParameters) {
         this(contextBuilder, expectedOutputs, new DefaultProcessContextToJobProcessConverter(), additionalProcessParameters);
     }
 
@@ -100,7 +101,7 @@ public class BestInputJobProcessBuilder implements JobProcessBuilder {
             throw new JobProcessCreationException("Unable to create job process for wacodis job " + job.getJobDefinition().getId().toString() + " because no resources for input " + input.getSubsetDefinitionIdentifier() + " are provided");
         }
 
-        ExpectedProcessOutput[] expectedOutputArr = this.expectedOutputs.toArray(new ExpectedProcessOutput[this.expectedOutputs.size()]);
+        JobOutputDescriptor[] expectedOutputArr = this.expectedOutputs.toArray(new JobOutputDescriptor[this.expectedOutputs.size()]);
         ProcessContext context = this.contextBuilder.buildProcessContext(job, this.additionalProcessParameters, expectedOutputArr);
         List<JobProcess> singleJobProcess = contextConverter.createJobProcesses(Arrays.asList(context), job.getJobDefinition(), tool);
 

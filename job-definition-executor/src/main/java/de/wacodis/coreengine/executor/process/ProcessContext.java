@@ -5,6 +5,7 @@
  */
 package de.wacodis.coreengine.executor.process;
 
+import de.wacodis.core.models.JobOutputDescriptor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +20,7 @@ import java.util.Map;
 public class ProcessContext {
 
     private Map<String, List<ResourceDescription>> inputResources;
-    private List<ExpectedProcessOutput> expectedOutputs;
+    private List<JobOutputDescriptor> expectedOutputs;
     private String wacodisProcessID;
     private Map<String, Object> additionalParameters;
 
@@ -63,19 +64,19 @@ public class ProcessContext {
         this.inputResources.putIfAbsent(inputID, currentInputResources);
     }
 
-    public List<ExpectedProcessOutput> getExpectedOutputs() {
+    public List<JobOutputDescriptor> getExpectedOutputs() {
         return expectedOutputs;
     }
 
-    public void setExpectedOutputs(List<ExpectedProcessOutput> expectedOutputs) {
+    public void setExpectedOutputs(List<JobOutputDescriptor> expectedOutputs) {
         this.expectedOutputs = expectedOutputs;
     }
 
-    public void addExpectedOutput(ExpectedProcessOutput expectedOutput) {
+    public void addExpectedOutput(JobOutputDescriptor expectedOutput) {
         this.expectedOutputs.add(expectedOutput);
     }
 
-    public void removeExpectedOutput(ExpectedProcessOutput expectedOutput) {
+    public void removeExpectedOutput(JobOutputDescriptor expectedOutput) {
         this.expectedOutputs.remove(expectedOutput);
     }
 

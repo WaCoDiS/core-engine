@@ -6,13 +6,13 @@
 package de.wacodis.coreengine.executor.process.wps;
 
 import de.wacodis.core.models.AbstractResource;
+import de.wacodis.core.models.JobOutputDescriptor;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.process.ProcessContext;
 import de.wacodis.coreengine.executor.process.ProcessContextBuilder;
 import java.util.List;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
-import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
 import de.wacodis.coreengine.executor.process.Schema;
 import java.util.Arrays;
@@ -63,7 +63,7 @@ public class WPSProcessContextBuilder implements ProcessContextBuilder {
     }
 
     @Override
-    public ProcessContext buildProcessContext(WacodisJobWrapper job, Map<String, Object> additionalParameters, ExpectedProcessOutput... expectedProcessOutputs) {
+    public ProcessContext buildProcessContext(WacodisJobWrapper job, Map<String, Object> additionalParameters, JobOutputDescriptor... expectedProcessOutputs) {
         ProcessContext context = new ProcessContext();
 
         context.setWacodisProcessID(job.getJobDefinition().getId().toString());

@@ -5,7 +5,7 @@
  */
 package de.wacodis.coreengine.executor.process.wps;
 
-import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
+import de.wacodis.core.models.JobOutputDescriptor;
 import de.wacodis.coreengine.executor.process.ProcessContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -81,8 +81,8 @@ public class WPSResultValidatorTest {
         //init process context
         this.processContext = new ProcessContext();
         this.processContext.setWacodisProcessID("testProcess");
-        ExpectedProcessOutput expectedLiteralOutput = new ExpectedProcessOutput("literalOutput", "text/json");
-        this.processContext.setExpectedOutputs(Arrays.asList(new ExpectedProcessOutput[]{expectedLiteralOutput}));
+        JobOutputDescriptor expectedLiteralOutput = new JobOutputDescriptor().identifier("literalOutput").mimeType("text/json");
+        this.processContext.setExpectedOutputs(Arrays.asList(new JobOutputDescriptor[]{expectedLiteralOutput}));
     }
 
     /**
@@ -125,10 +125,10 @@ public class WPSResultValidatorTest {
     public void testValidateProcessOutput_ResultAdditionalOutput() {
         System.out.println("validateProcessOutput invalid result additional output");
 
-        ExpectedProcessOutput additionalExpectedOutput = new ExpectedProcessOutput("additionalOutput", "text/plain");
-        ExpectedProcessOutput expectedLiteralOutput = new ExpectedProcessOutput("literalOutput", "text/json");
-        this.processContext.setExpectedOutputs(Arrays.asList(new ExpectedProcessOutput[]{expectedLiteralOutput, additionalExpectedOutput}));
-
+        JobOutputDescriptor additionalExpectedOutput = new JobOutputDescriptor().identifier("additionalOutput").mimeType("text/plain");
+        JobOutputDescriptor expectedLiteralOutput = new JobOutputDescriptor().identifier("literalOutput").mimeType("text/json");
+        this.processContext.setExpectedOutputs(Arrays.asList(expectedLiteralOutput, additionalExpectedOutput));
+ 
         WPSResultValidator instance = new WPSResultValidator(this.wpsProcessDescription);
         Optional<Throwable> result = instance.validateProcessOutput(this.wpsResult, this.processContext);
 

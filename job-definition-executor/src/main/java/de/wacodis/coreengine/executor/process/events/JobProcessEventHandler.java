@@ -5,18 +5,15 @@
  */
 package de.wacodis.coreengine.executor.process.events;
 
+import de.wacodis.core.models.JobOutputDescriptor;
 import de.wacodis.core.models.ProductDescription;
 import de.wacodis.core.models.SingleJobExecutionEvent;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobFailed;
 import de.wacodis.core.models.WacodisJobFinished;
-import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
-import de.wacodis.coreengine.executor.events.WacodisJobExecutionFailedEvent;
-import de.wacodis.coreengine.executor.exception.ExecutionException;
 import de.wacodis.coreengine.executor.exception.JobProcessCompletionException;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisher;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
-import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.JobProcess;
 import de.wacodis.coreengine.executor.process.JobProcessOutputDescription;
 import java.util.Collections;
@@ -131,13 +128,13 @@ public class JobProcessEventHandler implements JobProcessExecutedEventHandler, J
      * true
      */
     private List<String> getPublishableExpectedOutputIdentifiers(JobProcess subProcess) {
-        List<ExpectedProcessOutput> allExpectedOutputs = subProcess.getExecutionContext().getExpectedOutputs();
+        List<JobOutputDescriptor> allExpectedOutputs = subProcess.getExecutionContext().getExpectedOutputs();
 
         if (allExpectedOutputs == null || allExpectedOutputs.isEmpty()) {
             return Collections.EMPTY_LIST;
         } else { //return all where isPublishedOuput == true
             return allExpectedOutputs.stream()
-                    .filter(expectedOutput -> expectedOutput.isPublishedOutput())
+                    .filter(expectedOutput -> expectedOutput.getPublishedOutput())
                     .map(expectedOuputIdentifier -> expectedOuputIdentifier.getIdentifier())
                     .collect(Collectors.toList());
         }

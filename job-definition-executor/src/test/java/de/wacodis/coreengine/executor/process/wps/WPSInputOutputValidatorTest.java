@@ -5,8 +5,8 @@
  */
 package de.wacodis.coreengine.executor.process.wps;
 
+import de.wacodis.core.models.JobOutputDescriptor;
 import de.wacodis.core.models.extension.staticresource.StaticDummyResource;
-import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -88,8 +88,8 @@ public class WPSInputOutputValidatorTest {
     @DisplayName("validateExpectedOutputs valid")
     public void testValidateExpectedOutputs() {
         System.out.println("validateExpectedOutputs valid");
-        ExpectedProcessOutput expectedLiteralOutput = new ExpectedProcessOutput("literalOutput", "text/json");
-        List<ExpectedProcessOutput> expectedOutputs = Arrays.asList(new ExpectedProcessOutput[]{expectedLiteralOutput});
+        JobOutputDescriptor additionalExpectedOutput = new JobOutputDescriptor().identifier("literalOutput").mimeType("text/json");
+        List<JobOutputDescriptor> expectedOutputs = Arrays.asList(additionalExpectedOutput);
         WPSInputOutputValidator instance = new WPSInputOutputValidator(this.wpsProcessDescription);
         Optional<Throwable> result = instance.validateExpectedOutputs(expectedOutputs);
 
@@ -103,8 +103,8 @@ public class WPSInputOutputValidatorTest {
     @DisplayName("validateExpectedOutputs invalid unsupported output")
     public void testValidateExpectedOutputs_UnsupportedOutput() {
         System.out.println("validateExpectedOutputs invalid unsupported output");
-        ExpectedProcessOutput expectedLiteralOutput = new ExpectedProcessOutput("unsupportedOnput", "text/json"); // unsupported output
-        List<ExpectedProcessOutput> expectedOutputs = Arrays.asList(new ExpectedProcessOutput[]{expectedLiteralOutput});
+        JobOutputDescriptor expectedLiteralOutput = new JobOutputDescriptor().identifier("unsupportedOnput").mimeType("text/json");// unsupported output
+        List<JobOutputDescriptor> expectedOutputs = Arrays.asList(expectedLiteralOutput);
         WPSInputOutputValidator instance = new WPSInputOutputValidator(this.wpsProcessDescription);
         Optional<Throwable> result = instance.validateExpectedOutputs(expectedOutputs);
 
@@ -120,8 +120,8 @@ public class WPSInputOutputValidatorTest {
     @DisplayName("validateExpectedOutputs invalid unsupported mime type")
     public void testValidateExpectedOutputs_UnsupportedMimeType() {
         System.out.println("validateExpectedOutputs invalid unsupported mime type");
-        ExpectedProcessOutput expectedLiteralOutput = new ExpectedProcessOutput("literalOutput", "image/geotiff"); //unsupported mime type for literalOutput
-        List<ExpectedProcessOutput> expectedOutputs = Arrays.asList(new ExpectedProcessOutput[]{expectedLiteralOutput});
+        JobOutputDescriptor expectedLiteralOutput = new JobOutputDescriptor().identifier("literalOutput").mimeType("image/geotiff"); //unsupported mime type for literalOutput
+        List<JobOutputDescriptor> expectedOutputs = Arrays.asList(expectedLiteralOutput);
         WPSInputOutputValidator instance = new WPSInputOutputValidator(this.wpsProcessDescription);
         Optional<Throwable> result = instance.validateExpectedOutputs(expectedOutputs);
 

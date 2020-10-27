@@ -9,6 +9,7 @@ import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
 import de.wacodis.core.models.CopernicusSubsetDefinition;
 import de.wacodis.core.models.GetResource;
+import de.wacodis.core.models.JobOutputDescriptor;
 import de.wacodis.core.models.SingleJobExecutionEvent;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionExecution;
@@ -20,7 +21,6 @@ import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionContext;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.events.WacodisJobExecutableStateChangedHandler;
-import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import java.util.UUID;
 import java.util.List;
 import java.util.ArrayList;
@@ -41,8 +41,8 @@ import org.springframework.context.annotation.ComponentScan;
 public class WacodisJobExecutorIT {
 
     private final static String PROCESSTOOL = "org.n52.wps.server.algorithm.test.DummyTestClass";
-    private final static ExpectedProcessOutput[] EXPECTEDOUTPUTS = new ExpectedProcessOutput[]{
-        new ExpectedProcessOutput("LiteralOutputData", "text/xml", true)
+    private final static JobOutputDescriptor[] EXPECTEDOUTPUTS = new JobOutputDescriptor[]{
+        new JobOutputDescriptor().identifier("LiteralOutputData").mimeType("text/xml").asReference(Boolean.TRUE)
     };
 
     @Autowired
@@ -85,12 +85,12 @@ public class WacodisJobExecutorIT {
         execSettings.setTimeoutMillies(50000l);
         //execSettings.setPivotalInput("LiteralInputData");
         jobDef.setExecutionSettings(execSettings);
-        
+
         WacodisJobDefinitionExecution exec = new WacodisJobDefinitionExecution();
         //exec.setPattern("*/1 * * * *");
         exec.setEvent(new SingleJobExecutionEvent());
         jobDef.setExecution(exec);
-        
+
         StaticDummyResource staticResource = new StaticDummyResource();
         staticResource.setValue("this is a static resource");
         staticResource.setDataEnvelopeId("someDataEnvelopeID");
@@ -114,14 +114,13 @@ public class WacodisJobExecutorIT {
         copernicusResource2.dataEnvelopeId("vwxyz");
         copernicusResource2.setMethod(AbstractResource.MethodEnum.GETRESOURCE);
         copernicusResource2.setUrl("https://scihub.copernicus.eu/dhus/odata/v1/Products('21eb3657-9a68-46cf-979a-9b731dfedf24')/$value");
-        
+
         InputHelper copernicusInputHelper = jobWrapper.getInputs().get(1);
         List<AbstractResource> copernicusResources = new ArrayList<>();
         copernicusResources.add(copernicusResource1);
         copernicusResources.add(copernicusResource2);
         copernicusInputHelper.setResource(copernicusResources);
 
-        
         return jobWrapper;
     }
 

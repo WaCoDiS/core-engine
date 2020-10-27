@@ -9,9 +9,9 @@ import de.wacodis.coreengine.executor.process.ProcessContext;
 import org.n52.geoprocessing.wps.client.WPSClientSession;
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.GetResource;
+import de.wacodis.core.models.JobOutputDescriptor;
 import de.wacodis.core.models.extension.staticresource.StaticDummyResource;
 import de.wacodis.coreengine.executor.exception.ExecutionException;
-import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ProcessOutputDescription;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
 
@@ -73,9 +73,10 @@ public class RunWPSProcessIT {
         inputContext.addInputResource("REFERENCE_DATA_TYPE", new ResourceDescription(refDataType, "text/xml"));
         inputContext.addInputResource("REFERENCE_DATA", new ResourceDescription(refData, "text/xml"));
 
-        inputContext.addExpectedOutput(new ExpectedProcessOutput("PRODUCT", "image/geotiff"));
-        inputContext.addExpectedOutput(new ExpectedProcessOutput("METADATA", "text/json"));
-
+        
+        inputContext.addExpectedOutput(new JobOutputDescriptor().identifier("PRODUCT").mimeType("image/geotiff"));
+        inputContext.addExpectedOutput(new JobOutputDescriptor().identifier("METADATA").mimeType("text/json"));
+        
         inputContext.setWacodisProcessID("dummyLandCoverClassificationProcess");
 
         return inputContext;

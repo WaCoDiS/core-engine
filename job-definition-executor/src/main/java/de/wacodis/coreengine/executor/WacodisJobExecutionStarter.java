@@ -5,6 +5,8 @@
  */
 package de.wacodis.coreengine.executor;
 
+import de.wacodis.core.engine.utils.factories.JobOutputDescriptorBuilder;
+import de.wacodis.core.models.JobOutputDescriptor;
 import de.wacodis.core.models.SingleJobExecutionEvent;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionExecutionSettings;
@@ -27,7 +29,6 @@ import de.wacodis.coreengine.executor.process.wps.WPSProcessContextBuilder;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisherChannel;
 import de.wacodis.coreengine.executor.process.AsynchronousWacodisJobExecutor;
 import de.wacodis.coreengine.executor.process.BestInputJobProcessBuilder;
-import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.IntervalAsynchronousWacodisJobExecutor;
 import de.wacodis.coreengine.executor.process.JobProcess;
 import de.wacodis.coreengine.executor.process.JobProcessBuilder;
@@ -58,16 +59,13 @@ public class WacodisJobExecutionStarter {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WacodisJobExecutionStarter.class);
 
-    //default expected outputs
-    private static final ExpectedProcessOutput PRODUCTOUTPUT = new ExpectedProcessOutput("PRODUCT", "image/geotiff");
-    private static final ExpectedProcessOutput METADATAOUTPUT = new ExpectedProcessOutput("METADATA", "text/json", false, false); //no published output
     //default retry settings
     private static final int DEFAULT_MAXRETRIES = 0;
     private static final long DEFAULT_RETRIEDELAY_MILLIES = 0l;
 
     private final WPSClientSession wpsClient;
     private ProcessContextBuilder wpsContextBuilder;
-    private List<ExpectedProcessOutput> expectedProcessOutputs;
+    private List<JobOutputDescriptor> expectedProcessOutputs;
 
     @Autowired
     ToolMessagePublisherChannel processMessagePublisher;
@@ -86,24 +84,22 @@ public class WacodisJobExecutionStarter {
         return wpsConfig;
     }
 
-    public List<ExpectedProcessOutput> getExpectedProcessOutputs() {
+    public List<JobOutputDescriptor> getExpectedProcessOutputs() {
         return expectedProcessOutputs;
     }
 
-    public void setExpectedProcessOutputs(List<ExpectedProcessOutput> expectedProcessOutputs) {
+    public void setExpectedProcessOutputs(List<JobOutputDescriptor> expectedProcessOutputs) {
         this.expectedProcessOutputs = expectedProcessOutputs;
     }
 
     @PostConstruct
     private void initExpectedProcessOutputs() {
-        List<ExpectedProcessOutput> selectedOutputs;
+        List<JobOutputDescriptor> selectedOutputs;
 
         if (this.expectedProcessOutputs != null) {
             selectedOutputs = this.expectedProcessOutputs;
-        } else if (this.wpsConfig.getExpectedProcessOutputs() != null) {
-            selectedOutputs = this.wpsConfig.getExpectedProcessOutputs();
         } else {
-            selectedOutputs = Arrays.asList(new ExpectedProcessOutput[]{PRODUCTOUTPUT, METADATAOUTPUT});
+            selectedOutputs = Arrays.asList(JobOutputDescriptorBuilder.getDefaultOutputs());
         }
 
         this.expectedProcessOutputs = selectedOutputs;
