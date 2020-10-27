@@ -5,6 +5,8 @@
  */
 package de.wacodis.coreengine.executor.process;
 
+import de.wacodis.core.engine.utils.factories.DefaultOutputHelper;
+import de.wacodis.core.engine.utils.factories.JobOutputHelper;
 import de.wacodis.core.models.JobOutputDescriptor;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.exception.JobProcessCreationException;
@@ -22,28 +24,27 @@ public class SingleJobProcessBuilder implements JobProcessBuilder {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(SingleJobProcessBuilder.class);
 
+    private final JobOutputHelper outputHelper = new DefaultOutputHelper();
     private final ProcessContextBuilder contextBuilder;
-    private final List<JobOutputDescriptor> expectedOutputs;
     private final ProcessContextToJobProcessConverter contextConverter;
     private Map<String, Object> additionalProcessParameters;
 
-    public SingleJobProcessBuilder(ProcessContextBuilder contextBuilder, List<JobOutputDescriptor> expectedOutputs, ProcessContextToJobProcessConverter contextConverter) {
-        this(contextBuilder, expectedOutputs, contextConverter, new HashMap<>());
+    public SingleJobProcessBuilder(ProcessContextBuilder contextBuilder, ProcessContextToJobProcessConverter contextConverter) {
+        this(contextBuilder, contextConverter, new HashMap<>());
     }
 
-    public SingleJobProcessBuilder(ProcessContextBuilder contextBuilder, List<JobOutputDescriptor> expectedOutputs) {
-        this(contextBuilder, expectedOutputs, new DefaultProcessContextToJobProcessConverter());
+    public SingleJobProcessBuilder(ProcessContextBuilder contextBuilder) {
+        this(contextBuilder, new DefaultProcessContextToJobProcessConverter());
     }
 
-    public SingleJobProcessBuilder(ProcessContextBuilder contextBuilder, List<JobOutputDescriptor> expectedOutputs, ProcessContextToJobProcessConverter contextConverter, Map<String, Object> additionalProcessParameters) {
+    public SingleJobProcessBuilder(ProcessContextBuilder contextBuilder, ProcessContextToJobProcessConverter contextConverter, Map<String, Object> additionalProcessParameters) {
         this.contextBuilder = contextBuilder;
-        this.expectedOutputs = expectedOutputs;
         this.contextConverter = contextConverter;
         this.additionalProcessParameters = additionalProcessParameters;
     }
 
-    public SingleJobProcessBuilder(ProcessContextBuilder contextBuilder, List<JobOutputDescriptor> expectedOutputs, Map<String, Object> additionalProcessParameters) {
-        this(contextBuilder, expectedOutputs, new DefaultProcessContextToJobProcessConverter(), additionalProcessParameters);
+    public SingleJobProcessBuilder(ProcessContextBuilder contextBuilder, Map<String, Object> additionalProcessParameters) {
+        this(contextBuilder, new DefaultProcessContextToJobProcessConverter(), additionalProcessParameters);
     }
 
     public Map<String, Object> getAdditionalProcessParameters() {
@@ -56,11 +57,11 @@ public class SingleJobProcessBuilder implements JobProcessBuilder {
 
     @Override
     public List<JobProcess> getJobProcessesForWacodisJob(WacodisJobWrapper job, Process tool) throws JobProcessCreationException {
-        JobOutputDescriptor[] expectedOutputArr = this.expectedOutputs.toArray(new JobOutputDescriptor[this.expectedOutputs.size()]);
-        ProcessContext completeContext = this.contextBuilder.buildProcessContext(job, this.additionalProcessParameters, expectedOutputArr);
-        
+        List<JobOutputDescriptor> expectedOutputs = this.outputHelper.getExepectedOutputsForJob(job.getJobDefinition());
+        ProcessContext completeContext = this.contextBuilder.buildProcessContext(job, this.additionalProcessParameters, expectedOutputs.toArray(new JobOutputDescriptor[expectedOutputs.size()]));
+
         LOGGER.debug("retain complete context of wacodis job {}, create single job process", job.getJobDefinition().getId());
-        
+
         return contextConverter.createJobProcesses(Arrays.asList(completeContext), job.getJobDefinition(), tool);
     }
 

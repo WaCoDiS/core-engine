@@ -5,6 +5,8 @@
  */
 package de.wacodis.coreengine.executor.process;
 
+import de.wacodis.core.engine.utils.factories.DefaultOutputHelper;
+import de.wacodis.core.engine.utils.factories.JobOutputHelper;
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.CopernicusSubsetDefinition;
 import de.wacodis.core.models.JobOutputDescriptor;
@@ -31,28 +33,27 @@ public class BestInputJobProcessBuilder implements JobProcessBuilder {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(BestInputJobProcessBuilder.class);
 
     private final ProcessContextBuilder contextBuilder;
-    private final List<JobOutputDescriptor> expectedOutputs;
     private final ProcessContextToJobProcessConverter contextConverter;
+    private final JobOutputHelper outputHelper = new DefaultOutputHelper();
     private String splitInputIdentifier;
     private Map<String, Object> additionalProcessParameters;
 
-    public BestInputJobProcessBuilder(ProcessContextBuilder contextBuilder, List<JobOutputDescriptor> expectedOutputs, ProcessContextToJobProcessConverter contextConverter) {
-        this(contextBuilder, expectedOutputs, contextConverter, new HashMap<>());
+    public BestInputJobProcessBuilder(ProcessContextBuilder contextBuilder,  ProcessContextToJobProcessConverter contextConverter) {
+        this(contextBuilder, contextConverter, new HashMap<>());
     }
 
-    public BestInputJobProcessBuilder(ProcessContextBuilder contextBuilder, List<JobOutputDescriptor> expectedOutputs) {
-        this(contextBuilder, expectedOutputs, new DefaultProcessContextToJobProcessConverter());
+    public BestInputJobProcessBuilder(ProcessContextBuilder contextBuilder) {
+        this(contextBuilder, new DefaultProcessContextToJobProcessConverter());
     }
 
-    public BestInputJobProcessBuilder(ProcessContextBuilder contextBuilder, List<JobOutputDescriptor> expectedOutputs, ProcessContextToJobProcessConverter contextConverter, Map<String, Object> additionalProcessParameters) {
+    public BestInputJobProcessBuilder(ProcessContextBuilder contextBuilder, ProcessContextToJobProcessConverter contextConverter, Map<String, Object> additionalProcessParameters) {
         this.contextBuilder = contextBuilder;
-        this.expectedOutputs = expectedOutputs;
         this.contextConverter = contextConverter;
         this.additionalProcessParameters = additionalProcessParameters;
     }
 
-    public BestInputJobProcessBuilder(ProcessContextBuilder contextBuilder, List<JobOutputDescriptor> expectedOutputs, Map<String, Object> additionalProcessParameters) {
-        this(contextBuilder, expectedOutputs, new DefaultProcessContextToJobProcessConverter(), additionalProcessParameters);
+    public BestInputJobProcessBuilder(ProcessContextBuilder contextBuilder,  Map<String, Object> additionalProcessParameters) {
+        this(contextBuilder, new DefaultProcessContextToJobProcessConverter(), additionalProcessParameters);
     }
 
     public void setAdditionalProcessParameters(Map<String, Object> additionalProcessParameters) {
@@ -101,8 +102,8 @@ public class BestInputJobProcessBuilder implements JobProcessBuilder {
             throw new JobProcessCreationException("Unable to create job process for wacodis job " + job.getJobDefinition().getId().toString() + " because no resources for input " + input.getSubsetDefinitionIdentifier() + " are provided");
         }
 
-        JobOutputDescriptor[] expectedOutputArr = this.expectedOutputs.toArray(new JobOutputDescriptor[this.expectedOutputs.size()]);
-        ProcessContext context = this.contextBuilder.buildProcessContext(job, this.additionalProcessParameters, expectedOutputArr);
+        List<JobOutputDescriptor> expectedOutputs = this.outputHelper.getExepectedOutputsForJob(job.getJobDefinition());
+        ProcessContext context = this.contextBuilder.buildProcessContext(job, this.additionalProcessParameters, expectedOutputs.toArray(new JobOutputDescriptor[expectedOutputs.size()]));
         List<JobProcess> singleJobProcess = contextConverter.createJobProcesses(Arrays.asList(context), job.getJobDefinition(), tool);
 
         return singleJobProcess;

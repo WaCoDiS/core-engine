@@ -56,8 +56,6 @@ public class WacodisJobExecutorIT {
 
     @PostConstruct
     private void runTestApp() {
-        //set outputs
-        this.eventHandler.getJobExecutor().setExpectedProcessOutputs(Arrays.asList(EXPECTEDOUTPUTS));
         //produce executable job
         WacodisJobWrapper testJob = createJobWrapper();
 
@@ -80,6 +78,7 @@ public class WacodisJobExecutorIT {
         jobDef.addInputsItem(input2);
         jobDef.setProcessingTool(PROCESSTOOL);
         jobDef.setProductCollection("testMosaic");
+        jobDef.setOutputs(Arrays.asList(EXPECTEDOUTPUTS));
         WacodisJobDefinitionExecutionSettings execSettings = new WacodisJobDefinitionExecutionSettings();
         execSettings.setExecutionMode(WacodisJobDefinitionExecutionSettings.ExecutionModeEnum.ALL);
         execSettings.setTimeoutMillies(50000l);

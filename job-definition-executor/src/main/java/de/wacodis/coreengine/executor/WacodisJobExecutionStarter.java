@@ -65,7 +65,6 @@ public class WacodisJobExecutionStarter {
 
     private final WPSClientSession wpsClient;
     private ProcessContextBuilder wpsContextBuilder;
-    private List<JobOutputDescriptor> expectedProcessOutputs;
 
     @Autowired
     ToolMessagePublisherChannel processMessagePublisher;
@@ -84,27 +83,6 @@ public class WacodisJobExecutionStarter {
         return wpsConfig;
     }
 
-    public List<JobOutputDescriptor> getExpectedProcessOutputs() {
-        return expectedProcessOutputs;
-    }
-
-    public void setExpectedProcessOutputs(List<JobOutputDescriptor> expectedProcessOutputs) {
-        this.expectedProcessOutputs = expectedProcessOutputs;
-    }
-
-    @PostConstruct
-    private void initExpectedProcessOutputs() {
-        List<JobOutputDescriptor> selectedOutputs;
-
-        if (this.expectedProcessOutputs != null) {
-            selectedOutputs = this.expectedProcessOutputs;
-        } else {
-            selectedOutputs = Arrays.asList(JobOutputDescriptorBuilder.getDefaultOutputs());
-        }
-
-        this.expectedProcessOutputs = selectedOutputs;
-        LOGGER.debug("set expected process outputs to: " + selectedOutputs.toString());
-    }
 
     @PostConstruct
     private void initContextBuilder() {
@@ -123,7 +101,7 @@ public class WacodisJobExecutionStarter {
         switch (execSettings.getExecutionMode()) {
             case BEST:
                 //only use best copernicus resource provided by data access
-                BestInputJobProcessBuilder bestInputProcessCreator = new BestInputJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters(job.getJobDefinition()));
+                BestInputJobProcessBuilder bestInputProcessCreator = new BestInputJobProcessBuilder(this.wpsContextBuilder, this.initProcessParameters(job.getJobDefinition()));
                 //set pivotal input if provided
                 if (execSettings.getPivotalInput() != null) {
                     bestInputProcessCreator.setSplitInputIdentifier(execSettings.getPivotalInput());
@@ -131,7 +109,7 @@ public class WacodisJobExecutionStarter {
                 subProcessCreator = bestInputProcessCreator;
                 break;
             case SPLIT:
-                SplitByInputJobProcessBuilder splitInputProcessBuilder = new SplitByInputJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters(job.getJobDefinition()));
+                SplitByInputJobProcessBuilder splitInputProcessBuilder = new SplitByInputJobProcessBuilder(this.wpsContextBuilder, this.initProcessParameters(job.getJobDefinition()));
                 //set pivotal input if provided
                 if (execSettings.getPivotalInput() != null) {
                     splitInputProcessBuilder.setSplitInputIdentifier(execSettings.getPivotalInput());
@@ -139,11 +117,11 @@ public class WacodisJobExecutionStarter {
                 subProcessCreator = splitInputProcessBuilder;
                 break;
             case ALL:
-                subProcessCreator = new SingleJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters(job.getJobDefinition()));
+                subProcessCreator = new SingleJobProcessBuilder(this.wpsContextBuilder, this.initProcessParameters(job.getJobDefinition()));
                 break;
             default:
                 LOGGER.warn("unkown execution mode {}, process all inputs in a single process", execSettings.getExecutionMode());
-                subProcessCreator = new SingleJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs, this.initProcessParameters(job.getJobDefinition()));
+                subProcessCreator = new SingleJobProcessBuilder(this.wpsContextBuilder,  this.initProcessParameters(job.getJobDefinition()));
                 break;
         }
 
@@ -163,7 +141,7 @@ public class WacodisJobExecutionStarter {
         } catch (JobProcessCreationException ex) {
             LOGGER.error("could not create sub processes for wacodis job " + job.getJobDefinition().getId().toString(), ex);
             LOGGER.warn("try to process wacodis job {} as single sub process, processing tool is not called per input", job.getJobDefinition().getId().toString());
-            subProcessCreator = new SingleJobProcessBuilder(this.wpsContextBuilder, this.expectedProcessOutputs);
+            subProcessCreator = new SingleJobProcessBuilder(this.wpsContextBuilder);
             try {
                 subProcesses = subProcessCreator.getJobProcessesForWacodisJob(job, toolProcess);
             } catch (JobProcessCreationException ex2) {

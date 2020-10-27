@@ -5,6 +5,8 @@
  */
 package de.wacodis.coreengine.executor.process;
 
+import de.wacodis.core.engine.utils.factories.DefaultOutputHelper;
+import de.wacodis.core.engine.utils.factories.JobOutputHelper;
 import de.wacodis.core.models.CopernicusSubsetDefinition;
 import de.wacodis.core.models.JobOutputDescriptor;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
@@ -18,9 +20,10 @@ import java.util.Optional;
 import org.slf4j.LoggerFactory;
 
 /**
- * split Wacodis Job into multiple JobProcesses using the first resource for the first copernicus
- * input that is found, or (if this.splitInputIndentifier != null) for the input with identifier == splitInputIndentifier, the first resource is considered the best/highes
- * priority resource (see DataAccess)
+ * split Wacodis Job into multiple JobProcesses using the first resource for the
+ * first copernicus input that is found, or (if this.splitInputIndentifier !=
+ * null) for the input with identifier == splitInputIndentifier, the first
+ * resource is considered the best/highes priority resource (see DataAccess)
  *
  * @author Arne
  */
@@ -29,28 +32,27 @@ public class SplitByInputJobProcessBuilder implements JobProcessBuilder {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(SplitByInputJobProcessBuilder.class);
 
     private final ProcessContextBuilder contextBuilder;
-    private final List<JobOutputDescriptor> expectedOutputs;
     private final ProcessContextToJobProcessConverter contextConverter;
+    private final JobOutputHelper outputHelper = new DefaultOutputHelper();
     private Map<String, Object> additionalProcessParameters;
     private String splitInputIdentifier;
 
-    public SplitByInputJobProcessBuilder(ProcessContextBuilder contextBuilder, List<JobOutputDescriptor> expectedOutputs, ProcessContextToJobProcessConverter contextConverter) {
-        this(contextBuilder, expectedOutputs, contextConverter, new HashMap<>());
+    public SplitByInputJobProcessBuilder(ProcessContextBuilder contextBuilder, ProcessContextToJobProcessConverter contextConverter) {
+        this(contextBuilder, contextConverter, new HashMap<>());
     }
 
     public SplitByInputJobProcessBuilder(ProcessContextBuilder contextBuilder, List<JobOutputDescriptor> expectedOutputs) {
-        this(contextBuilder, expectedOutputs, new DefaultProcessContextToJobProcessConverter());
+        this(contextBuilder, new DefaultProcessContextToJobProcessConverter());
     }
 
-    public SplitByInputJobProcessBuilder(ProcessContextBuilder contextBuilder, List<JobOutputDescriptor> expectedOutputs, ProcessContextToJobProcessConverter contextConverter, Map<String, Object> additionalProcessParameters) {
+    public SplitByInputJobProcessBuilder(ProcessContextBuilder contextBuilder, ProcessContextToJobProcessConverter contextConverter, Map<String, Object> additionalProcessParameters) {
         this.contextBuilder = contextBuilder;
-        this.expectedOutputs = expectedOutputs;
         this.contextConverter = contextConverter;
         this.additionalProcessParameters = additionalProcessParameters;
     }
 
-    public SplitByInputJobProcessBuilder(ProcessContextBuilder contextBuilder, List<JobOutputDescriptor> expectedOutputs, Map<String, Object> additionalProcessParameters) {
-        this(contextBuilder, expectedOutputs, new DefaultProcessContextToJobProcessConverter(), additionalProcessParameters);
+    public SplitByInputJobProcessBuilder(ProcessContextBuilder contextBuilder, Map<String, Object> additionalProcessParameters) {
+        this(contextBuilder, new DefaultProcessContextToJobProcessConverter(), additionalProcessParameters);
     }
 
     public Map<String, Object> getAdditionalProcessParameters() {
@@ -73,8 +75,8 @@ public class SplitByInputJobProcessBuilder implements JobProcessBuilder {
     public List<JobProcess> getJobProcessesForWacodisJob(WacodisJobWrapper job, Process tool) throws JobProcessCreationException {
         Optional<InputHelper> optSplitInput = (this.splitInputIdentifier != null && !this.splitInputIdentifier.isEmpty()) ? findInputByIdentifier(job, this.splitInputIdentifier) : findFirstCopernicusInput(job);
         String splitInputID;
-        JobOutputDescriptor[] expectedOutputArr = this.expectedOutputs.toArray(new JobOutputDescriptor[this.expectedOutputs.size()]);
-        ProcessContext completeContext = this.contextBuilder.buildProcessContext(job, this.additionalProcessParameters, expectedOutputArr);
+        List<JobOutputDescriptor> expectedOutputs = this.outputHelper.getExepectedOutputsForJob(job.getJobDefinition());
+        ProcessContext completeContext = this.contextBuilder.buildProcessContext(job, this.additionalProcessParameters, expectedOutputs.toArray(new JobOutputDescriptor[expectedOutputs.size()]));
 
         if (optSplitInput.isPresent()) {
             splitInputID = optSplitInput.get().getSubsetDefinitionIdentifier();
