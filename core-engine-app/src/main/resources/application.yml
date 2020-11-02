@@ -16,6 +16,7 @@ spring:
         job-creation:
           destination: wacodis.test.jobs.new
           binder: wacodis_rabbit
+          group: wacodis.core-engine.job-creation-consumer
           content-type: application/json
         job-deletion:
           destination: wacodis.test.jobs.deleted
