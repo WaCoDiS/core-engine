@@ -5,8 +5,6 @@
  */
 package de.wacodis.coreengine.executor;
 
-import de.wacodis.core.engine.utils.factories.JobOutputDescriptorBuilder;
-import de.wacodis.core.models.JobOutputDescriptor;
 import de.wacodis.core.models.SingleJobExecutionEvent;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionExecutionSettings;
@@ -39,7 +37,6 @@ import de.wacodis.coreengine.executor.process.WacodisJobExecutor;
 import de.wacodis.coreengine.executor.process.events.JobExecutionEventHandler;
 import de.wacodis.coreengine.executor.process.events.JobProcessEventHandler;
 import de.wacodis.coreengine.executor.process.events.WacodisJobExecutionEventHandler;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
