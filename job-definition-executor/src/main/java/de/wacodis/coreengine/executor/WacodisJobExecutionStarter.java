@@ -15,8 +15,10 @@ import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfigur
 import de.wacodis.coreengine.executor.exception.JobProcessCreationException;
 import de.wacodis.coreengine.executor.messaging.ToolMessagePublisher;
 import de.wacodis.coreengine.executor.process.wps.WPSProcess;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 import org.n52.geoprocessing.wps.client.WPSClientSession;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,10 +39,12 @@ import de.wacodis.coreengine.executor.process.WacodisJobExecutor;
 import de.wacodis.coreengine.executor.process.events.JobExecutionEventHandler;
 import de.wacodis.coreengine.executor.process.events.JobProcessEventHandler;
 import de.wacodis.coreengine.executor.process.events.WacodisJobExecutionEventHandler;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
+
 import org.joda.time.DateTime;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
@@ -95,31 +99,36 @@ public class WacodisJobExecutionStarter {
 
         JobProcessBuilder subProcessCreator;
 
-        switch (execSettings.getExecutionMode()) {
-            case BEST:
-                //only use best copernicus resource provided by data access
-                BestInputJobProcessBuilder bestInputProcessCreator = new BestInputJobProcessBuilder(this.wpsContextBuilder, this.initProcessParameters(job.getJobDefinition()));
-                //set pivotal input if provided
-                if (execSettings.getPivotalInput() != null) {
-                    bestInputProcessCreator.setSplitInputIdentifier(execSettings.getPivotalInput());
-                }
-                subProcessCreator = bestInputProcessCreator;
-                break;
-            case SPLIT:
-                SplitByInputJobProcessBuilder splitInputProcessBuilder = new SplitByInputJobProcessBuilder(this.wpsContextBuilder, this.initProcessParameters(job.getJobDefinition()));
-                //set pivotal input if provided
-                if (execSettings.getPivotalInput() != null) {
-                    splitInputProcessBuilder.setSplitInputIdentifier(execSettings.getPivotalInput());
-                }
-                subProcessCreator = splitInputProcessBuilder;
-                break;
-            case ALL:
-                subProcessCreator = new SingleJobProcessBuilder(this.wpsContextBuilder, this.initProcessParameters(job.getJobDefinition()));
-                break;
-            default:
-                LOGGER.warn("unkown execution mode {}, process all inputs in a single process", execSettings.getExecutionMode());
-                subProcessCreator = new SingleJobProcessBuilder(this.wpsContextBuilder,  this.initProcessParameters(job.getJobDefinition()));
-                break;
+        if (execSettings == null || execSettings.getExecutionMode() == null) {
+            LOGGER.warn("execution settings or execution mode not defined, process all inputs in a single process");
+            subProcessCreator = new SingleJobProcessBuilder(this.wpsContextBuilder, this.initProcessParameters(job.getJobDefinition()));
+        } else {
+            switch (execSettings.getExecutionMode()) {
+                case BEST:
+                    //only use best copernicus resource provided by data access
+                    BestInputJobProcessBuilder bestInputProcessCreator = new BestInputJobProcessBuilder(this.wpsContextBuilder, this.initProcessParameters(job.getJobDefinition()));
+                    //set pivotal input if provided
+                    if (execSettings.getPivotalInput() != null) {
+                        bestInputProcessCreator.setSplitInputIdentifier(execSettings.getPivotalInput());
+                    }
+                    subProcessCreator = bestInputProcessCreator;
+                    break;
+                case SPLIT:
+                    SplitByInputJobProcessBuilder splitInputProcessBuilder = new SplitByInputJobProcessBuilder(this.wpsContextBuilder, this.initProcessParameters(job.getJobDefinition()));
+                    //set pivotal input if provided
+                    if (execSettings.getPivotalInput() != null) {
+                        splitInputProcessBuilder.setSplitInputIdentifier(execSettings.getPivotalInput());
+                    }
+                    subProcessCreator = splitInputProcessBuilder;
+                    break;
+                case ALL:
+                    subProcessCreator = new SingleJobProcessBuilder(this.wpsContextBuilder, this.initProcessParameters(job.getJobDefinition()));
+                    break;
+                default:
+                    LOGGER.warn("unkown execution mode {}, process all inputs in a single process", execSettings.getExecutionMode());
+                    subProcessCreator = new SingleJobProcessBuilder(this.wpsContextBuilder, this.initProcessParameters(job.getJobDefinition()));
+                    break;
+            }
         }
 
         setDefaultRetrySettingsIfAbsent(job.getJobDefinition()); //use defaults if retry settings are not set in job definition
