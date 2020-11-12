@@ -39,7 +39,7 @@
 		<url>https://github.com/WaCoDiS/core-engine/</url>
 		<connection>scm:git:git://github.com/WaCoDiS/core-engine.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/WaCoDiS/core-engine.git</developerConnection>
-		<tag>v1.2.2</tag>
+		<tag>v1.2.4</tag>
 	</scm>
     
     <dependencyManagement>
