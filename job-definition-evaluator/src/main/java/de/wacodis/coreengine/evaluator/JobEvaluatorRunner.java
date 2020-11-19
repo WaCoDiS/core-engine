@@ -173,11 +173,12 @@ public class JobEvaluatorRunner {
 
         //single query for all inputs without separate temporal coverage
         List<AbstractSubsetDefinition> inputsNoneTempCov = this.getInputsWithoutTemporalCoverage(nonStaticInputs);
-        inputRelevancyTimeFrame = job.calculateInputRelevancyTimeFrame();
-        query = generateDataAccessQuery(inputsNoneTempCov, job.getJobDefinition().getAreaOfInterest(), getIntervalAsAbstractDataEnvelopeTimeFrame(inputRelevancyTimeFrame));
-        queries.add(query);
-        LOGGER.debug("generated data access query for {} of {} (non-static) inputs with common temporal coverage of wacodis job {}", inputsNoneTempCov.size(), nonStaticInputs.size(), job.getJobDefinition().getId());
-
+        if (!inputsNoneTempCov.isEmpty()) { //only necessary if at least one input without temp cov
+            inputRelevancyTimeFrame = job.calculateInputRelevancyTimeFrame();
+            query = generateDataAccessQuery(inputsNoneTempCov, job.getJobDefinition().getAreaOfInterest(), getIntervalAsAbstractDataEnvelopeTimeFrame(inputRelevancyTimeFrame));
+            queries.add(query);
+            LOGGER.debug("generated data access query for {} of {} (non-static) inputs with common temporal coverage of wacodis job {}", inputsNoneTempCov.size(), nonStaticInputs.size(), job.getJobDefinition().getId());
+        }
         //generate separate query for each input with temporal coverage
         List<AbstractSubsetDefinition> inputsTempCov = this.getInputsWithTemporalCoverage(nonStaticInputs);
         for (AbstractSubsetDefinition input : inputsTempCov) {
