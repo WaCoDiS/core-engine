@@ -155,7 +155,7 @@ public class WacodisJobWrapper {
         for (AbstractSubsetDefinition inputDef : this.jobDefinition.getInputs()) {
             InputHelper input = new InputHelper(inputDef);
 
-            if (StaticSubsetDefinition.class.isAssignableFrom(input.getClass())) { //handle static inputs
+            if (StaticSubsetDefinition.class.isAssignableFrom(inputDef.getClass())) { //handle static inputs
                 input.setResource(createStaticDummyResource(((StaticSubsetDefinition) inputDef)));
             }
 
