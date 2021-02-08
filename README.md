@@ -46,10 +46,12 @@ A REST API enables users to define job descriptions for planning the execution o
 The _Core Engine_ schedules jobs for planned process executions based on the job descriptions. In addition, it is responsible for triggering WPS processes as soon as all required process input data is available.
 
 **[Datasource Observer](https://github.com/WaCoDiS/datasource-observer)**  
-Several observing routins requests certain datastores for new available data, such as in-situ measurements, Copernicus satellite data, sdi based geodata and services or meteorological data that are required for process executions.
+Several observing routines requests certain datastores for new available data, such as in-situ measurements, Copernicus satellite data, sdi based geodata and services or meteorological data that are required for process executions.
 
-**[Data Wrapper](https://github.com/WaCoDiS/data-access-api)**  
-Information  about  all  incoming  required datasets are bundled by a are stored in a Metadata Storage. For the purpose of defining process inputs, the _Data Wrapper_ generates references to the required datasets from the metadata and provides these references to the Core Engine via a REST API. To provide an asynchronous Pub/Sub pattern, a [Metadata Connector](https://github.com/WaCoDiS/metadata-connector) will listen for new datasets and then interacts with the REST API.
+**[Data Discovery](https://github.com/WaCoDiS/data-access-api)**  
+Data Discovery comprises two components: the [WaCoDiS Data Access Api](https://github.com/WaCoDiS/data-access-api) and the [WaCoDiS Metadata Connector](https://github.com/WaCoDiS/metadata-connector).  
+Metadata  about  all  incoming, available datasets discovered by the _Datasource Observer_ is handled and bundled by the [WaCoDiS Data Access Api](https://github.com/WaCoDiS/data-access-api). For the purpose of defining process inputs, the WaCoDiS Data Access API generates references to the required datasets from the metadata and provides these references to the Core Engine via a REST API. The WaCoDis Data Access API uses a instance of Elasticsearch search engine to store the metdata about all available datasets.  
+To provide an asynchronous Publish/Subscribe pattern, the [WaCoDiS Metadata Connector](https://github.com/WaCoDiS/metadata-connector) will listen for new datasets and then interacts with the REST API of WaCoDiS Data Access API. 
 
 **[Web Processing Service](https://github.com/WaCoDiS/javaps-wacodis-backend)**  
 The  execution  of  analysis processes  provided  by  EO  Tools  is  encapsulated  by  a  OGC 
@@ -60,6 +62,9 @@ A _Product Listener_ will be notified as soon as any analyis process has finishe
 
 **Product Importer**  
 For each product service backend a certain helper component will import the earth observation product into the specific backend's datastore and may set up a service on top of it. The product importer can be provided as part of the _Product Listener_ or can be provided as an external component (e.g. a [python script](https://github.com/WaCoDiS/Tools/tree/imageServicePublisherTest/imageServicePublisher) for importing porduct into the ArcGIS Image Server).
+
+**[Job Status Listener](https://github.com/WaCoDiS/job-status-listener)**  
+The WaCoDiS Job Status Listener is intermediate component that consumes messages (published by the Core Engine) on execution progress of processing jobs. According to the job's progress the Job Status Listener updates the status in the job's describtion by interacting with the REST API of the Job Manager.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/WaCoDiS/apis-and-workflows/develop/architecture/wacodis_high_level_architecture.png" width="600" alt="Diagram of WaCoDiS high level architecture">
