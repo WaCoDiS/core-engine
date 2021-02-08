@@ -98,7 +98,7 @@ Since this is a Maven project, [Apache Maven](https://maven.apache.org/) must be
 can build the project by running `mvn clean install` from root directory
 
 ### Build using Docker
-The project contains a Dockerfile for building a Docker image. Simply run `docker build -t wacodis/core-engie:latest .`
+The project contains a Dockerfile for building a Docker image. Simply run `docker build -t wacodis/core-engine:latest .`
 in order to build the image. You will find some detailed information about running the Core Engine as Docker container
 within the [deployment section](#run-with-docker).
 
