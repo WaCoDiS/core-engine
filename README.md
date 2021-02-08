@@ -189,8 +189,6 @@ configuration of message chanel for receiving messages on newly available datase
 configuration of message chanel for receiving messages when a new job is created
 
 | value     | description       | note  |
-
-| value     | description       | note  |
 | ------------- |-------------| -----|
 | destination     | topic used to publish messages about created WaCoDiS jobs | e.g. *wacodis.test.jobs.new* |
 | binder      | defines the binder (message broker)   | |
@@ -259,7 +257,13 @@ configuration parameters related to the job executor module, precisely the inter
 | version | version of the OGC WPS standard that is implemented by the WaCoDiS WPS | e.g. *2.0.0*|
 | defaultResourceMimeType | (optional) define mime type for **every** input resource | default is *text/xml*|
 | defaultResourceSchema/name | (optional) define schema for **every** input resource | default is *GML3*, always provide _name_ and _schemaLocation_ |
-| defaultResourceSchema/schemaLocation | v(optional) define schema for **every** input resource | default is *http://schemas.opengis.net/gml/3.1.1/base/feature.xsd*|
+| defaultResourceSchema/schemaLocation | (optional) define schema for **every** input resource | default is *http://schemas.opengis.net/gml/3.1.1/base/feature.xsd*|
+
+##### spring/datasource.core.quartz-data-source
+TODO
+
+##### spring/quartz
+TODO
 
 ## Developer Information
 ### How to Contribute
