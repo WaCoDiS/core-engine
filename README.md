@@ -76,11 +76,11 @@ and can be used as Maven Plugin within this module.
 This module is responsible for initiating the evaluation (and execution) of a processing job according to cron pattern provided in the job's definition (WacodisJobDefinition). The scheduling is implemented based on the Java API Quartz. 
 * __WaCoDiS Core Engine Evaluator__  
 This module is responsible for checking if a scheduled job is actually executable; that means checking if all necessary input data is available. If not, the evaluator waits until new data sets become available a re-evaluates the executably of the given processing job. 
-* __WaCoDiS Core Engine Executor__ 
+* __WaCoDiS Core Engine Executor__  
 If a processing job is executable the executor module is responsible for putting together a execution request (containing all input parameters) and submitting this request to the processing environment. The Core Engine Executor keeps track of the job's execution progress and publishes messages via the system's message broker when a processing job is executed sucessfully or processing has failed. 
-* __WaCoDiS Core Engine App__ 
+* __WaCoDiS Core Engine App__  
 Since WaCoDiS Core Engine is implemented as Spring Boot application, the App module provides the application runner as well as default externalized configurations.
-* __WaCoDiS Core Utils__ 
+* __WaCoDiS Core Utils__  
 The Core Engine Utils module contains classes that implement routines used in multiple of the above modules. 
 ### Technologies
 * __Java__  
