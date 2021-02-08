@@ -49,8 +49,8 @@ The _Core Engine_ schedules jobs for planned process executions based on the job
 Several observing routines requests certain datastores for new available data, such as in-situ measurements, Copernicus satellite data, sdi based geodata and services or meteorological data that are required for process executions.
 
 **[Data Discovery](https://github.com/WaCoDiS/data-access-api)**  
-Data Discovery comprises two components: the [WaCoDiS Data Access Api](https://github.com/WaCoDiS/data-access-api) and the [WaCoDiS Metadata Connector](https://github.com/WaCoDiS/metadata-connector).  
-Metadata  about  all  incoming, available datasets discovered by the _Datasource Observer_ is handled and bundled by the [WaCoDiS Data Access Api](https://github.com/WaCoDiS/data-access-api). For the purpose of defining process inputs, the _WaCoDiS Data Access API_ generates references to the required datasets from the metadata and provides these references to the Core Engine via a REST API. The _WaCoDis Data Access API_ uses a instance of Elasticsearch search engine to store the metdata about all available datasets.  
+Data Discovery comprises two components: the [WaCoDiS Data Access API](https://github.com/WaCoDiS/data-access-api) and the [WaCoDiS Metadata Connector](https://github.com/WaCoDiS/metadata-connector).  
+Metadata  about  all  incoming, available datasets discovered by the _Datasource Observer_ is handled and bundled by the [WaCoDiS Data Access API](https://github.com/WaCoDiS/data-access-api). For the purpose of defining process inputs, the _WaCoDiS Data Access API_ generates references to the required datasets from the metadata and provides these references to the Core Engine via a REST API. The _WaCoDis Data Access API_ uses a instance of Elasticsearch search engine to store the metdata about all available datasets.  
 To provide an asynchronous Publish/Subscribe pattern, the [WaCoDiS Metadata Connector](https://github.com/WaCoDiS/metadata-connector) will listen for new datasets and then interacts with the REST API of _WaCoDiS Data Access API_. 
 
 **[Web Processing Service](https://github.com/WaCoDiS/javaps-wacodis-backend)**  
