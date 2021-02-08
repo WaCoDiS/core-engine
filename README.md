@@ -53,6 +53,19 @@ The WaCoDiS Core Engine is the system component that implements the core process
 3. initiation of the execution of the processing job by sending a request to the processing environment or rather the web processing service (job execution)  
   
 The core engine is also responsible for keeping other WaCoDiS components updated about the progress of processing jobs. The core engine publishes messages via the sytem's message broke if a processing job is started, failt or executed sucessfully. 
+
+### Core Data Types
+* **Job**  
+A _WacodisJobDefinition_ (Job) describes a processing that is to be executed automatically according to a defined schedule. The WacodisJobDefinition contains (among other attributes) the input data required for execution, as well as the time frame and area of interest. 
+* **DataEnvelope**  
+The metadata about an existing dataset is described by the _AbstractDataEnvelope_ (DataEnvelope) data format. There are different subtypes for different data sources (e.g _SensorWebDataEnvelope_ or _CopernicusDataEnvelope).    
+* **Resource**  
+Access to the actual data records is described by the _AbstractResource_ (Resources) data format. There are the subtypes _GetResources_ and _PostResources_. A GetResources contains only a URL while a PostResource contains a URL and a body for a HTTP-POST request.  
+* **SubsetDefinition**  
+The required inputs of a job are described by the data format _AbstractSubsetDefinition_ (SubsetDefinition). There are different subtypes for different types of input data (e.g _SensorWebSubsetDefinition_ or _CopernicusSubsetDefinition_). There is usually a subtype of AbstractSubsetDefinition that corresponds to a subtype of AbstractDataEnvelope.  
+   
+The formal definition of these data types is done with OpenAPI and is available in the [apis-and-workflows repo](https://github.com/WaCoDiS/apis-and-workflows/blob/master/openapi/src/main/definitions/wacodis-schemas.yml).
+
 ### Modules
 The WaCoDiS Core Engine comprises three Maven modules:
 * __WaCoDiS Core Engine Data Models__  
