@@ -87,7 +87,7 @@ is utilized. RabbitMQ is not part of WaCoDiS Core Engine and therefore [must be 
 * __OpenAPI__  
 [OpenAPI](https://github.com/OAI/OpenAPI-Specification) is used for the specification of data models used within this project.
 * __Quartz__  
-[Quartz](http://www.quartz-scheduler.org/) is a Java API for execution recurrent, regular tasks based on a [Cron definition (crontab)](http://pubs.opengroup.org/onlinepubs/9699919799/utilities/crontab.html#tag_20_25_07). Quartz is used for scheduling the processing jobs.
+[Quartz](http://www.quartz-scheduler.org/) is a Java API for execution of recurrent, regular tasks based on a [Cron definition (crontab)](http://pubs.opengroup.org/onlinepubs/9699919799/utilities/crontab.html#tag_20_25_07). Quartz is used for scheduling the processing jobs.
 
 ## Installation / Building Information
 ### Build from Source
