@@ -148,8 +148,14 @@ are applied instead.
 TODO
 
 ## Developer Information
-### How to contribute
-TODO
+### How to Contribute
+#### Extending Core Engine
+##### New Types of DataEnvelope and SubsetDefinition
+WaCoDiS Core Engine and [WaCoDiS Data Access](https://github.com/WaCoDiS/data-access-api) must be modified if new types of DataEnvelope or SubsetDefintion are added to [Wacodis schemas](https://github.com/WaCoDiS/apis-and-workflows/blob/master/openapi/src/main/definitions/wacodis-schemas.yml) in order to support the newly introduced data types. See the [Wiki](https://github.com/WaCoDiS/core-engine/wiki/Extending-Core-Engine#integrate-new-dataenvelopes-and-subsetdefinitions) for further information.
+
+#### Pending Developments
+##### Support for POSTResources
+The Core Engine Executor is currently only able to submit GetResources to the WaCoDiS processing environment. Currently the Core Engine cannot handle POSTResources.
 
 ### Branching
 The master branch provides sources for stable builds. The develop branch represents the latest (maybe unstable)
