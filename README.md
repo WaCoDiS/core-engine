@@ -258,6 +258,11 @@ configuration parameters related to the job executor module, precisely the inter
 | defaultResourceMimeType | (optional) define mime type for **every** input resource | default is *text/xml*|
 | defaultResourceSchema/name | (optional) define schema for **every** input resource | default is *GML3*, always provide _name_ and _schemaLocation_ |
 | defaultResourceSchema/schemaLocation | (optional) define schema for **every** input resource | default is *http://schemas.opengis.net/gml/3.1.1/base/feature.xsd*|
+| maxParallelWPSProcessPerJob | max. number of parallel wps processes started per wacodis processing job | only applicable if wacodis job is splitted in multiple wps processes (see WacodisJobDefinition.executionSettings.executionMode), e.g. _3_|
+| processInputsDelayed | delay between start of multiple wps processes per wacodis processing job | only applicable if wacodis job is splitted in multiple wps processes (see WacodisJobDefinition.executionSettings.executionMode), boolean, e.g. _false_|
+| initialDelay_Milliseconds | delay before the first wps process is started | applicable if processInputDelayed is true, e.g. _0_|
+| delay_Milliseconds | delay between separate wps processes are started | applicable if processInputDelayed is true,  e.g. _900000_|
+| delay_Milliseconds | if true, squential processing of multiple wps process per wacodis processing job| overrides maxParallelWPSProcessPerJob (effectively same as maxParallelWPSProcessPerJob = 1), only applicable if wacodis job is splitted in multiple wps processes (see WacodisJobDefinition.executionSettings.executionMode),  boolean|
 
 ##### spring/datasource.core.quartz-data-source
 TODO
