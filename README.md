@@ -102,15 +102,11 @@ The project contains a Dockerfile for building a Docker image. Simply run `docke
 in order to build the image. You will find some detailed information about running the Core Engine as Docker container
 within the [deployment section](#run-with-docker).
 
-### Configuration
-Configuration is fetched from [WaCoDiS Config Server](https://github.com/WaCoDiS/config-server). If config server is not
-available, configuration values located at *src/main/resources/application.yml* within the Core Engine App submodule
-are applied instead.   
-#### Parameters
-TODO
+## User Guide
 
 ### Deployment
 This section describes deployment scenarios, options and preconditions.
+
 #### Preconditions
 * (without using Docker) In order to run Job Definition API Java Runtime Environment (JRE) (version >= 8) must be available. In order to [build Job Definition API from source](#installation--building-information) Java Development Kit (JDK) version >= 8) must be abailable. Job Definition API is tested with Oracle JDK 8 and OpenJDK 8.
 * In order to receive message about newly available data sets (job evalutation) and to publish message about processing progress (job execution) a running instance a running instance of [RabbitMQ message broker](https://www.rabbitmq.com/) must be available.  
@@ -131,7 +127,11 @@ sure you have installed all dependencies with `mvn clean install` from the proje
 
 Alternatively, latest available docker image (automatically built from master branch) can be pulled from [Docker Hub](https://hub.docker.com/r/wacodis/job-definition-api). See [WaCoDiS Docker repository](https://github.com/WaCoDiS/wacodis-docker) for pre-configured Docker Compose files to run WaCoDiS system components and backend services (RabbitMQ and Elasticsearch).
 
-## User Guide
+### Configuration
+Configuration is fetched from [WaCoDiS Config Server](https://github.com/WaCoDiS/config-server). If config server is not
+available, configuration values located at *src/main/resources/application.yml* within the Core Engine App submodule
+are applied instead.   
+#### Parameters
 TODO
 
 ## Developer Information
