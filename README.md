@@ -31,7 +31,7 @@ The WaCoDiS Core Engine component provides core functionalities such as job sche
 
 ## WaCoDiS Project Information
 <p align="center">
-  <img src="https://raw.githubusercontent.com/WaCoDiS/apis-and-workflows/master/misc/logos/wacodis.png" width="200">
+  <img src="https://raw.githubusercontent.com/WaCoDiS/apis-and-workflows/develop/architecture/wacodis_high_level_architecture.png" width="200">
 </p>
 Climate changes and the ongoing intensification of agriculture effect in increased material inputs in watercourses and dams. Thus, water industry associations, suppliers and municipalities face new challenges. To ensure an efficient and environmentally friendly water supply for the future, adjustments on changing conditions are necessary. Hence, the research project WaCoDiS aims to geo-locate and quantify material outputs from agricultural areas and to optimize models for sediment and material inputs (nutrient contamination) into watercourses and dams. Therefore, approaches for combining heterogeneous data sources, existing interoperable web based information systems and innovative domain oriented models will be explored.
 
