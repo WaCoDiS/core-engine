@@ -171,9 +171,95 @@ Alternatively, latest available docker image (automatically built from master br
 ### Configuration
 Configuration is fetched from [WaCoDiS Config Server](https://github.com/WaCoDiS/config-server). If config server is not
 available, configuration values located at *src/main/resources/application.yml* within the Core Engine App submodule
-are applied instead.   
+are applied instead. 
+
 #### Parameters
-TODO
+The following section contains descriptions for configuration parameters structured by configuration section.
+
+##### spring/cloud/stream/bindings/input-data-envelope
+configuration of message chanel for receiving messages on newly available datasets
+
+| value     | description       | note  |
+| ------------- |-------------| -----|
+| destination     | topic used to receive messages on newly available datasets, must be algined with Data Access API config | e.g. *wacodis.test.jobs.data.accessible* |
+| binder      | defines the binder (message broker)   | |
+| content-type      | content type of  DataEnvelope acknowledgement messages (mime type)   | should always be *application/json* |
+
+##### spring/cloud/stream/bindings/job-creation
+configuration of message chanel for receiving messages when a new job is created
+
+| value     | description       | note  |
+
+| value     | description       | note  |
+| ------------- |-------------| -----|
+| destination     | topic used to publish messages about created WaCoDiS jobs | e.g. *wacodis.test.jobs.new* |
+| binder      | defines the binder (message broker)   | |
+| content-type      | content type of  the messages   | should always be *application/json* |
+
+##### spring/cloud/stream/bindings/job-deletion
+configuration of message chanel for receiving messages when an existing job is deleted
+
+| value     | description       | note  |
+| ------------- |-------------| -----|
+| destination     | topic used to publish message about deleted WaCoDiS jobs | e.g. *wacodis.test.jobs.deleted* |
+
+##### spring/cloud/stream/bindings/toolFinished
+configuration of message chanel for publishing messages on successfully executed processing jobs
+
+| value     | description       | note  |
+| ------------- |-------------| -----|
+| destination     | topic used to publish message about deleted WaCoDiS jobs | e.g. *wacodis.test.tools.finished* |
+
+##### spring/cloud/stream/bindings/toolExecution
+configuration of message chanel for publishing messages when a processing job is started (submitted to the processing environment)
+
+| value     | description       | note  |
+| ------------- |-------------| -----|
+| destination     | topic used to publish message about deleted WaCoDiS jobs | e.g. *wacodis.test.tools.execute* |
+
+##### spring/cloud/stream/bindings/toolExecution
+configuration of message chanel for publishing messages when a processing job is started (submitted to the processing environment)
+
+| value     | description       | note  |
+| ------------- |-------------| -----|
+| destination     | topic used to publish message about deleted WaCoDiS jobs | e.g. *wacodis.test.tools.execute* |
+
+##### spring/rabbitmq
+parameters related to WaCoDis message broker
+
+| value     | description       | note  |
+| ------------- |-------------| -----|
+| host | RabbitMQ host (WaCoDiS message broker) | e.g. *localhost* |
+| port | RabbitMQ port (WaCoDiS message broker)   | e.g. *5672*|
+| username | RabbitMQ username (WaCoDiS message broker)   | |
+| password | RabbitMQ password (WaCoDiS message broker)   | |
+
+##### spring/scheduler
+configuration parameters related to the job scheduling module
+
+| value     | description       | note  |
+| ------------- |-------------| -----|
+| timezone| time zone used for job scheduling  | e.g. *Europe/Berlin* |
+| jobrepository/uri | base url of the necessary instance of [Job Management API](https://github.com/WaCoDiS/job-definition-api) | e.g. *http://localhost:8081*|
+
+##### spring/evaluator
+configuration parameters related to the job evaluation module
+
+| value     | description       | note  |
+| ------------- |-------------| -----|
+| matching/preselectCandidates| if true, a waiting processing job (missing input data) is only re-evaluated if a new data set with matching source type becomes available  | boolean, if set to _false_ requests do Data Access API will increase because every new data set triggers re-evaluation of every waiting job |
+| dataaccess/uri | url of the **_resource/search_ endpoint** of the necessary instance of [Data Access API](https://github.com/WaCoDiS/data-access-api) | e.g. *http://localhost:8082/resources/search*|
+
+##### spring/executor/wps
+configuration parameters related to the job executor module, precisely the interacting with the web processing service (WPS, processing environment)
+
+| value     | description       | note  |
+| ------------- |-------------| -----|
+| uri| base url of the WaCoDiS (OGC) WPS  | e.g. *http://localhost:8083/wps* |
+| version | version of the OGC WPS standard that is implemented by the WaCoDiS WPS | e.g. *2.0.0*|
+| defaultResourceMimeType | (optional) define mime type for **every** input resource | default is *text/xml*|
+| defaultResourceSchema/name | (optional) define schema for **every** input resource | default is *GML3*, always provide _name_ and _schemaLocation_ |
+| defaultResourceSchema/schemaLocation | v(optional) define schema for **every** input resource | default is *http://schemas.opengis.net/gml/3.1.1/base/feature.xsd*|
 
 ## Developer Information
 ### How to Contribute
