@@ -31,7 +31,7 @@ The WaCoDiS Core Engine component provides core functionalities such as job sche
 
 ## WaCoDiS Project Information
 <p align="center">
-  <img src="https://raw.githubusercontent.com/WaCoDiS/apis-and-workflows/develop/architecture/wacodis_high_level_architecture.png" width="200">
+  <img src="https://raw.githubusercontent.com/WaCoDiS/apis-and-workflows/master/misc/logos/wacodis.png" width="200">
 </p>
 Climate changes and the ongoing intensification of agriculture effect in increased material inputs in watercourses and dams. Thus, water industry associations, suppliers and municipalities face new challenges. To ensure an efficient and environmentally friendly water supply for the future, adjustments on changing conditions are necessary. Hence, the research project WaCoDiS aims to geo-locate and quantify material outputs from agricultural areas and to optimize models for sediment and material inputs (nutrient contamination) into watercourses and dams. Therefore, approaches for combining heterogeneous data sources, existing interoperable web based information systems and innovative domain oriented models will be explored.
 
@@ -62,7 +62,7 @@ A _Product Listener_ will be notified as soon as any analyis process has finishe
 For each product service backend a certain helper component will import the earth observation product into the specific backend's datastore and may set up a service on top of it. The product importer can be provided as part of the _Product Listener_ or can be provided as an external component (e.g. a [python script](https://github.com/WaCoDiS/Tools/tree/imageServicePublisherTest/imageServicePublisher) for importing porduct into the ArcGIS Image Server).
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/WaCoDiS/apis-and-workflows/master/architecture/wacodis_high_level_architecture.png" width="600" alt="Diagram of WaCoDiS high level architecture">
+  <img src="https://raw.githubusercontent.com/WaCoDiS/apis-and-workflows/develop/architecture/wacodis_high_level_architecture.png" width="600" alt="Diagram of WaCoDiS high level architecture">
 </p>
 
 The WaCoDiS monitoring system architecture is designed in a modular fashion and follows a  publish/subscribe pattern. The different components are loosely connected to each other via messages that are passed through a message broker. Each module subscribes to messages of interest at the message broker. This approach enables an independent and asynchronous handling of specific events.  
