@@ -114,7 +114,7 @@ This section describes deployment scenarios, options and preconditions.
 #### Preconditions
 * (without using Docker) In order to run Job Definition API Java Runtime Environment (JRE) (version >= 8) must be available. In order to [build Job Definition API from source](#installation--building-information) Java Development Kit (JDK) version >= 8) must be abailable. Job Definition API is tested with Oracle JDK 8 and OpenJDK 8.
 * In order to receive message about newly available data sets (job evalutation) and to publish message about processing progress (job execution) a running instance a running instance of [RabbitMQ message broker](https://www.rabbitmq.com/) must be available.  
-* A running instance of (WaCoDiS Job Manager)[https://github.com/WaCoDiS/job-definition-api] must be available because during the job scheduling the core engine retrieves detailed job information by consuming the Job Manager's REST API.
+* A running instance of [WaCoDiS Job Manager](https://github.com/WaCoDiS/job-definition-api) must be available because during the job scheduling the core engine retrieves detailed job information by consuming the Job Manager's REST API.
 
   
 The server addresses are [configurable](#configuration).  
