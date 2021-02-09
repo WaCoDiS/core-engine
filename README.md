@@ -269,10 +269,14 @@ configuration parameters related to the job executor module, precisely the inter
 | delay_Milliseconds | if true, squential processing of multiple wps process per wacodis processing job| overrides maxParallelWPSProcessPerJob (effectively same as maxParallelWPSProcessPerJob = 1), only applicable if wacodis job is splitted in multiple wps processes (see WacodisJobDefinition.executionSettings.executionMode),  boolean|
 
 ##### spring/datasource.core.quartz-data-source
-TODO
+Per default, Quartz scheduler makes use of an in-memory job store. In order to configure a JDBC-based store, Core Engine
+provides a `DataSource` bean which can be configured using `spring.datasource.core.quartz-data-source`. To configure the
+`DataSource` just follow the [Spring Boot guide](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto-configure-a-datasource).
 
 ##### spring/quartz
-TODO
+Quartz scheduler related beans are provided using [spring-boot-starter-quartz](https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-quartz).
+Hence, the scheduler can be configured via externalized configuration using `spring.quartz.properties`. Just set the usual
+[Quartz configuration properties](https://www.quartz-scheduler.org/documentation/quartz-2.3.0/configuration/).
 
 ## Developer Information
 ### How to Contribute
