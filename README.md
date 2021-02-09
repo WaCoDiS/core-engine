@@ -134,9 +134,13 @@ is utilized. RabbitMQ is not part of WaCoDiS Core Engine and therefore [must be 
 ### Build from Source
 In order to build the WaCoDiS Core Engine from source _Java Development Kit_ (JDK) must be available. Core Engine 
 is tested with Oracle JDK 8 and OpenJDK 8. Unless stated otherwise later JDK versions can be used.  
+Since this is a Maven project, [Apache Maven](https://maven.apache.org/) must be available for building it.
 
-Since this is a Maven project, [Apache Maven](https://maven.apache.org/) must be available for building it. Then, you
-can build the project by running `mvn clean install` from root directory
+Before you build the Core Engine project, it is necessary to clone and build the [WaCoDiS fork of the 52°North WPS Client Lib](https://github.com/WaCoDiS/wps-client-lib). 
+1. clone the project: `git clone https://github.com/WaCoDiS/wps-client-lib.git`
+2. run `mvn clean install` in WPS Client Lib project's root folder to build the project and install the artifacts in your local Maven repository.
+
+After you built the WPS Client Lib project, you can build the Core Engine project by running `mvn clean install` from (Core Engine) root directory.
 
 ### Build using Docker
 The project contains a Dockerfile for building a Docker image. Simply run `docker build -t wacodis/core-engine:latest .`
@@ -159,8 +163,8 @@ The server addresses are [configurable](#configuration).
  * If [configuration](#configuration) should be fetched from Configuration Server a running instance of [WaCoDiS Config Server](https://github.com/WaCoDiS/config-server) must be available.
 
 ### Run with Maven
-Just start the application by running `mvn spring-boot:run` from the root of the `core-engine-app` module. Make
-sure you have installed all dependencies with `mvn clean install` from the project root.
+Just start the application by running `mvn spring-boot:run` from the root of the `core-engine-app` module. [Make
+sure you have installed all dependencies](#build-from-source) with `mvn clean install` from the project root.
 
 ### Run with Docker
 1. Build Docker Image from [Dockerfile](https://github.com/WaCoDiS/core-engine/blob/master/Dockerfile) that resides in the project's root folder.
