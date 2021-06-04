@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.wacodis</groupId>
     <artifactId>core-engine</artifactId>
     <version>1.2.7-SNAPSHOT</version>
     <packaging>pom</packaging>
+
     <name>WaCoDiS Core Engine</name>
+    <inceptionYear>2018</inceptionYear>
+
     <modules>
         <module>job-scheduling</module>
         <module>job-definition-evaluator</module>
@@ -14,6 +18,16 @@
         <module>core-engine-app</module>
         <module>core-engine-utils</module>
     </modules>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -23,7 +37,7 @@
         <java.version>1.8</java.version>
         <springfox-version>2.8.0</springfox-version>
         <spring-boot.version>2.1.0.RELEASE</spring-boot.version>
-        <spring-cloud.version>Greenwich.SR3</spring-cloud.version>   
+        <spring-cloud.version>Greenwich.SR3</spring-cloud.version>
         <wacodis-core-engine.version>1.2.7-SNAPSHOT</wacodis-core-engine.version>
         <surefire-plugin.version>3.0.0-M4</surefire-plugin.version>
         <failsafe-plugin.version>3.0.0-M4</failsafe-plugin.version>
@@ -36,12 +50,12 @@
     </properties>
 
     <scm>
-		<url>https://github.com/WaCoDiS/core-engine/</url>
-		<connection>scm:git:git://github.com/WaCoDiS/core-engine.git</connection>
-		<developerConnection>scm:git:ssh://git@github.com/WaCoDiS/core-engine.git</developerConnection>
-		<tag>v1.2.4</tag>
-	</scm>
-    
+        <url>https://github.com/WaCoDiS/core-engine/</url>
+        <connection>scm:git:git://github.com/WaCoDiS/core-engine.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/WaCoDiS/core-engine.git</developerConnection>
+        <tag>v1.2.4</tag>
+    </scm>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -65,7 +79,7 @@
                 <version>${wacodis-core-engine.version}</version>
             </dependency>
             <dependency>
-                <groupId>de.wacodis</groupId>                
+                <groupId>de.wacodis</groupId>
                 <artifactId>core-engine-utils</artifactId>
                 <version>${wacodis-core-engine.version}</version>
             </dependency>
@@ -108,11 +122,21 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-quartz</artifactId>
                 <version>${spring-boot.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-jdbc</artifactId>
                 <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-log4j2</artifactId>
             </dependency>
             <dependency>
                 <groupId>com.h2database</groupId>
@@ -123,9 +147,15 @@
                 <groupId>org.n52.geoprocessing</groupId>
                 <artifactId>wps-client-lib-wacodis</artifactId>
                 <version>${wps-client-lib.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>ch.qos.logback</groupId>
+                        <artifactId>logback-classic</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
-		
-            <!-- Test Dependencies  --> 
+
+            <!-- Test Dependencies  -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-test</artifactId>
@@ -134,9 +164,79 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-       
+
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.gmaven</groupId>
+                <artifactId>groovy-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <source>project.properties['currentYearDynamic'] = java.time.Year.now().toString()</source>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>3.0</version>
+                <inherited>true</inherited>
+                <configuration>
+                    <aggregate>true</aggregate>
+                    <header>etc/license-header.txt</header>
+                    <includes>
+                        <include>src/**/*.java</include>
+                        <include>src/**/*.xml</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/src/test/resources/**</exclude>
+                        <exclude>src/**/models/*.java</exclude>
+                    </excludes>
+                    <strictCheck>true</strictCheck>
+                    <properties>
+                        <year>${project.inceptionYear}-${currentYearDynamic}</year>
+                    </properties>
+                    <mapping>
+                        <java>SLASHSTAR_STYLE</java>
+                    </mapping>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>format-license-headers</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jasig.maven</groupId>
+                <artifactId>maven-notice-plugin</artifactId>
+                <version>1.1.0</version>
+                <configuration>
+                    <noticeTemplate>etc/notice-template.txt</noticeTemplate>
+                    <licenseMapping>
+                        <param>http://52north.github.io/cdn/licenses/license-mappings.xml</param>
+                    </licenseMapping>
+                    <generateChildNotices>false</generateChildNotices>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>check-license</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -184,4 +284,30 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>create-license-list</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <version>2.0.0</version>
+                        <configuration>
+                            <useMissingFile>true</useMissingFile>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>create-license-list</id>
+                                <goals>
+                                    <goal>aggregate-add-third-party</goal>
+                                </goals>
+                                <phase>generate-resources</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
