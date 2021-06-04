@@ -3,7 +3,7 @@ services:
   core-engine:
     build:
       context: .
-    image: wacodis/core-engine:1.2.4
+    image: wacodis/core-engine:latest
     ports:
       - 8080:8080
     environment: 
