@@ -1,12 +1,23 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2018-2021 52°North Spatial Information Research GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package de.wacodis.coreengine.evaluator.wacodisjobevaluation;
 
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
+import de.wacodis.core.models.AbstractSubsetDefinitionTemporalCoverage;
 import de.wacodis.core.models.StaticSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionTemporalCoverage;
@@ -68,11 +79,10 @@ public class WacodisJobWrapper {
      */
     public boolean isExecutable() {
         for (InputHelper input : this.inputs) {
-            if (!input.isResourceAvailable()) {
+            if (!input.hasResource()) {
                 return false;
             }
         }
-
         return true;
     }
 
@@ -82,7 +92,7 @@ public class WacodisJobWrapper {
      */
     public Interval calculateInputRelevancyTimeFrame() {
         WacodisJobDefinitionTemporalCoverage tempCov = this.jobDefinition.getTemporalCoverage();
-        DateTime start;
+        DateTime start, end;
 
         if (tempCov.getPreviousExecution() != null && tempCov.getPreviousExecution()) { //previousExecution (data since last job execution is relevant)
             try {
@@ -96,24 +106,67 @@ public class WacodisJobWrapper {
 
         } else { //duration (data since a specified point in time is relevant)
             Period period = Period.parse(tempCov.getDuration()); //terms duration and period are mixed up
+
+            //consider optional offset
+            if (tempCov.getOffset() != null && !tempCov.getOffset().isEmpty()) {
+                Period offsetPeriod = Period.parse(tempCov.getOffset());
+                period = period.plus(offsetPeriod);
+            }
+
             start = this.executionContext.getExecutionTime().minus(period);
         }
 
-        return new Interval(start, this.executionContext.getExecutionTime());
+        //consider optional offset
+        end = this.executionContext.getExecutionTime();
+        if (tempCov.getOffset() != null && !tempCov.getOffset().isEmpty()) {
+            Period offsetPeriod = Period.parse(tempCov.getOffset());
+            end = end.minus(offsetPeriod);
+        }
+
+        return new Interval(start, end);
     }
-    
-    public int incrementRetryCount(){
+
+    public Interval calculateInputRelevancyTimeFrameForInput(AbstractSubsetDefinition input) {
+        DateTime start, end;
+        Interval relevancyTimeFrameInput;
+        AbstractSubsetDefinitionTemporalCoverage tempCov;
+        Interval relevancyTimeFrameJob = this.calculateInputRelevancyTimeFrame();
+
+        //return if input has no temporal coverage
+        if (input.getTemporalCoverage() != null && input.getTemporalCoverage().getDuration() != null) {
+            tempCov = input.getTemporalCoverage();
+        } else {
+            return relevancyTimeFrameJob;
+        }
+
+        //consider offset if provided
+        end = relevancyTimeFrameJob.getEnd();
+        if (tempCov.getOffset() != null && !tempCov.getOffset().isEmpty()) {
+            Period offset = Period.parse(tempCov.getOffset());
+            end = end.minus(offset);
+        }
+
+        start = end.minus(Period.parse(tempCov.getDuration()));
+
+        relevancyTimeFrameInput = new Interval(start, end);
+
+        return relevancyTimeFrameInput;
+    }
+
+    /**
+     * @return incremented retry count
+     */
+    public int incrementRetryCount() {
         this.executionContext = this.executionContext.createCopyWithIncrementedRetryCount();
         return this.executionContext.getRetryCount();
     }
 
     private void initInputs() {
-        for (AbstractSubsetDefinition subset : this.jobDefinition.getInputs()) {
-            InputHelper input = new InputHelper(subset);
+        for (AbstractSubsetDefinition inputDef : this.jobDefinition.getInputs()) {
+            InputHelper input = new InputHelper(inputDef);
 
-            if (StaticSubsetDefinition.class.isAssignableFrom(subset.getClass())) { //handle static inputs
-                input.setResourceAvailable(true); //static input always available 
-                input.setResource(createStaticDummyResource(((StaticSubsetDefinition) subset)));
+            if (StaticSubsetDefinition.class.isAssignableFrom(inputDef.getClass())) { //handle static inputs
+                input.setResource(createStaticDummyResource(((StaticSubsetDefinition) inputDef)));
             }
 
             this.inputs.add(input);

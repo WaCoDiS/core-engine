@@ -1,10 +1,21 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2018-2021 52°North Spatial Information Research GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package de.wacodis.coreengine.executor.process;
 
+import de.wacodis.core.models.JobOutputDescriptor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +30,7 @@ import java.util.Map;
 public class ProcessContext {
 
     private Map<String, List<ResourceDescription>> inputResources;
-    private List<ExpectedProcessOutput> expectedOutputs;
+    private List<JobOutputDescriptor> expectedOutputs;
     private String wacodisProcessID;
     private Map<String, Object> additionalParameters;
 
@@ -63,19 +74,19 @@ public class ProcessContext {
         this.inputResources.putIfAbsent(inputID, currentInputResources);
     }
 
-    public List<ExpectedProcessOutput> getExpectedOutputs() {
+    public List<JobOutputDescriptor> getExpectedOutputs() {
         return expectedOutputs;
     }
 
-    public void setExpectedOutputs(List<ExpectedProcessOutput> expectedOutputs) {
+    public void setExpectedOutputs(List<JobOutputDescriptor> expectedOutputs) {
         this.expectedOutputs = expectedOutputs;
     }
 
-    public void addExpectedOutput(ExpectedProcessOutput expectedOutput) {
+    public void addExpectedOutput(JobOutputDescriptor expectedOutput) {
         this.expectedOutputs.add(expectedOutput);
     }
 
-    public void removeExpectedOutput(ExpectedProcessOutput expectedOutput) {
+    public void removeExpectedOutput(JobOutputDescriptor expectedOutput) {
         this.expectedOutputs.remove(expectedOutput);
     }
 

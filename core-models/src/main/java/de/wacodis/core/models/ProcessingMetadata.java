@@ -16,10 +16,13 @@ import javax.validation.constraints.*;
  * extensible datatype for metadata that describes the processing of a product 
  */
 @ApiModel(description = "extensible datatype for metadata that describes the processing of a product ")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-05-14T13:10:16.857+02:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-10-26T17:56:55.611+01:00[Europe/Berlin]")
 
 public class ProcessingMetadata  implements Serializable {
   private static final long serialVersionUID = 1L;
+
+  @JsonProperty("process")
+  private String process = null;
 
   @JsonProperty("areaOfInterest")
   private AbstractDataEnvelopeAreaOfInterest areaOfInterest = null;
@@ -29,6 +32,27 @@ public class ProcessingMetadata  implements Serializable {
 
   @JsonProperty("created")
   private DateTime created = null;
+
+  public ProcessingMetadata process(String process) {
+    this.process = process;
+    return this;
+  }
+
+  /**
+   * name of the process that was responsible for creating the product 
+   * @return process
+  **/
+  @ApiModelProperty(required = true, value = "name of the process that was responsible for creating the product ")
+  @NotNull
+
+
+  public String getProcess() {
+    return process;
+  }
+
+  public void setProcess(String process) {
+    this.process = process;
+  }
 
   public ProcessingMetadata areaOfInterest(AbstractDataEnvelopeAreaOfInterest areaOfInterest) {
     this.areaOfInterest = areaOfInterest;
@@ -106,14 +130,15 @@ public class ProcessingMetadata  implements Serializable {
       return false;
     }
     ProcessingMetadata processingMetadata = (ProcessingMetadata) o;
-    return Objects.equals(this.areaOfInterest, processingMetadata.areaOfInterest) &&
+    return Objects.equals(this.process, processingMetadata.process) &&
+        Objects.equals(this.areaOfInterest, processingMetadata.areaOfInterest) &&
         Objects.equals(this.timeFrame, processingMetadata.timeFrame) &&
         Objects.equals(this.created, processingMetadata.created);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(areaOfInterest, timeFrame, created);
+    return Objects.hash(process, areaOfInterest, timeFrame, created);
   }
 
   @Override
@@ -121,6 +146,7 @@ public class ProcessingMetadata  implements Serializable {
     StringBuilder sb = new StringBuilder();
     sb.append("class ProcessingMetadata {\n");
     
+    sb.append("    process: ").append(toIndentedString(process)).append("\n");
     sb.append("    areaOfInterest: ").append(toIndentedString(areaOfInterest)).append("\n");
     sb.append("    timeFrame: ").append(toIndentedString(timeFrame)).append("\n");
     sb.append("    created: ").append(toIndentedString(created)).append("\n");

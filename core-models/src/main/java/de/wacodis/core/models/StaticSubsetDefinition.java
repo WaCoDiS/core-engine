@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import de.wacodis.core.models.AbstractSubsetDefinition;
+import de.wacodis.core.models.AbstractSubsetDefinitionTemporalCoverage;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
@@ -15,7 +16,7 @@ import javax.validation.constraints.*;
  * contains information for defining a subset definition for static process inputs
  */
 @ApiModel(description = "contains information for defining a subset definition for static process inputs")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-05-14T13:10:16.857+02:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-10-26T17:56:55.611+01:00[Europe/Berlin]")
 
 public class StaticSubsetDefinition extends AbstractSubsetDefinition implements Serializable {
   private static final long serialVersionUID = 1L;

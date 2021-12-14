@@ -1,23 +1,24 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2018-2021 52°North Spatial Information Research GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package de.wacodis.coreengine.app;
 
-import de.wacodis.coreengine.evaluator.JobEvaluatorRunner;
-import de.wacodis.coreengine.evaluator.WacodisJobInputTrackerProvider;
-import de.wacodis.coreengine.evaluator.configuration.DataAccessConfiguration;
-import de.wacodis.coreengine.evaluator.configuration.DataEnvelopeMatchingConfiguration;
-import de.wacodis.coreengine.evaluator.http.dataaccess.DataAccessConnector;
-import de.wacodis.coreengine.evaluator.wacodisjobevaluation.BasicDataEnvelopeMatcher;
-import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobInputTracker;
 import java.net.MalformedURLException;
-import java.net.URL;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -37,46 +38,17 @@ import org.springframework.context.annotation.ComponentScan;
 public class CoreEngineApp {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CoreEngineApp.class);
-    
-    @Autowired
-    private DataEnvelopeMatchingConfiguration dataMatchingConfiguration;
-    
-    @Autowired
-    private DataAccessConfiguration dataAccessConfiguration;
-    
-    @Autowired
-    private JobEvaluatorRunner jobEvaluator;
-    
-    @Autowired
-    private WacodisJobInputTrackerProvider provider;
-    
-    
+
+
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         SpringApplication.run(CoreEngineApp.class, args);
     }
-    
+
     @PostConstruct
-    private void initialize() throws MalformedURLException{
-        //init DataEnvelopeMatcher
-        BasicDataEnvelopeMatcher dataMatcher = new BasicDataEnvelopeMatcher();
-        dataMatcher.setConfig(this.dataMatchingConfiguration);
- 
-        //init InputTracker
-        WacodisJobInputTracker inputTracker = new WacodisJobInputTracker(dataMatcher);
-        this.provider.setInputTracker(inputTracker);
-        
-        //init DataAccessConnector
-        DataAccessConnector dataAccess = new DataAccessConnector();
-        //ToDo runtime changes of dataaccess configuration are not reflected
-        URL dataAccessURL = new URL(this.dataAccessConfiguration.getUri());
-        dataAccess.setUrl(dataAccessURL);
-        
-        //init JobEvaluatorRunner
-        this.jobEvaluator.setInputTracker(inputTracker);
-        this.jobEvaluator.setDataAccessConnector(dataAccess);
-    }     
-} 
- 
+    private void initialize() throws MalformedURLException {
+        LOGGER.debug("initialize CoreEngineApp");
+    }
+}

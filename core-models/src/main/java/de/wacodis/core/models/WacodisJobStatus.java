@@ -17,7 +17,9 @@ public enum WacodisJobStatus {
   
   RUNNING("running"),
   
-  DELETED("deleted");
+  DELETED("deleted"),
+  
+  FINISHED("finished");
 
   private String value;
 

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonValue;
+import de.wacodis.core.models.AbstractSubsetDefinitionTemporalCoverage;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
@@ -16,7 +17,7 @@ import javax.validation.constraints.*;
  * abstract type for job input subsets
  */
 @ApiModel(description = "abstract type for job input subsets")
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-05-14T13:10:16.857+02:00[Europe/Berlin]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2020-10-26T17:56:55.611+01:00[Europe/Berlin]")
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "sourceType", visible = true)
 @JsonSubTypes({
@@ -76,6 +77,9 @@ public class AbstractSubsetDefinition  implements Serializable {
   @JsonProperty("identifier")
   private String identifier = null;
 
+  @JsonProperty("temporalCoverage")
+  private AbstractSubsetDefinitionTemporalCoverage temporalCoverage = null;
+
   public AbstractSubsetDefinition sourceType(SourceTypeEnum sourceType) {
     this.sourceType = sourceType;
     return this;
@@ -118,6 +122,27 @@ public class AbstractSubsetDefinition  implements Serializable {
     this.identifier = identifier;
   }
 
+  public AbstractSubsetDefinition temporalCoverage(AbstractSubsetDefinitionTemporalCoverage temporalCoverage) {
+    this.temporalCoverage = temporalCoverage;
+    return this;
+  }
+
+  /**
+   * Get temporalCoverage
+   * @return temporalCoverage
+  **/
+  @ApiModelProperty(value = "")
+
+  @Valid
+
+  public AbstractSubsetDefinitionTemporalCoverage getTemporalCoverage() {
+    return temporalCoverage;
+  }
+
+  public void setTemporalCoverage(AbstractSubsetDefinitionTemporalCoverage temporalCoverage) {
+    this.temporalCoverage = temporalCoverage;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -129,12 +154,13 @@ public class AbstractSubsetDefinition  implements Serializable {
     }
     AbstractSubsetDefinition abstractSubsetDefinition = (AbstractSubsetDefinition) o;
     return Objects.equals(this.sourceType, abstractSubsetDefinition.sourceType) &&
-        Objects.equals(this.identifier, abstractSubsetDefinition.identifier);
+        Objects.equals(this.identifier, abstractSubsetDefinition.identifier) &&
+        Objects.equals(this.temporalCoverage, abstractSubsetDefinition.temporalCoverage);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(sourceType, identifier);
+    return Objects.hash(sourceType, identifier, temporalCoverage);
   }
 
   @Override
@@ -144,6 +170,7 @@ public class AbstractSubsetDefinition  implements Serializable {
     
     sb.append("    sourceType: ").append(toIndentedString(sourceType)).append("\n");
     sb.append("    identifier: ").append(toIndentedString(identifier)).append("\n");
+    sb.append("    temporalCoverage: ").append(toIndentedString(temporalCoverage)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -1,18 +1,28 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2018-2021 52°North Spatial Information Research GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package de.wacodis.coreengine.executor.process.wps;
 
 import de.wacodis.core.models.AbstractResource;
+import de.wacodis.core.models.JobOutputDescriptor;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.process.ProcessContext;
 import de.wacodis.coreengine.executor.process.ProcessContextBuilder;
 import java.util.List;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.InputHelper;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
-import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
 import de.wacodis.coreengine.executor.process.Schema;
 import java.util.Arrays;
@@ -63,7 +73,7 @@ public class WPSProcessContextBuilder implements ProcessContextBuilder {
     }
 
     @Override
-    public ProcessContext buildProcessContext(WacodisJobWrapper job, Map<String, Object> additionalParameters, ExpectedProcessOutput... expectedProcessOutputs) {
+    public ProcessContext buildProcessContext(WacodisJobWrapper job, Map<String, Object> additionalParameters, JobOutputDescriptor... expectedProcessOutputs) {
         ProcessContext context = new ProcessContext();
 
         context.setWacodisProcessID(job.getJobDefinition().getId().toString());
@@ -75,7 +85,7 @@ public class WPSProcessContextBuilder implements ProcessContextBuilder {
                 String mimeType = getDefaultMimeType(); //mime type currently the same for every resource, no mime type information available
                 Schema schema = getDefaultSchema(); //schema type currently the same for every resource, no schema information available
 
-                for (AbstractResource resource : jobInput.getResource().get()) {
+                for (AbstractResource resource : jobInput.getResource()) {
                     context.setInputResource(jobInput.getSubsetDefinitionIdentifier(), new ResourceDescription(resource, mimeType, schema));
                 }
             }

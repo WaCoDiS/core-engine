@@ -1,7 +1,17 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2018-2021 52°North Spatial Information Research GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package de.wacodis.coreengine.evaluator.configuration;
 
@@ -22,18 +32,16 @@ public class DataEnvelopeMatchingConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataEnvelopeMatchingConfiguration.class);
 
-    private float minimumOverlapPercentage;
+    private boolean preselectCandidates;
 
-    public float getMinimumOverlapPercentage() {
-        return minimumOverlapPercentage;
+    public boolean isPreselectCandidates() {
+        return preselectCandidates;
     }
 
-    public void setMinimumOverlapPercentage(float minimumOverlapPercentage) {
-        if (minimumOverlapPercentage > 100.0f) {
-            throw new IllegalArgumentException("minimumOverlapPercentage is " + minimumOverlapPercentage + " but must not be bigger than 100.0");
-        }
-
-        this.minimumOverlapPercentage = minimumOverlapPercentage;
-        LOGGER.info("minimumOverlapPercentage set to: " + this.minimumOverlapPercentage);
+    public void setPreselectCandidates(boolean preselectCandidates) {
+        this.preselectCandidates = preselectCandidates;
+        LOGGER.debug("set preselectCandidates to " + preselectCandidates);
     }
+
+    
 }

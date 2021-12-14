@@ -4,25 +4,30 @@
     <parent>
         <groupId>de.wacodis</groupId>
         <artifactId>core-engine</artifactId>
-        <version>1.1.5</version>
+        <version>2.0.1-SNAPSHOT</version>
     </parent>
     <artifactId>core-engine-utils</artifactId>
     <packaging>jar</packaging>
     <name>WaCoDiS Core Engine Utils</name>
-    
-    
+
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>     
-        
-        <!-- test dependencies -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>de.wacodis</groupId>
             <artifactId>core-models</artifactId>
-            <scope>test</scope>
         </dependency>
+
+        <!-- test dependencies -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -39,5 +44,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    
+
 </project>

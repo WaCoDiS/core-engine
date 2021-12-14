@@ -1,7 +1,17 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2018-2021 52°North Spatial Information Research GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package de.wacodis.coreengine.evaluator.wacodisjobevaluation;
 
@@ -32,7 +42,7 @@ public class InputHelperTest {
         resourceList.add(resource);
         InputHelper input = new InputHelper(subset, resourceList);
 
-        assertEquals(resourceList, input.getResource().get());
+        assertTrue(input.getResource().containsAll(resourceList));
     }
 
     /**
@@ -43,7 +53,7 @@ public class InputHelperTest {
         AbstractSubsetDefinition subset = new AbstractSubsetDefinition();
         InputHelper input = new InputHelper(subset);
 
-        assertFalse(input.getResource().isPresent());
+        assertTrue(input.getResource().isEmpty());
     }
 
     /**
@@ -55,10 +65,9 @@ public class InputHelperTest {
         AbstractResource resource = new AbstractResource();
         List<AbstractResource> resourceList = new ArrayList();
         resourceList.add(resource);
-        InputHelper input = new InputHelper(subset);
+        InputHelper input = new InputHelper(subset, resourceList);
 
-        input.setResource(resourceList);
-        assertEquals(resourceList, input.getResource().get());
+        assertTrue(input.getResource().containsAll(resourceList));
     }
 
     /**
@@ -94,6 +103,14 @@ public class InputHelperTest {
         assertFalse(input.hasResource());
     }
 
+    @Test
+    public void testGetSubsetDefinitionID() {
+        AbstractSubsetDefinition subset = new AbstractSubsetDefinition();
+        InputHelper input = new InputHelper(subset);
+
+        assertEquals(subset.getIdentifier(), input.getSubsetDefinitionIdentifier());
+    }
+
     /**
      * Test of hasResource method, of class InputHelper.
      */
@@ -107,23 +124,9 @@ public class InputHelperTest {
 
         input.setResource(resourceList);
         assertTrue(input.hasResource());
+
+        input.removeResource(resourceList);
+        assertFalse(input.hasResource());
     }
 
-    @Test
-    public void testSetResourceAvailable() {
-        AbstractSubsetDefinition subset = new AbstractSubsetDefinition();
-        InputHelper input = new InputHelper(subset);
-
-        input.setResourceAvailable(true);
-        assertTrue(input.isResourceAvailable());
-    }
-
-    @Test
-    public void testIsResourceAvailable() {
-        AbstractSubsetDefinition subset = new AbstractSubsetDefinition();
-        InputHelper input = new InputHelper(subset);
-
-        input.setResourceAvailable(false);
-        assertFalse(input.isResourceAvailable());
-    }
 }

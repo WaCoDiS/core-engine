@@ -1,14 +1,25 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2018-2021 52°North Spatial Information Research GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package de.wacodis.coreengine.evaluator.wacodisjobevaluation;
 
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 /**
  *
@@ -18,38 +29,55 @@ import java.util.Optional;
 public class InputHelper {
 
     private final AbstractSubsetDefinition subsetDefinition;
-    private boolean resourceAvailable;
-    private Optional<List<AbstractResource>> resource;
+    private final List<AbstractResource> resourceList ;
 
-    public InputHelper(AbstractSubsetDefinition subsetDefinition, Optional<List<AbstractResource>> resource) {
+
+    public InputHelper(AbstractSubsetDefinition subsetDefinition) {
         this.subsetDefinition = subsetDefinition;
-        this.resource = resource;
-        this.resourceAvailable = false;
+        this.resourceList = new ArrayList<>();
     }
 
     public InputHelper(AbstractSubsetDefinition subsetDefinition, List<AbstractResource> resource) {
-        this(subsetDefinition, Optional.ofNullable(resource)) ;
+        this(subsetDefinition);    
+        this.resourceList.addAll(resource);
+    }
+  
+
+
+    /**
+     * @return unmodifable list of registered resources
+     */
+    public List<AbstractResource> getResource() {
+        return Collections.unmodifiableList(this.resourceList);
     }
 
     /**
-     * creates instance with empty resource
-     *
-     * @param subsetDefinition
+     * register resources, override current resources
+     * @param resource 
      */
-    public InputHelper(AbstractSubsetDefinition subsetDefinition) {
-        this(subsetDefinition, Optional.empty());
-    }
-
-    public Optional<List<AbstractResource>> getResource() {
-        return resource;
-    }
-
     public void setResource(List<AbstractResource> resource) {
-        setResource(Optional.ofNullable(resource));
+        this.resourceList.clear();
+        this.resourceList.addAll(resource);
     }
 
-    public void setResource(Optional<List<AbstractResource>> resource) {
-        this.resource = resource;
+    /**
+     * register resource, add to current resources
+     * @param resource 
+     */
+    public void addResource(List<AbstractResource> resource) {
+        this.resourceList.addAll(resource);
+    }
+    
+    /**
+     * @param resource
+     * @return true if at least one item is removed from item list
+     */
+    public boolean removeResource(List<AbstractResource> resource){
+        return this.resourceList.removeAll(resource);
+    }
+    
+    public void clearResource(){
+        this.resourceList.clear();
     }
 
     public AbstractSubsetDefinition getSubsetDefinition() {
@@ -64,43 +92,28 @@ public class InputHelper {
     public AbstractSubsetDefinition getKey() {
         return getSubsetDefinition();
     }
-
+    
     /**
      * returns true if resource is not null
      *
      * @return
      */
     public boolean hasResource() {
-        return resource.isPresent();
+        return (this.resourceList != null && this.resourceList.size() > 0);
     }
 
-    /**
-     * true if a resource matching the SubsetDefinition is available
-     * @return 
-     */
-    public boolean isResourceAvailable() {
-        return resourceAvailable;
-    }
-
-    /**
-     * mark if a resource matching the SubsetDefinition is available
-     * @param resourceAvailable
-     */
-    public void setResourceAvailable(boolean resourceAvailable) {
-        this.resourceAvailable = resourceAvailable;
-    }
-    
     /**
      * returns the ID of the wrapped SubsetDefinition
-     * @return 
+     *
+     * @return
      */
-    public String getSubsetDefinitionIdentifier(){
+    public String getSubsetDefinitionIdentifier() {
         return this.subsetDefinition.getIdentifier();
     }
 
     @Override
     public String toString() {
-        return "InputHelper{" + "subsetDefinition=" + subsetDefinition + ", resourceAvailable=" + resourceAvailable + ", resource=" + resource + '}';
+        return "InputHelper{" + "subsetDefinition=" + subsetDefinition + ", resourceAvailable=" + hasResource() + ", resource=" + resourceList + '}';
     }
-    
+
 }

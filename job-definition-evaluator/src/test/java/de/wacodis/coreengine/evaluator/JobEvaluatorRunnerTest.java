@@ -1,7 +1,17 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2018-2021 52°North Spatial Information Research GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package de.wacodis.coreengine.evaluator;
 
@@ -12,10 +22,10 @@ import de.wacodis.core.models.DataAccessResourceSearchBody;
 import de.wacodis.core.models.WacodisJobDefinition;
 import de.wacodis.core.models.WacodisJobDefinitionExecution;
 import de.wacodis.core.models.WacodisJobDefinitionTemporalCoverage;
+import de.wacodis.coreengine.evaluator.configuration.DataAccessConfiguration;
+import de.wacodis.coreengine.evaluator.configuration.DataEnvelopeMatchingConfiguration;
 import de.wacodis.coreengine.evaluator.http.dataaccess.DataAccessConnector;
-import de.wacodis.coreengine.evaluator.wacodisjobevaluation.BasicDataEnvelopeMatcher;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionContext;
-import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobInputTracker;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,7 +49,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
  * @author <a href="mailto:arne.vogt@hs-bochum.de">Arne Vogt</a>
  */
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = {JobEvaluatorRunner.class, TestJobExecutableListener.class})
+@SpringBootTest(classes = {JobEvaluatorRunner.class, TestJobExecutableListener.class, WacodisJobInputTrackerProvider.class, EvaluatorService.class, DataEnvelopeMatchingConfiguration.class, DataAccessConfiguration.class})
 public class JobEvaluatorRunnerTest {
 
     @Autowired
@@ -58,8 +68,6 @@ public class JobEvaluatorRunnerTest {
 
     @BeforeEach
     public void initJobEvaluatorRunner() {
-        WacodisJobInputTracker inputTracker = new WacodisJobInputTracker(new BasicDataEnvelopeMatcher());
-        this.evaluator.setInputTracker(inputTracker);
         this.evaluator.setDataAccessConnector(new EmptyResponseDataAccessConnector());
 
     }
@@ -75,35 +83,7 @@ public class JobEvaluatorRunnerTest {
         assertEquals(dataAccess, this.evaluator.getDataAccessConnector());
     }
 
-    /**
-     * Test of setInputTracker method, of class JobEvaluatorRunner.
-     */
-    @Test
-    public void testSetInputTracker() {
-        WacodisJobInputTracker inputTracker = new WacodisJobInputTracker(new BasicDataEnvelopeMatcher());
-        this.evaluator.setInputTracker(inputTracker);
 
-        assertEquals(inputTracker, this.evaluator.getInputTracker());
-    }
-
-    /**
-     * Test of setInputTracker method, of class JobEvaluatorRunner.
-     */
-    @Test
-    @DisplayName("register and deregister listener with inputtracker")
-    public void testSetInputTracker_InputTracker_Listener_Registered() {
-        WacodisJobInputTracker inputTracker = new WacodisJobInputTracker(new BasicDataEnvelopeMatcher());
-        this.evaluator.setInputTracker(inputTracker);
-        //listener must be add to inputTracker
-        assertTrue(inputTracker.containsJobIsExecutableChangeListener(this.evaluator.getExecutableJobListener()));
-
-        WacodisJobInputTracker inputTracker2 = new WacodisJobInputTracker(new BasicDataEnvelopeMatcher());
-        this.evaluator.setInputTracker(inputTracker2);
-
-        //listener must be removed from inputTracker and added to inputTracker2
-        assertFalse(inputTracker.containsJobIsExecutableChangeListener(this.evaluator.getExecutableJobListener()));
-        assertTrue(inputTracker2.containsJobIsExecutableChangeListener(this.evaluator.getExecutableJobListener()));
-    }
 
     /**
      * Test of evaluateJob method, of class JobEvaluatorRunner.
@@ -137,7 +117,10 @@ public class JobEvaluatorRunnerTest {
     public void testEvaluateJob_WacodisJobWrapper_NotExecutable() {
         WacodisJobDefinition jobDefinition = new WacodisJobDefinition();
         jobDefinition.setInputs(new ArrayList<>());
-        jobDefinition.addInputsItem(new AbstractSubsetDefinition()); //add input
+        AbstractSubsetDefinition input = new AbstractSubsetDefinition();
+        input.setIdentifier("testInput");
+        jobDefinition.addInputsItem(input); //add input
+        jobDefinition.setId(UUID.randomUUID());
 
         WacodisJobDefinitionExecution execution = new WacodisJobDefinitionExecution();
         execution.setPattern("0 0 1 * *"); //executes on the 1st day of each month (00:00:00)
@@ -226,25 +209,7 @@ public class JobEvaluatorRunnerTest {
         assertFalse(this.evaluator.getInputTracker().containsJob(job));
     }
 
-    @Test
-    @DisplayName("ceck if executable job is removed from InputTracker")
-    public void testEvaluateJob_boolean_ExecutableJobRemovedFromInputTracker() {
-        WacodisJobDefinition jobDefinition = new WacodisJobDefinition();
-        jobDefinition.setInputs(new ArrayList<>()); //no inputs
-        WacodisJobDefinitionExecution execution = new WacodisJobDefinitionExecution();
-        execution.setPattern("0 0 1 * *"); //executes on the 1st day of each month (00:00:00)
-        WacodisJobDefinitionTemporalCoverage tempCov = new WacodisJobDefinitionTemporalCoverage();
-        tempCov.setPreviousExecution(Boolean.TRUE);
-        jobDefinition.setTemporalCoverage(tempCov);
-        jobDefinition.setExecution(execution);
-        WacodisJobWrapper job = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), DateTime.now(), 0), jobDefinition);
 
-        EvaluationStatus status = this.evaluator.evaluateJob(job, true); //add to input tracker
-        
-        //job has no inputs, empty response -> executable
-        assertEquals(EvaluationStatus.EXECUTABLE, status);
-        assertFalse(this.evaluator.getInputTracker().containsJob(job)); //job must be removed from InputTracker if executable
-    }
 
 
     /**

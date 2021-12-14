@@ -1,21 +1,30 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2018-2021 52°North Spatial Information Research GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package de.wacodis.coreengine.executor.process.wps;
 
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.AbstractSubsetDefinition;
 import de.wacodis.core.models.WacodisJobDefinition;
+import de.wacodis.core.models.WacodisJobDefinitionExecutionSettings;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobExecutionContext;
 import de.wacodis.coreengine.evaluator.wacodisjobevaluation.WacodisJobWrapper;
 import de.wacodis.coreengine.executor.configuration.WebProcessingServiceConfiguration;
-import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ProcessContext;
 import de.wacodis.coreengine.executor.process.Schema;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,29 +91,28 @@ public class WPSProcessContextBuilderTest {
         WacodisJobDefinition jobDef = new WacodisJobDefinition();
         UUID processID = UUID.randomUUID();
         jobDef.setId(processID);
+        WacodisJobDefinitionExecutionSettings execSettings = new WacodisJobDefinitionExecutionSettings();
+        jobDef.setExecutionSettings(execSettings);
+        execSettings.setTimeoutMillies(Long.MAX_VALUE);
         WacodisJobWrapper jobWrapper = new WacodisJobWrapper(new WacodisJobExecutionContext(UUID.randomUUID(), DateTime.now(), 0), jobDef);
 
         WPSProcessContextBuilder contextBuilder = new WPSProcessContextBuilder();
         
         Map<String, Object> additionalParams = new HashMap<>();
         //set timeout parameter
-        additionalParams.put(WPSProcessContextBuilder.getTIMEOUT_MILLIES_KEY(), getWPSConfig().getTimeout_Millies());
+        additionalParams.put(WPSProcessContextBuilder.getTIMEOUT_MILLIES_KEY(),jobDef.getExecutionSettings().getTimeoutMillies());
         ProcessContext context = contextBuilder.buildProcessContext(jobWrapper, additionalParams);
 
-        assertEquals(getWPSConfig().getTimeout_Millies(), context.getAdditionalParameter(WPSProcessContextBuilder.getTIMEOUT_MILLIES_KEY()));
+        assertEquals(jobDef.getExecutionSettings().getTimeoutMillies(), context.getAdditionalParameter(WPSProcessContextBuilder.getTIMEOUT_MILLIES_KEY()));
     }
 
     private WebProcessingServiceConfiguration getWPSConfig() {
-        ExpectedProcessOutput productOutput = new ExpectedProcessOutput("PRODUCT", "image/geotiff");
-        ExpectedProcessOutput metadataOutput = new ExpectedProcessOutput("METADATA", "text/json", false);
         WebProcessingServiceConfiguration config = new WebProcessingServiceConfiguration();
 
         config.setVersion("2.0.0");
         config.setUri("localhost:8080");
         config.setDefaultResourceMimeType("text/xml");
         config.setDefaultResourceSchema(Schema.GML3);
-        config.setExpectedProcessOutputs(Arrays.asList(new ExpectedProcessOutput[]{metadataOutput, productOutput}));
-        config.setTimeout_Millies(30000l);
 
         return config;
     }

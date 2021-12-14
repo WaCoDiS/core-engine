@@ -1,0 +1,91 @@
+spring:
+  application:
+    name: core-engine
+  profiles:
+    active: docker
+  cloud:
+    config:
+      url: http://localhost:8888
+    stream:
+      #InputChannel
+      bindings:
+        input-data-envelope:
+          destination: wacodis.test.data.available
+          binder: wacodis_rabbit
+          content-type: application/json
+        job-creation:
+          destination: wacodis.test.jobs.new
+          binder: wacodis_rabbit
+          content-type: application/json
+        job-deletion:
+          destination: wacodis.test.jobs.deleted
+          binder: wacodis_rabbit
+          content-type: application/json
+        toolFinished:
+          destination: wacodis.test.tools.finished
+          binder: wacodis_rabbit
+          content-type: application/json
+        toolExecution:
+          destination: wacodis.test.tools.execute
+          binder: wacodis_rabbit
+          content-type: application/json
+        toolFailure:
+          destination: wacodis.test.tools.failure
+          binder: wacodis_rabbit
+          content-type: application/json
+      #MessageBroker
+      binders:
+        wacodis_rabbit:
+          type: rabbit
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: rabbitmq
+    password: rabbitmq
+  scheduler:
+    timezone: Europe/Berlin
+    jobrepository:
+      uri: http://localhost:8081
+  evaluator:
+    matching:
+      preselectCandidates: true
+    dataaccess:
+      uri: http://localhost:8081/resources/search
+  executor:
+    wps:
+      uri: http://localhost:8080/wps
+      version: 2.0.0
+        #define mime type for every input resource, otherwise defaults to text/xml
+        #defaultResourceMimeType: text/xml
+        #define schema for every input resource, otherwise defaults to GML3
+        #defaultResourceSchema:
+      #   name: GML3
+      #   schemaLocation: http://schemas.opengis.net/gml/3.1.1/base/feature.xsd
+      validateInputs: true
+      #only applicable if wacodis job is splitted in multiple processes (see WacodisJobDefinition.executionSettings.executionMode)
+      maxParallelWPSProcessPerJob: 3
+      #intialDelay and delay applicable if processInputDelayed is true
+      processInputsDelayed: false
+      initialDelay_Milliseconds: 0 
+      delay_Milliseconds: 900000
+      #overrides maxParallelWPSProcessPerJob (effectively same as maxParallelWPSProcessPerJob = 1)
+      processInputsSequentially: true
+  datasource.core.quartz-data-source:
+    name: quartzDataSource
+    driverClassName: org.h2.Driver
+    jdbc-url: jdbc:h2:file:./job-scheduling/src/main/resources/h2_Jobstore
+    username: sa
+    password:
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: always
+    properties:
+      org.quartz.jobStore:
+        dataSource: quartzDataSource
+        class: org.quartz.impl.jdbcjobstore.JobStoreTX
+        driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+        useProperties: true
+        misfireThreshold: 60000
+        tablePrefix: QRTZ_
+        isClustered: true

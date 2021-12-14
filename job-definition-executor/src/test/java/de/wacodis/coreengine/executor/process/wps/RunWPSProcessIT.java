@@ -1,7 +1,17 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2018-2021 52°North Spatial Information Research GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package de.wacodis.coreengine.executor.process.wps;
 
@@ -9,9 +19,9 @@ import de.wacodis.coreengine.executor.process.ProcessContext;
 import org.n52.geoprocessing.wps.client.WPSClientSession;
 import de.wacodis.core.models.AbstractResource;
 import de.wacodis.core.models.GetResource;
+import de.wacodis.core.models.JobOutputDescriptor;
 import de.wacodis.core.models.extension.staticresource.StaticDummyResource;
 import de.wacodis.coreengine.executor.exception.ExecutionException;
-import de.wacodis.coreengine.executor.process.ExpectedProcessOutput;
 import de.wacodis.coreengine.executor.process.ProcessOutputDescription;
 import de.wacodis.coreengine.executor.process.ResourceDescription;
 
@@ -73,9 +83,10 @@ public class RunWPSProcessIT {
         inputContext.addInputResource("REFERENCE_DATA_TYPE", new ResourceDescription(refDataType, "text/xml"));
         inputContext.addInputResource("REFERENCE_DATA", new ResourceDescription(refData, "text/xml"));
 
-        inputContext.addExpectedOutput(new ExpectedProcessOutput("PRODUCT", "image/geotiff"));
-        inputContext.addExpectedOutput(new ExpectedProcessOutput("METADATA", "text/json"));
-
+        
+        inputContext.addExpectedOutput(new JobOutputDescriptor().identifier("PRODUCT").mimeType("image/geotiff"));
+        inputContext.addExpectedOutput(new JobOutputDescriptor().identifier("METADATA").mimeType("text/json"));
+        
         inputContext.setWacodisProcessID("dummyLandCoverClassificationProcess");
 
         return inputContext;

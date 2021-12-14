@@ -1,18 +1,27 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2018-2021 52°North Spatial Information Research GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package de.wacodis.coreengine.scheduling.listener;
 
 import de.wacodis.core.models.*;
 import de.wacodis.coreengine.scheduling.manage.QuartzSingleExecutionSchedulingManager;
 import de.wacodis.coreengine.scheduling.manage.QuartzSchedulingManager;
-
 import java.util.Date;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -58,16 +67,14 @@ public class JobMessageScheduleHandler implements JobMessageHandler {
         }
     }
 
-
     private void handleEventbasedExecution(WacodisJobDefinition jobDefinition) {
         AbstractWacodisJobExecutionEvent execEvent = jobDefinition.getExecution().getEvent();
 
         if (execEvent instanceof SingleJobExecutionEvent) {
-            SingleJobExecutionEvent singleExecEvent = (SingleJobExecutionEvent) execEvent;
+            DateTime execAt = jobDefinition.getExecution().getStartAt();
 
-            if (singleExecEvent.getStartAt() != null) {
-                Date execAt = singleExecEvent.getStartAt().toDate();
-                singleExecutionSchedulingManger.scheduleSingleJobExecutionAt(jobDefinition, execAt); //execute wacodis job once on specified date
+            if (execAt != null) {
+                singleExecutionSchedulingManger.scheduleSingleJobExecutionAt(jobDefinition, execAt.toDate()); //execute wacodis job once on specified date
             } else {
                 singleExecutionSchedulingManger.scheduleSingleJobExecutionImmediately(jobDefinition); //execute immediately if no start date provided
             }
@@ -76,7 +83,14 @@ public class JobMessageScheduleHandler implements JobMessageHandler {
     }
 
     private void handleRegularExecution(WacodisJobDefinition jobDefinition) {
-        regularExecutionschedulingManager.scheduleNewJob(jobDefinition);
+        WacodisJobDefinitionExecution exec = jobDefinition.getExecution();
+
+        if (exec.getStartAt() != null) {
+            Date startAtDate = exec.getStartAt().toDate();
+            regularExecutionschedulingManager.scheduleNewJob(jobDefinition, startAtDate);
+        } else {
+            regularExecutionschedulingManager.scheduleNewJob(jobDefinition);
+        }
     }
 
 }
