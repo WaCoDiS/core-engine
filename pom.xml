@@ -42,7 +42,7 @@
         <failsafe-plugin.version>3.0.0-M4</failsafe-plugin.version>
         <quartz.version>2.3.2</quartz.version>
         <cron-utils.version>9.1.6</cron-utils.version>
-        <h2.version>1.4.196</h2.version>
+        <h2.version>2.0.206</h2.version>
         <wps-client-lib.version>1.0.8</wps-client-lib.version>
         <maven.javadocplugin.version>3.1.1</maven.javadocplugin.version>
         <release-plugin.version>3.0.0-M1</release-plugin.version>
